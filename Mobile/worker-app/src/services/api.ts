@@ -16,8 +16,8 @@ const getBaseURL = () => {
   if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
     return `http://${window.location.hostname}:3000/api/v1`;
   }
-  // Changed to your laptop's hotspot IP address automatically
-  return 'http://10.40.94.74:3000/api/v1';
+  // Changed to your live Render backend URL
+  return 'https://workquora.onrender.com/api/v1';
 };
 
 const api = axios.create({

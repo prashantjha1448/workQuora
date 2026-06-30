@@ -13,6 +13,7 @@ import {
   RefreshControl,
   Dimensions,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import api, { getApiData } from '../services/api';
@@ -23,6 +24,11 @@ interface Task {
   _id: string;
   status: 'assigned' | 'traveling' | 'working' | 'completed' | 'cancelled';
   assignedAt: string;
+  client?: {
+    _id: string;
+    name: string;
+    mobileNumber?: string;
+  };
   job: {
     _id: string;
     title: string;
@@ -115,26 +121,26 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
     }
   };
 
-  const handlePinSubmit = (taskId: string) => {
+  const handlePinSubmit = async (taskId: string) => {
     const pinString = clientPin.join('');
     if (pinString.length !== 4) {
       Alert.alert('Error', 'Please enter the 4-digit verification PIN.');
       return;
     }
-    // Simple verification check - for demo we accept any PIN, in real we submit it
-    Alert.alert(
-      'PIN Verified',
-      'Client verification PIN matches successfully! Starting work setup...',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            handleUpdateStatus(taskId, 'working');
-            setClientPin(['', '', '', '']);
-          }
-        }
-      ]
-    );
+    setUpdatingStatus(true);
+    try {
+      const response = await api.post(`/tasks/${taskId}/verify-pin`, { pin: pinString });
+      if (response.data?.success) {
+        Alert.alert('PIN Verified', 'Client verification PIN matches! Work session started.');
+        setClientPin(['', '', '', '']);
+        setShowPinPad(false);
+        await fetchActiveGigs();
+      }
+    } catch (error: any) {
+      Alert.alert('Incorrect PIN', error.response?.data?.message || 'Please ask the client for the correct check-in code.');
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   const getStatusText = (status: string) => {
@@ -197,7 +203,7 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
     const status = selectedTask.status;
 
     if (showPinPad) {
-      const taskTitle = job.title || 'Luxury Lobby Maintenance';
+      const taskTitle = job.title || 'this gig';
       const pinString = clientPin.join('');
       const isPinComplete = pinString.length === 4;
 
@@ -244,10 +250,9 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
 
             {/* Current Task Card */}
             <View style={styles.pinTaskCard}>
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=150' }} 
-                style={styles.pinTaskImg} 
-              />
+              <View style={[styles.pinTaskImg, { backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center' }]}>
+                <Feather name="briefcase" size={28} color="#059669" />
+              </View>
               <View style={styles.pinTaskInfo}>
                 <Text style={styles.pinTaskLabel}>CURRENT TASK</Text>
                 <Text style={styles.pinTaskTitle}>{taskTitle}</Text>
@@ -320,72 +325,49 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
           <TouchableOpacity onPress={() => setSelectedTask(null)} style={styles.backBtn}>
             <Feather name="arrow-left" size={24} color="#059669" />
           </TouchableOpacity>
-          <Text style={styles.detailHeaderTitle}>Route Map</Text>
+          <Text style={styles.detailHeaderTitle}>Gig Details</Text>
           <View style={styles.detailAvatarContainer}>
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFAwXh3vhQ8xJ97_FvUmbwrTxLJ7Uo-HHdcEY7YqPgfIeNuoUObs360oXy7cmM2QA7Q4vYqbiOTrecKrIDRvP2YcN05MVIykoorSd5EChbhDfypy0QIAy-EyPSPKoMrwqqN0xFOWAXk2nEKCpoqvt9VugBe9kfmvz7LOIgQwcQTivhyK5shpIm73X0msXJvcwT0dRnPnQYuTEjXScYT2HhKYuq4MmRbWGuMoPw0xbrJimBJz0sngcAHImkj-CMdTqtoz0NoHcjjG5y' }} 
-              style={styles.detailAvatarImg}
-            />
+            <View style={[styles.detailAvatarImg, { backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center' }]}>
+              <Text style={{ color: '#059669', fontWeight: '800', fontSize: 14 }}>
+                {(selectedTask.client?.name || 'C').charAt(0).toUpperCase()}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Map Area */}
+        {/* Job Site Info + Real Navigation Handoff (real in-app turn-by-turn map is not yet built;
+            this opens the device's actual Maps app with real directions instead of fake data) */}
         <View style={styles.mapContainer}>
-          {/* Mock Map Image showing SF map */}
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC7_JUe9OCby5nP91dARdYBNpm2wDyEfN7-Hsn9PGvmBLTzrycusAdIegJx2foWIUQsF7J0Acv4qW8UlcmMVjxAxyyNeM7E6sg5uPKha0e5_7aO7cv8Jg2oWRQwSpXGR28W4g97FZIXoQNWZ9dtC8Z_VzNX_fssjBUMdrbgdYMwHaSN_sOPlT0x1IZ9TRag_yUMKb4ORypLExxyOZGtV8vW_y102fXL7qMSYY6uEqfxSQvZepmSyEzD0LVICycn4rXvvIHpgS5FhK5L' }}
-            style={styles.mapImg}
-            resizeMode="cover"
-          />
-
-          {/* Dashed Route Line drawn directly on top of map */}
-          <View style={styles.dashedRouteLine} />
-
-          {/* TechHub HQ Map Bubble Flag */}
-          <View style={[styles.techHubFlagContainer]}>
-            <View style={styles.techHubBubble}>
-              <Text style={styles.techHubBubbleTitle}>TechHub</Text>
-              <Text style={styles.techHubBubbleTitle}>HQ</Text>
-            </View>
-          </View>
-
-          {/* TOP FLOATING CARD: Job Route Stats */}
-          <View style={styles.statsCardFloating}>
+          <View style={styles.realInfoCard}>
             <View style={styles.statsHeaderRow}>
               <View style={styles.statsIconBoxPurple}>
-                <Feather name="git-commit" size={20} color="#ffffff" style={{ transform: [{ rotate: '45deg' }] }} />
+                <Feather name="map-pin" size={20} color="#ffffff" />
               </View>
               <View style={styles.statsTitleContainer}>
-                <Text style={styles.statsTitleText}>Mission: Fix It</Text>
-                <Text style={styles.statsSubtitleText}>Office Hardware Repair</Text>
+                <Text style={styles.statsTitleText}>{job.title || 'Gig Location'}</Text>
+                <Text style={styles.statsSubtitleText}>{job.location?.address || 'Address not specified'}</Text>
               </View>
             </View>
             <View style={styles.dividerLine} />
-            <View style={styles.statsColumnsRow}>
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>ESTIMATED TIME</Text>
-                <Text style={styles.statColValue}>12 mins</Text>
-              </View>
-              <View style={styles.statCol}>
-                <Text style={styles.statColLabel}>DISTANCE</Text>
-                <Text style={styles.statColValue}>4.2 km</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* BOTTOM FLOATING CARD: Turn Instruction */}
-          <View style={styles.instructionCardFloating}>
-            <View style={styles.turnIconBoxPurple}>
-              <Feather name="corner-up-right" size={24} color="#ffffff" />
-            </View>
-            <View style={styles.instructionTextContainer}>
-              <Text style={styles.turnDistanceText}>NEXT TURN IN 200M</Text>
-              <Text style={styles.turnLabelText}>Turn right onto Market St</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.openMapsBtn}
+              onPress={() => {
+                const address = job.location?.address;
+                if (!address) {
+                  Alert.alert('No Address', 'This job does not have a location address set.');
+                  return;
+                }
+                const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+                Linking.openURL(url).catch(() => Alert.alert('Error', 'Could not open Maps.'));
+              }}
+            >
+              <Feather name="navigation" size={16} color="#ffffff" style={{ marginRight: 8 }} />
+              <Text style={styles.startNavBtnText}>Open in Google Maps</Text>
+            </TouchableOpacity>
           </View>
 
           {/* BOTTOM ACTION BAR */}
-          <View style={styles.bottomActionBar}>
+          <View style={[styles.bottomActionBar, { position: 'relative', marginTop: 16 }]}>
             {status === 'assigned' && (
               <TouchableOpacity 
                 style={styles.startNavBtn}
@@ -430,7 +412,14 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
 
             <TouchableOpacity 
               style={styles.navCallBtn}
-              onPress={() => Alert.alert('Call Client', 'Connecting voice line to client site manager...')}
+              onPress={() => {
+                const phone = selectedTask.client?.mobileNumber;
+                if (!phone) {
+                  Alert.alert('No Phone Number', 'This client has not added a mobile number.');
+                  return;
+                }
+                Linking.openURL(`tel:${phone}`).catch(() => Alert.alert('Error', 'Could not open dialer.'));
+              }}
             >
               <Feather name="phone" size={22} color="#059669" />
             </TouchableOpacity>
@@ -476,7 +465,7 @@ export default function ActiveGigsScreen({ navigation }: ActiveGigsScreenProps) 
               <Text style={styles.emptySubtext}>Search and apply to client listings nearby to get assigned.</Text>
               <TouchableOpacity
                 style={styles.findJobsButton}
-                onPress={() => navigation.navigate('BrowseGigs')}
+                onPress={() => navigation.navigate('Discover')}
               >
                 <Text style={styles.findJobsButtonText}>Find Gigs</Text>
               </TouchableOpacity>
@@ -668,6 +657,26 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
     backgroundColor: '#f2ecf4',
+    padding: 16,
+  },
+  realInfoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  openMapsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#059669',
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 4,
   },
   mapImg: {
     width: '100%',

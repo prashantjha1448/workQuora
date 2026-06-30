@@ -9,6 +9,9 @@ export interface ChatMessage {
   receiver: string;
   job?: string;
   text: string;
+  fileUrl?: string;
+  fileType?: 'text' | 'image' | 'video' | 'audio' | 'document' | 'location';
+  location?: { lat: number; lng: number };
   createdAt: string;
   status?: 'sent' | 'delivered' | 'read';
   isRead?: boolean;
@@ -17,7 +20,7 @@ export interface ChatMessage {
 interface ChatBubbleProps {
   message: ChatMessage;
   isSelf: boolean;
-  onPressAttachment?: (type: string) => void;
+  onPressAttachment?: (message: ChatMessage) => void;
 }
 
 export default function ChatBubble({ message, isSelf, onPressAttachment }: ChatBubbleProps) {
@@ -44,100 +47,59 @@ export default function ChatBubble({ message, isSelf, onPressAttachment }: ChatB
     isSelf ? styles.bubbleRight : styles.bubbleLeft,
   ];
 
-  // Helper to render special attachment items
+  // Helper to render real attachment messages from backend (fileType/fileUrl/location)
   const renderContent = () => {
-    const text = message.text;
-
-    if (text.startsWith('[attachment:map]')) {
+    if (message.fileType === 'location' && message.location) {
+      const { lat, lng } = message.location;
       return (
-        <TouchableOpacity 
-          style={styles.attachmentCard} 
-          onPress={() => onPressAttachment?.('map')}
+        <TouchableOpacity
+          style={styles.attachmentCard}
+          onPress={() => onPressAttachment?.(message)}
           activeOpacity={0.8}
         >
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB6Qu1vg5HJ-QFo0EW7PsRNmHDeIvluYIeyJMgKjwX5E7v8F6cPt7oSPR9lFSyUNEMQI2AGdgLaJl-510-6sqbfJlyp1jY3sY94T9wbzNuOYjLqzKeudBt7ANzjpbul5h7TPtmsw3jJPypVFra8S03HVIY5SkZb8PQQaoEXs844yfqtwyMbq8q778gYAiBJnSlcgysr-7k0NGjzOyxIFHC9_xgkqUs9k4BAHZNTSC0jGChs9Q8CK09_u8Kx7EZyBLO2-neV1UOLMPky' }}
-            style={styles.attachmentImage}
-            resizeMode="cover"
-          />
+          <View style={styles.locationPlaceholder}>
+            <Feather name="map-pin" size={28} color={colors.primary} />
+          </View>
           <View style={styles.attachmentInfo}>
             <Feather name="map-pin" size={16} color={colors.primary} />
-            <Text style={[styles.attachmentText, { color: colors.text }]}>Share Live Location</Text>
+            <Text style={[styles.attachmentText, { color: colors.text }]}>Shared Location</Text>
           </View>
         </TouchableOpacity>
       );
     }
 
-    if (text.startsWith('[attachment:image]')) {
+    if (message.fileType === 'image' && message.fileUrl) {
       return (
-        <TouchableOpacity 
-          style={styles.attachmentCard} 
-          onPress={() => onPressAttachment?.('image')}
+        <TouchableOpacity
+          style={styles.attachmentCard}
+          onPress={() => onPressAttachment?.(message)}
           activeOpacity={0.8}
         >
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBolW1a--kPeq9zeVDTq9VUq4iBwzk4w_pKt2_xGA6Lf3rJNXsF3VMgVIZ8VcxuO3nwEYcUIUqaRmB6n6Ni37g6fQGk-VsQckHdcvmFUPl0ARAyXGQm2GjZPp1E7_dfflIRreSgCoBX3t57fpx1c-iWV6MWM0UDojUf6DILYPIk980N7k5QvSpC1H7b3umte-V7zPpq-H8kPDp7b3-l8q7U0Dw3xVpxIIFKAi9UG4bOBq6Ckr8RmWHRD1dCfJkgXWfU6zyypC8imYZ4' }}
-            style={styles.attachmentImage}
-            resizeMode="cover"
-          />
-          <View style={styles.attachmentInfo}>
-            <Feather name="image" size={16} color={colors.primary} />
-            <Text style={[styles.attachmentText, { color: colors.text }]}>Attached Photo</Text>
-          </View>
+          <Image source={{ uri: message.fileUrl }} style={styles.attachmentImage} resizeMode="cover" />
         </TouchableOpacity>
       );
     }
 
-    if (text.startsWith('[attachment:pdf]')) {
+    if ((message.fileType === 'document' || message.fileType === 'video') && message.fileUrl) {
       return (
-        <TouchableOpacity 
-          style={[styles.docCard, { backgroundColor: isSelf ? 'rgba(255,255,255,0.1)' : '#ffffff' }]} 
-          onPress={() => onPressAttachment?.('pdf')}
+        <TouchableOpacity
+          style={[styles.docCard, { backgroundColor: isSelf ? 'rgba(255,255,255,0.1)' : '#ffffff' }]}
+          onPress={() => onPressAttachment?.(message)}
           activeOpacity={0.8}
         >
-          <Feather name="file-text" size={24} color={isSelf ? colors.white : colors.primary} />
+          <Feather name={message.fileType === 'video' ? 'video' : 'file-text'} size={24} color={isSelf ? colors.white : colors.primary} />
           <View style={styles.docInfo}>
-            <Text style={[styles.docTitle, { color: textColor }]}>Requirements.pdf</Text>
-            <Text style={[styles.docSize, { color: timeColor }]}>1.2 MB</Text>
+            <Text style={[styles.docTitle, { color: textColor }]}>Tap to open {message.fileType}</Text>
           </View>
           <Feather name="download" size={16} color={isSelf ? colors.white : colors.textMuted} />
         </TouchableOpacity>
       );
     }
 
-    if (text.startsWith('[attachment:audio]')) {
-      return (
-        <View style={styles.audioContainer}>
-          <TouchableOpacity 
-            style={[styles.audioPlayButton, { backgroundColor: isSelf ? colors.white : colors.primary }]}
-            activeOpacity={0.8}
-          >
-            <Feather name="play" size={16} color={isSelf ? colors.primary : colors.white} />
-          </TouchableOpacity>
-          <View style={styles.audioWaveform}>
-            {/* Horizontal waveform mockup bars */}
-            {[8, 14, 20, 16, 10, 12, 18, 22, 14, 8].map((h, i) => (
-              <View 
-                key={i} 
-                style={[
-                  styles.waveBar, 
-                  { 
-                    height: h, 
-                    backgroundColor: isSelf ? 'rgba(255,255,255,0.6)' : colors.primary + '60' 
-                  }
-                ]} 
-                />
-            ))}
-          </View>
-          <Text style={[styles.audioTime, { color: textColor }]}>0:12</Text>
-        </View>
-      );
-    }
-
     // Default Text message bubble
     return (
       <Text style={[styles.messageText, { color: textColor }]}>
-        {text}
+        {message.text}
       </Text>
     );
   };
@@ -215,6 +177,13 @@ const styles = StyleSheet.create({
   attachmentImage: {
     width: '100%',
     height: 110,
+  },
+  locationPlaceholder: {
+    width: '100%',
+    height: 110,
+    backgroundColor: '#f1f3f4',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   attachmentInfo: {
     flexDirection: 'row',

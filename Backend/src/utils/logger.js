@@ -59,4 +59,9 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
+// Extended helpers for Phase 5 Centralized Logging (Vol 7)
+logger.financial = (msg, meta = {}) => logger.info(msg, { ...meta, category: 'financial' });
+logger.security = (msg, meta = {}) => logger.warn(msg, { ...meta, category: 'security' });
+logger.audit = (msg, meta = {}) => logger.info(msg, { ...meta, category: 'audit' });
+
 module.exports = logger;

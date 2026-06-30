@@ -1,21 +1,10 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-// AI Initialize kiya key ke sath
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const aiProvider = require('../services/aiProvider');
 
 /**
- * @desc    Parses raw job description and extracts matching skill keywords using Gemini
- * @param   {String} description 
- * @returns {Array} Array of strings (skills)
+ * Parses raw job description and extracts matching skill keywords using AI Provider abstraction.
  */
 exports.extractSkillsFromText = async (description) => {
   try {
-    // We use gemini-1.5-flash as it is extremely fast and perfect for text structuring
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: { responseMimeType: "application/json" } // Ensure strict JSON output
-    });
-    
     const prompt = `Analyze the following job description or user requirement for a local service marketplace. 
     Extract a list of relevant professional skills, tools, or service categories needed to complete this work.
     
@@ -26,14 +15,23 @@ exports.extractSkillsFromText = async (description) => {
     
     Current Job Description: "${description}"`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await aiProvider.generate(prompt);
     
-    // JSON string ko JavaScript array mein convert kiya
-    return JSON.parse(responseText);
+    // Attempt parsing JSON
+    try {
+      // Find JSON block if Gemini returned markdown wrap
+      const jsonStart = responseText.indexOf('[');
+      const jsonEnd = responseText.lastIndexOf(']') + 1;
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        return JSON.parse(responseText.substring(jsonStart, jsonEnd));
+      }
+      return JSON.parse(responseText);
+    } catch (e) {
+      // Regex parse fallback if it is a list of comma words
+      return responseText.replace(/[\[\]"]/g, '').split(',').map(s => s.trim().toLowerCase());
+    }
   } catch (error) {
     console.error("🤖 AI Parsing Error, falling back to basic regex array:", error);
-    // Safer side fallback agar API hit limit par ho to description ko split kar dega
     return description.toLowerCase().split(' ').filter(word => word.length > 3);
   }
 };

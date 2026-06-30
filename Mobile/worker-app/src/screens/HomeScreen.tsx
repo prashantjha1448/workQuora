@@ -124,7 +124,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     try {
       const lat = (user as any)?.location?.coordinates?.[1] ?? 23.2599;
       const lng = (user as any)?.location?.coordinates?.[0] ?? 77.4126;
-      const params: any = { lat, lng, radius: 9999 };
+      const params: any = { lat, lng, radius: 25 };
       if (kw) params.keyword = kw;
       if (cat && cat !== 'All') params.category = cat;
 
@@ -457,7 +457,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Nearby Gigs */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Nearby Gigs</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('BrowseGigs')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Discover')}>
               <Text style={styles.seeAll}>See All →</Text>
             </TouchableOpacity>
           </View>

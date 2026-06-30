@@ -39,16 +39,84 @@ const adminAdRoutes        = require('./modules/admin/routes/adminAdRoutes');
 const { mongoSanitize } = require('./middlewares/securityMiddleware');
 
 const app = express();
-app.use(helmet());
+
+const compression = require('compression');
+app.use(compression());
+
+// Distributed Tracing & API Versioning headers (Phase 5)
+const traceService = require('./services/traceService');
+const versionManager = require('./services/versionManager');
+app.use(traceService.traceMiddleware());
+app.use(versionManager.versionHeadersMiddleware());
+
+// Hardened Helmet Configuration (Module 7)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://apis.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://*.tile.openstreetmap.org"],
+      connectSrc: ["'self'", "http://localhost:3000", "ws://localhost:3000", "wss://localhost:3000", "https://api.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com"],
+    }
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  frameguard: { action: 'deny' },
+  xssFilter: true,
+  noSniff: true
+}));
+
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
-app.use(rateLimit({ windowMs: 15*60*1000, max: 200, message: { success:false, message:'Too many requests' } }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Body Size Limit Hardening (Module 7)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Malformed JSON Protection
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ success: false, message: 'Malformed JSON payload' });
+  }
+  next(err);
+});
+
 app.use(mongoSanitize);
+
+// Idempotency Middleware for financial transactions (Module 6)
+const idempotencyMiddleware = require('./middlewares/idempotency');
+app.use(idempotencyMiddleware);
+
+// Advanced Route Specific Rate Limiters (Module 2)
+const {
+  loginLimiter, registerLimiter, emailOtpLimiter, mobileOtpLimiter,
+  forgotPasswordLimiter, passwordResetLimiter, walletLimiter, paymentLimiter,
+  proposalLimiter, kycLimiter, adminLimiter
+} = require('./middlewares/rateLimiters');
+
+app.use('/api/v1/auth/login', loginLimiter);
+app.use('/api/v1/auth/register', registerLimiter);
+app.use('/api/v1/auth/verify-registration', emailOtpLimiter);
+app.use('/api/v1/auth/verify-mobile', mobileOtpLimiter);
+app.use('/api/v1/auth/send-mobile-otp', mobileOtpLimiter);
+app.use('/api/v1/auth/forgot-password', forgotPasswordLimiter);
+app.use('/api/v1/auth/reset-password', passwordResetLimiter);
+
+app.use('/api/v1/wallet', walletLimiter);
+app.use('/api/v1/payments', paymentLimiter);
+app.use('/api/v1/proposals', proposalLimiter);
+app.use('/api/v1/kyc', kycLimiter);
+
 const { traceRequest, morganLogger } = require('./middlewares/requestLogger');
 app.use(traceRequest);
 app.use(morganLogger);
+
+app.get('/api/v1/docs', (req, res) => {
+  const spec = require('./config/swaggerSpec');
+  res.status(200).json(spec);
+});
 
 app.use('/api/v1/health',        monitoringRoutes);
 
@@ -71,8 +139,14 @@ app.use('/api/v1/analytics',     analyticsRoutes);
 app.use('/api/v1/dashboard',     dashboardRoutes);
 app.use('/api/v1/ads',           adRoutes);
 
+// ── Phase 4 Business Engine Routes ─────────────────────────
+app.use('/api/v1/disputes',      require('./routes/disputeRoutes'));
+app.use('/api/v1/coupons',       require('./routes/couponRoutes'));
+app.use('/api/v1/invoices',      require('./routes/invoiceRoutes'));
+app.use('/api/v1/referrals',     require('./routes/referralRoutes'));
+app.use('/api/v1/settings',      require('./routes/settingsRoutes'));
+
 // ── Admin Module Routes (separate auth, stricter rate limit) ──
-const adminLimiter = rateLimit({ windowMs: 15*60*1000, max: 60, message: { success:false, message:'Admin rate limit exceeded' } });
 app.use('/api/admin/auth',       adminLimiter, adminAuthRoutes);
 app.use('/api/admin/users',      adminLimiter, adminUserRoutes);
 app.use('/api/admin/tasks',      adminLimiter, adminTaskRoutes);

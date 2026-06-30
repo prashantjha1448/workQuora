@@ -119,6 +119,15 @@ exports.submitPan = async (req, res, next) => {
     
     await checkAndUpdateGlobalStatus(kyc._id);
 
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'KYC_SUBMIT',
+      entity: 'Kyc',
+      entityId: kyc._id,
+      metadata: { type: 'PAN' }
+    });
+
     res.status(200).json({ success: true, message: 'PAN details submitted successfully' });
   } catch (error) {
     next(error);
@@ -155,6 +164,15 @@ exports.submitAadhaar = async (req, res, next) => {
     await kyc.save();
     
     await checkAndUpdateGlobalStatus(kyc._id);
+
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'KYC_SUBMIT',
+      entity: 'Kyc',
+      entityId: kyc._id,
+      metadata: { type: 'AADHAAR' }
+    });
 
     res.status(200).json({ success: true, message: 'Aadhaar details submitted successfully' });
   } catch (error) {

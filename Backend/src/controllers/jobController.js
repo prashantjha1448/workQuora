@@ -70,6 +70,15 @@ exports.createJob = async (req, res, next) => {
     // Publish asynchronous JobCreated event via eventProvider
     eventProvider.publish('JobCreated', job._id, req.app.get('io'));
 
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'JOB_CREATED',
+      entity: 'Job',
+      entityId: job._id,
+      metadata: { title: job.title, category: job.category, budget: job.budget }
+    });
+
     res.status(201).json({
       success: true,
       data: job

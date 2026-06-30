@@ -60,9 +60,8 @@ export default function NotificationScreen({ navigation }: { navigation: any }) 
     if (!isAuthenticated) return;
     try {
       const response = await api.get('/notifications');
-      const data = getApiData(response);
-      setNotifications(data?.notifications || data || []);
-      setUnreadCount(data?.unreadCount || 0);
+      setNotifications(response.data?.notifications || []);
+      setUnreadCount(response.data?.unreadCount || 0);
     } catch (error) {
       console.error('Fetch notifications error:', error);
     } finally {
@@ -238,6 +237,7 @@ export default function NotificationScreen({ navigation }: { navigation: any }) 
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
           }
+          ListHeaderComponent={renderHeader}
           ListEmptyComponent={
             <View style={styles.emptyWrapper}>
               <View style={[styles.emptyIconBox, { backgroundColor: colors.accent }]}>

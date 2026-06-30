@@ -215,12 +215,48 @@ async function run() {
       );
       log('POST /jobs (asynchronous notification trigger)', asyncJob.status === 201);
 
-      // Wait for background eventBus queue to finish matching
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for background eventBus queue to finish matching (1 second for async IO)
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const freelancerNotifs = await request('GET', '/notifications', null, freelancerToken);
       const hasJobAlert = freelancerNotifs.data?.data?.some(n => n.message.includes('Emergency Tap Replacement'));
       log('Asynchronous Notification Delivery & Deduplication Validation', freelancerNotifs.status === 200 && hasJobAlert, `freelancer notification count: ${freelancerNotifs.data?.data?.length}`);
+
+      // ── PHASE 3 VERIFICATION CHECKS ──
+      console.log('\n--- Phase 3 Verification Diagnostics ---');
+      const phase3Diagnostics = await request('GET', `/health/test-phase3?jobId=${asyncJob.data.data._id}`, null, clientToken);
+      
+      log('Phase 3: Search Engine verification', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.searchOk === true);
+      log('Phase 3: Recommendation scoring engine verification', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.recommendationOk === true);
+      log('Phase 3: Caching abstraction layer verification', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.cacheOk === true);
+      log('Phase 3: Secure Storage Provider verification', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.storageOk === true);
+      log('Phase 3: AI Provider driver & timeout controls verification', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.aiOk === true);
+      log('Phase 3: Queue priority metrics diagnostics check', phase3Diagnostics.status === 200 && phase3Diagnostics.data?.data?.queueOk === true);
+
+      // ── PHASE 4 VERIFICATION CHECKS ──
+      console.log('\n--- Phase 4 Verification Diagnostics ---');
+      const phase4Diagnostics = await request('GET', '/health/test-phase4', null, clientToken);
+      
+      log('Phase 4: Milestone-Based Escrow Engine verification', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.escrowOk === true);
+      log('Phase 4: Double-Entry Wallet Ledger integrity verification', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.ledgerOk === true);
+      log('Phase 4: Milestone Release & Payout checks', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.releaseOk === true);
+      log('Phase 4: Commission calculations rule evaluations', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.commissionOk === true);
+      log('Phase 4: Invoicing event generation validation', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.invoiceOk === true);
+      log('Phase 4: Coupon code discount calculations', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.couponOk === true);
+      log('Phase 4: Security Risk & Fraud detection calculations', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.fraudOk === true);
+      log('Phase 4: Referral rewards enqueues', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.referralOk === true);
+      log('Phase 4: User Trust Reputation Score compiling', phase4Diagnostics.status === 200 && phase4Diagnostics.data?.data?.reputationOk === true);
+
+      // ── PHASE 5 VERIFICATION CHECKS ──
+      console.log('\n--- Phase 5 Verification Diagnostics ---');
+      const phase5Diagnostics = await request('GET', '/health/test-phase5', null, clientToken);
+      
+      log('Phase 5: Secrets Provider resolution', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.secretsOk === true);
+      log('Phase 5: Database Schema Migrations & locking', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.migrationsOk === true);
+      log('Phase 5: Version Release Manager metadata Info', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.releaseOk === true);
+      log('Phase 5: Canary weights traffic routing shifts', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.canaryOk === true);
+      log('Phase 5: Backups & Restoration verification checks', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.backupOk === true && phase5Diagnostics.data?.data?.recoveryOk === true);
+      log('Phase 5: Production Validator Readiness Auditor', phase5Diagnostics.status === 200 && phase5Diagnostics.data?.data?.validatorOk === true, `Production Score: ${phase5Diagnostics.data?.data?.productionScore}/100`);
     }
 
     const failed = results.filter((r) => !r.ok).length;

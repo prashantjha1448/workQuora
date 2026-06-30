@@ -92,7 +92,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     setLoading(true);
     try {
       await api.post('/auth/forgot-password', { email: forgotEmail });
-      Alert.alert('OTP Sent', 'Check your email/console for the 6-digit OTP code.');
+      Alert.alert('OTP Sent', 'A 6-digit reset code has been sent to your email.');
       setOtpSent(true);
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to request reset OTP.');

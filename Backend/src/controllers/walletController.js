@@ -107,6 +107,15 @@ exports.verifyAddMoneyPayment = async (req, res, next) => {
         { status: 'failed', razorpayPaymentId, description: 'Payment verification failed (signature mismatch)' },
         { session }
       );
+      const { createAuditLog } = require('../utils/auditLogger');
+      await createAuditLog(req, {
+        userId: req.user.id,
+        action: 'PAYMENT_FAILURE',
+        entity: 'Wallet',
+        entityId: null,
+        metadata: { razorpayOrderId, reason: 'Signature mismatch' }
+      });
+
       await session.commitTransaction(); // Save the failed state
       session.endSession();
       return res.status(400).json({ success: false, message: 'Payment verification failed — your wallet was not credited.' });
@@ -115,6 +124,15 @@ exports.verifyAddMoneyPayment = async (req, res, next) => {
     // Double-check with Razorpay directly
     const payment = await fetchPayment(razorpayPaymentId);
     if (!payment || payment.status !== 'captured') {
+      const { createAuditLog } = require('../utils/auditLogger');
+      await createAuditLog(req, {
+        userId: req.user.id,
+        action: 'PAYMENT_FAILURE',
+        entity: 'Wallet',
+        entityId: null,
+        metadata: { razorpayOrderId, razorpayPaymentId, reason: 'Payment not captured' }
+      });
+
       await WalletTransaction.findOneAndUpdate(
         { razorpayOrderId },
         { status: 'failed', razorpayPaymentId, description: `Payment verification failed (status: ${payment?.status})` },
@@ -160,6 +178,15 @@ exports.verifyAddMoneyPayment = async (req, res, next) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'DEPOSIT',
+      entity: 'Wallet',
+      entityId: wallet._id,
+      metadata: { amount: amountInPaise / 100, paymentId: razorpayPaymentId, orderId: razorpayOrderId }
+    });
 
     // Emit live update
     const io = req.app.get('io');
@@ -235,6 +262,15 @@ exports.withdraw = async (req, res, next) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'WITHDRAWAL',
+      entity: 'Wallet',
+      entityId: transaction[0]._id,
+      metadata: { amount, balance: wallet.balance }
+    });
 
     const io = req.app.get('io');
     if (io) {

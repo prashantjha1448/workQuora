@@ -61,6 +61,14 @@ exports.verifyRazorpayPayment = async (req, res, next) => {
       .digest('hex');
 
     if (expectedSignature !== razorpay_signature) {
+      const { createAuditLog } = require('../utils/auditLogger');
+      await createAuditLog(req, {
+        userId: req.user.id,
+        action: 'PAYMENT_FAILURE',
+        entity: 'Wallet',
+        entityId: null,
+        metadata: { orderId: req.body.razorpay_order_id, paymentId: req.body.razorpay_payment_id }
+      });
       return res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
 
@@ -79,6 +87,15 @@ exports.verifyRazorpayPayment = async (req, res, next) => {
       amount: amountINR,
       type: 'deposit',
       status: 'completed'
+    });
+
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'DEPOSIT',
+      entity: 'Wallet',
+      entityId: updatedEarnings._id,
+      metadata: { amount: amountINR, orderId: razorpay_order_id, paymentId: razorpay_payment_id }
     });
 
     res.status(200).json({

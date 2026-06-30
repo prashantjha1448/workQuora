@@ -44,6 +44,15 @@ exports.withdraw = async (req, res, next) => {
       }], { session });
     });
 
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'WITHDRAWAL',
+      entity: 'Wallet',
+      entityId: updated._id,
+      metadata: { amount, newBalance: updated.walletBalance }
+    });
+
     res.status(200).json({ success: true, message: `₹${amount} withdrawal initiated`, data: { newBalance: updated.walletBalance } });
   } catch (error) {
     if (error.message === 'Insufficient balance') {

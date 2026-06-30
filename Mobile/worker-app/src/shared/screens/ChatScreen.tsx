@@ -13,9 +13,12 @@ import {
   Alert,
   Image,
   Modal,
+  Linking,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import api from '../../services/api';
 import socketService from '../../services/socket';
 import { useTheme } from '../theme/theme';
@@ -53,6 +56,7 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
   const [otherUserProfile, setOtherUserProfile] = useState<any>(null);
 
   useEffect(() => {
+    if (!jobId || !otherUserId) { setLoading(false); return; }
     // 1. Fetch conversation history
     const fetchMessages = async () => {
       try {
@@ -165,7 +169,6 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
         socket.off('messages_delivered');
         socket.off('messages_read');
       }
-      socketService.disconnect();
     };
   }, [jobId, otherUserId, token, currentUser]);
 
@@ -238,52 +241,42 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
     }
   };
 
-  const handleSendAttachment = async (type: string) => {
-    let attachmentText = '';
-    if (type === 'map') {
-      attachmentText = '[attachment:map]';
-    } else if (type === 'image') {
-      attachmentText = '[attachment:image]';
-    } else if (type === 'pdf') {
-      attachmentText = '[attachment:pdf]';
-    } else if (type === 'audio') {
-      attachmentText = '[attachment:audio]';
-    }
+  const sendRealAttachment = (payload: { fileUrl?: string; fileType: string; location?: any }) => {
+    const socket = socketService.getSocket();
+    if (!socket || !currentUser) return;
+    socket.emit('send_message', { jobId, receiverId: otherUserId, text: '', ...payload });
+  };
 
-    if (!attachmentText) return;
-
-    const payload = {
-      jobId,
-      receiverId: otherUserId,
-      text: attachmentText,
-    };
-
-    // Optimistic rendering
-    const tempMsg: ChatMessage = {
-      _id: `temp-${Date.now()}`,
-      sender: currentUser?._id || '',
-      receiver: otherUserId,
-      text: attachmentText,
-      createdAt: new Date().toISOString(),
-      status: 'sent',
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-
+  const handlePickImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return Alert.alert('Permission Required', 'Please allow gallery access.');
+    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.6 });
+    if (result.canceled || !result.assets?.[0]) return;
+    const asset = result.assets[0];
     try {
-      const response = await api.post('/messages', payload);
-      if (response.data?.success && response.data.data) {
-        setMessages((prev) =>
-          prev.map((m) => (m._id === tempMsg._id ? response.data.data : m))
-        );
-      }
-    } catch (e) {
-      console.error('Failed to send attachment:', e);
-      setMessages((prev) => prev.filter((m) => m._id !== tempMsg._id));
+      const fd = new FormData();
+      fd.append('jobId', jobId);
+      fd.append('file', { uri: asset.uri, name: asset.fileName || `img_${Date.now()}.jpg`, type: asset.mimeType || 'image/jpeg' } as any);
+      const res = await api.post('/messages/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (res.data?.success) sendRealAttachment({ fileUrl: res.data.fileUrl, fileType: res.data.fileType });
+    } catch (e: any) {
+      Alert.alert('Upload Failed', e.response?.data?.message || 'Could not send photo.');
     }
   };
 
-  const handleAttachmentPress = (type: string) => {
-    Alert.alert('Attachment Download', `Opening attachment file of type: ${type.toUpperCase()}`);
+  const handleShareLocation = async () => {
+    const perm = await Location.requestForegroundPermissionsAsync();
+    if (perm.status !== 'granted') return Alert.alert('Permission Required', 'Please allow location access.');
+    try {
+      const loc = await Location.getCurrentPositionAsync({});
+      sendRealAttachment({ fileType: 'location', location: { lat: loc.coords.latitude, lng: loc.coords.longitude } });
+    } catch {
+      Alert.alert('Error', 'Could not get current location.');
+    }
+  };
+
+  const handleAttachmentPress = (msg: ChatMessage) => {
+    if ((msg as any).fileUrl) Linking.openURL((msg as any).fileUrl);
   };
 
   const handlePlusPress = () => {
@@ -291,9 +284,8 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
       'Share Media',
       'Select the attachment type to send',
       [
-        { text: '📷 Photo / Image', onPress: () => handleSendAttachment('image') },
-        { text: '📁 PDF Document', onPress: () => handleSendAttachment('pdf') },
-        { text: '📍 Live Location', onPress: () => handleSendAttachment('map') },
+        { text: '📷 Photo / Image', onPress: handlePickImage },
+        { text: '📍 Live Location', onPress: handleShareLocation },
         { text: 'Cancel', style: 'cancel' }
       ]
     );
@@ -349,6 +341,18 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
     return `${mins < 10 ? '0' : ''}${mins}:${remainingSecs < 10 ? '0' : ''}${remainingSecs}`;
   };
 
+  if (!jobId || !otherUserId) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
+        <Feather name="alert-triangle" size={40} color="#f59e0b" />
+        <Text style={{ marginTop: 12, color: colors.text, fontWeight: '700' }}>Conversation not found</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16 }}>
+          <Text style={{ color: colors.primary, fontWeight: '700' }}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       {/* Header */}
@@ -383,10 +387,10 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
         </View>
 
         <View style={styles.headerRightActions}>
-          <TouchableOpacity style={styles.headerActionBtn} onPress={() => startCall('audio')}>
+          <TouchableOpacity style={styles.headerActionBtn} onPress={() => Alert.alert('Coming Soon', 'Voice calling will be available in a future app update.')}>
             <Feather name="phone" size={20} color="#63597C" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerActionBtn} onPress={() => startCall('video')}>
+          <TouchableOpacity style={styles.headerActionBtn} onPress={() => Alert.alert('Coming Soon', 'Video calling will be available in a future app update.')}>
             <Feather name="video" size={20} color="#63597C" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerActionBtn} onPress={handleMorePress}>
@@ -431,26 +435,6 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
               <Feather name="slash" size={16} color="#ba1a1a" style={{ marginRight: 6 }} />
               <Text style={styles.blockedText}>You have blocked this user. Unblock to continue chatting.</Text>
             </View>
-          ) : recordingAudio ? (
-            <View style={[styles.inputContainerRow, { justifyContent: 'space-between', backgroundColor: '#fef2f2', borderTopColor: '#fecaca' }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={styles.pulsingDot} />
-                <Text style={{ color: '#ef4444', fontWeight: '700', marginLeft: 8 }}>
-                  Recording Audio... {recordSeconds}s
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
-                <TouchableOpacity onPress={() => setRecordingAudio(false)} style={styles.cancelRecordBtn}>
-                  <Text style={{ color: '#6b7280', fontWeight: '600' }}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => {
-                  setRecordingAudio(false);
-                  handleSendAttachment('audio');
-                }} style={styles.sendRecordBtn}>
-                  <Text style={{ color: colors.primary, fontWeight: '700' }}>Send</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           ) : (
             <View style={styles.inputContainerRow}>
               {/* Plus Icon */}
@@ -474,7 +458,7 @@ export default function ChatScreen({ route, navigation }: ChatScreenProps) {
               </View>
 
               {/* Mic Icon */}
-              <TouchableOpacity style={styles.micBtn} onPress={startAudioRecording}>
+              <TouchableOpacity style={styles.micBtn} onPress={() => Alert.alert('Coming Soon', 'Voice notes will be available in a future update.')}>
                 <Feather name="mic" size={20} color="#63597C" />
               </TouchableOpacity>
 

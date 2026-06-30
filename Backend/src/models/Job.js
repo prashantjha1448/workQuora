@@ -91,5 +91,12 @@ const jobSchema = new mongoose.Schema(
 // Index for geo-spatial queries
 jobSchema.index({ location: '2dsphere' });
 
+// Advanced Search Indexing (Phase 3 compliance)
+jobSchema.index(
+  { title: 'text', description: 'text', category: 'text' },
+  { weights: { title: 10, category: 5, description: 1 }, name: 'JobTextSearchIndex' }
+);
+jobSchema.index({ status: 1, category: 1, createdAt: -1 });
+
 const Job = mongoose.model('Job', jobSchema);
 module.exports = Job;

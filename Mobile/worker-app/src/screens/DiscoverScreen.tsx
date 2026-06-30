@@ -34,7 +34,7 @@ export default function DiscoverScreen({ navigation }: { navigation: any }) {
         params: {
           lat: userLat,
           lng: userLng,
-          radius: 100,
+          radius: 25,
           keyword: query,
         },
       });
@@ -92,7 +92,7 @@ export default function DiscoverScreen({ navigation }: { navigation: any }) {
         <Text style={styles.budgetValue}>₹{item.budget}</Text>
         <TouchableOpacity 
           style={styles.actionBtn}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('GigDetails', { job: item })}
         >
           <Text style={styles.actionBtnTxt}>Apply Now</Text>
         </TouchableOpacity>

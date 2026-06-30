@@ -11,14 +11,13 @@ import {
   TextInput,
   Modal,
   ActivityIndicator,
-  Platform,
-  KeyboardAvoidingView,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useSelector, useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
-import { logoutUserSession, updateUser } from '../../store/authSlice';
+import { logoutUserSession } from '../../store/authSlice';
 import { useTheme } from '../theme/theme';
 import { useLanguage } from '../../services/i18n';
 
@@ -49,12 +48,6 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
-
-  // Mobile Verification States
-  const [mobileOtpModalVisible, setMobileOtpModalVisible] = useState(false);
-  const [mobileOtp, setMobileOtp] = useState('');
-  const [isSendingMobileOtp, setIsSendingMobileOtp] = useState(false);
-  const [isVerifyingMobile, setIsVerifyingMobile] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem('safety_alerts_enabled').then((val) => {
@@ -100,14 +93,16 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
     setSavingPassword(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      Alert.alert(t('successLabel'), 'Password updated successfully!');
-      setPasswordModalVisible(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      Alert.alert(t('errorLabel'), 'Failed to change password.');
+      const res = await api.put('/auth/change-password', { currentPassword, newPassword });
+      if (res.data?.success) {
+        Alert.alert(t('successLabel'), res.data.message || 'Password updated successfully!');
+        setPasswordModalVisible(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err: any) {
+      Alert.alert(t('errorLabel'), err.response?.data?.message || 'Failed to change password.');
     } finally {
       setSavingPassword(false);
     }
@@ -142,9 +137,22 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         {
           text: 'Link',
           onPress: async () => {
-            setBiometricEnabled(true);
-            await AsyncStorage.setItem('biometric_enabled', 'true');
-            Alert.alert('Success', 'Biometrics configured successfully!');
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            if (!hasHardware || !isEnrolled) {
+              Alert.alert('Not Available', 'No Face ID / Fingerprint is set up on this device. Please configure it in your phone settings first.');
+              return;
+            }
+            const result = await LocalAuthentication.authenticateAsync({
+              promptMessage: 'Confirm your identity to enable app lock',
+            });
+            if (result.success) {
+              setBiometricEnabled(true);
+              await AsyncStorage.setItem('biometric_enabled', 'true');
+              Alert.alert('Success', 'Biometric app lock enabled successfully!');
+            } else {
+              Alert.alert('Cancelled', 'Biometric verification was not completed.');
+            }
           },
         },
       ]);
@@ -160,39 +168,6 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           },
         },
       ]);
-    }
-  };
-
-  const handleSendMobileOtp = async () => {
-    if (user?.isMobileVerified) {
-      Alert.alert('Already Verified', 'Your mobile number is already verified.');
-      return;
-    }
-    try {
-      setIsSendingMobileOtp(true);
-      await api.post('/auth/send-mobile-otp', { email: user?.email });
-      setMobileOtpModalVisible(true);
-      Alert.alert('OTP Sent', 'Mobile OTP sent via SMS.');
-    } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Failed to send OTP.');
-    } finally {
-      setIsSendingMobileOtp(false);
-    }
-  };
-
-  const handleVerifyMobile = async () => {
-    if (!mobileOtp) return Alert.alert('Error', 'Enter OTP');
-    try {
-      setIsVerifyingMobile(true);
-      await api.post('/auth/verify-mobile', { email: user?.email, otp: mobileOtp });
-      Alert.alert('Success', 'Mobile Verified Successfully!');
-      setMobileOtpModalVisible(false);
-      dispatch(updateUser({ ...user, isMobileVerified: true }));
-      api.get('/profile/me').then(res => setProfileData(res.data?.data));
-    } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Invalid OTP.');
-    } finally {
-      setIsVerifyingMobile(false);
     }
   };
 
@@ -218,18 +193,16 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   // Determine dynamic verification tags
   const isKycComplete = !!(profileData?.kycVerified || profileData?.isVerified);
   const kycStatusText = isKycComplete ? 'VERIFIED' : 'PENDING';
-  
-  const hasAadhar = !!profileData?.kyc?.aadharNumber;
-  const hasPan = !!(profileData?.kyc?.panCard || profileData?.kyc?.panNumber);
-  const isIdentityVerified = hasAadhar && hasPan;
-  const identityStatusText = isIdentityVerified ? 'VERIFIED' : 'PENDING';
-  const identitySubText = isIdentityVerified ? 'Last updated Oct 2023' : 'Action required';
 
-  const hasBankDetails = !!profileData?.bankDetails;
-  const bankStatusText = hasBankDetails ? 'VERIFIED' : 'PENDING';
-  const bankName = profileData?.bankDetails?.bankName || 'HDFC Bank';
-  const lastFourDigits = profileData?.bankDetails?.accountNo?.slice(-4) || profileData?.bankDetails?.accountNumber?.slice(-4) || '4821';
-  const bankSubText = hasBankDetails ? `${bankName} • • • • ${lastFourDigits}` : 'Link bank for withdrawals';
+  const isAadhaarVerified = !!profileData?.kyc?.aadhaarVerified;
+  const isPanVerified = !!profileData?.kyc?.panVerified;
+  const isIdentityVerified = isAadhaarVerified && isPanVerified;
+  const identityStatusText = isIdentityVerified ? 'VERIFIED' : 'PENDING';
+  const identitySubText = isIdentityVerified ? 'Aadhaar & PAN verified' : 'Action required';
+
+  const isBankVerified = !!profileData?.kyc?.bankVerified;
+  const bankStatusText = isBankVerified ? 'VERIFIED' : 'PENDING';
+  const bankSubText = isBankVerified ? 'Bank account verified' : 'Link bank for withdrawals';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -248,31 +221,6 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>IDENTITY VERIFICATION (KYC)</Text>
         <View style={[styles.cardContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
           
-          {/* Verify Mobile Number */}
-          <TouchableOpacity
-            style={styles.row}
-            onPress={handleSendMobileOtp}
-            disabled={isSendingMobileOtp}
-          >
-            <View style={styles.rowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: '#d1fae5' }]}>
-                <Feather name="phone" size={18} color="#059669" />
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={[styles.label, { color: colors.text }]}>Verify Mobile Number</Text>
-                <Text style={styles.subLabel}>{profileData?.mobileNumber || user?.mobileNumber || 'No mobile linked'}</Text>
-              </View>
-            </View>
-            <View style={styles.rowRight}>
-              <View style={user?.isMobileVerified ? styles.badgeVerified : styles.badgePending}>
-                <Text style={user?.isMobileVerified ? styles.badgeVerifiedText : styles.badgePendingText}>
-                  {user?.isMobileVerified ? 'VERIFIED' : 'PENDING'}
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={16} color="#9ca3af" style={{ marginLeft: 8 }} />
-            </View>
-          </TouchableOpacity>
-
           {/* Identity Document (Aadhaar/PAN) */}
           <TouchableOpacity
             style={styles.row}
@@ -312,8 +260,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               </View>
             </View>
             <View style={styles.rowRight}>
-              <View style={hasBankDetails ? styles.badgeVerified : styles.badgePending}>
-                <Text style={hasBankDetails ? styles.badgeVerifiedText : styles.badgePendingText}>
+              <View style={isBankVerified ? styles.badgeVerified : styles.badgePending}>
+                <Text style={isBankVerified ? styles.badgeVerifiedText : styles.badgePendingText}>
                   {bankStatusText}
                 </Text>
               </View>
@@ -577,34 +525,6 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
-
-      {/* Mobile OTP Modal */}
-      <Modal visible={mobileOtpModalVisible} transparent animationType="fade">
-        <View style={styles.modalBg}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Enter Mobile OTP</Text>
-            <Text style={[styles.modalSub, { color: colors.textMuted }]}>We sent a 6-digit OTP to your mobile number.</Text>
-            <TextInput
-              style={[styles.modalInput, { color: colors.text, borderColor: colors.border }]}
-              placeholder="000000"
-              placeholderTextColor="#9ca3af"
-              keyboardType="number-pad"
-              maxLength={6}
-              value={mobileOtp}
-              onChangeText={setMobileOtp}
-              textAlign="center"
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={[styles.modalCancel, { backgroundColor: colors.grayLight }]} onPress={() => setMobileOtpModalVisible(false)}>
-                <Text style={[styles.modalCancelText, { color: colors.text }]}>{t('cancelBtn') || 'Cancel'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalSubmit, { backgroundColor: colors.primary }]} onPress={handleVerifyMobile} disabled={isVerifyingMobile}>
-                <Text style={[styles.modalSubmitText, { color: colors.white }]}>{isVerifyingMobile ? 'Verifying...' : 'Verify'}</Text>
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
         </View>
       </Modal>
     </SafeAreaView>

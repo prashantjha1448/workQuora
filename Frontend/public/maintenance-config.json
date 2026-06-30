@@ -1,6 +1,6 @@
 {
-  "isMaintenanceMode": true,
-  "targetLaunchDate": "2026-06-29T12:00:00Z",
+  "isMaintenanceMode": false,
+  "targetLaunchDate": "2026-07-04T12:00:00Z",
   "version": "v3.0",
   "progressPercent": 78,
   "headingLine1": "WE ARE BUILDING",

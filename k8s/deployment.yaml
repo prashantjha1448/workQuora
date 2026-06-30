@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workquora-backend
+  namespace: workquora
+  labels:
+    app: workquora-backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: workquora-backend
+  template:
+    metadata:
+      labels:
+        app: workquora-backend
+    spec:
+      containers:
+        - name: backend
+          image: workquora-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: workquora-cm
+            - secretRef:
+                name: workquora-secret
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/liveness
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10

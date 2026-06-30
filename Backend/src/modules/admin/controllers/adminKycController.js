@@ -99,6 +99,15 @@ exports.reviewKycStep = async (req, res, next) => {
     const io = req.app.get('io');
     await recalculateKycStatus(kyc._id, io);
 
+    const { createAuditLog } = require('../../../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.admin.id,
+      action: isApprove ? 'KYC_APPROVAL' : 'KYC_REJECTION',
+      entity: 'Kyc',
+      entityId: kyc._id,
+      metadata: { step, decision, reason }
+    });
+
     res.status(200).json({ success: true, message: `KYC step ${step} marked as ${decision}` });
   } catch (error) {
     next(error);

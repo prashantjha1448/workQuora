@@ -184,6 +184,15 @@ const acceptProposal = async (req, res, next) => {
       }], { session });
     });
 
+    const { createAuditLog } = require('../utils/auditLogger');
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'PROPOSAL_ACCEPTED',
+      entity: 'Proposal',
+      entityId: proposal._id,
+      metadata: { jobId: proposal.job._id, bidAmount: proposal.bidAmount }
+    });
+
     // Notify the freelancer that their proposal was accepted
     const io = req.app.get('io');
     const senderDetail = req.user.username ? `${req.user.name} (@${req.user.username})` : req.user.name;

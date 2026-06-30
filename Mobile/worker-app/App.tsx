@@ -7,6 +7,7 @@ import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 
 import { LanguageProvider } from './src/services/i18n';
+import { ThemeModeProvider } from './src/shared/theme/theme';
 
 if (Platform.OS === 'web') {
   const style = document.createElement('style');
@@ -25,6 +26,7 @@ import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <Provider store={store}>
+      <ThemeModeProvider>
       <LanguageProvider>
         <SafeAreaProvider>
           <StatusBar style="auto" />
@@ -32,6 +34,7 @@ export default function App() {
           <Toast />
         </SafeAreaProvider>
       </LanguageProvider>
+      </ThemeModeProvider>
     </Provider>
   );
 }

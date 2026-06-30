@@ -2,48 +2,120 @@ const User = require('../models/User');
 const Earnings = require('../models/Earnings');
 const Kyc = require('../models/Kyc');
 const BankDetails = require('../models/BankDetails');
+const Session = require('../models/Session');
+const { parseUserAgent } = require('../utils/uaParser');
+const { createAuditLog } = require('../utils/auditLogger');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const sendEmail = require('../utils/sendEmail');
 const smsService = require('../services/smsService');
+const crypto = require('crypto');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', {
-    expiresIn: process.env.JWT_EXPIRE || '30d',
+// Session based token response generation (Module 1)
+const sendTokenResponse = async (user, statusCode, req, res) => {
+  const ua = parseUserAgent(req.headers['user-agent']);
+  const ip = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
+  const country = req.headers['x-country'] || 'Unknown';
+  const city = req.headers['x-city'] || 'Unknown';
+
+  // Generate Access Token (1 hour expiry)
+  const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret123', {
+    expiresIn: '1h',
   });
 
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = generateToken(user.id);
+  // Generate Refresh Token (rotated)
+  const refreshToken = crypto.randomBytes(40).toString('hex');
+  const refreshTokenHash = Session.hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+  // Suspicious Login Detection (Module 5)
+  let isSuspicious = false;
+  const lastSession = await Session.findOne({ userId: user.id }).sort({ createdAt: -1 });
+  if (lastSession) {
+    if (
+      (lastSession.country !== 'Unknown' && country !== 'Unknown' && lastSession.country !== country) ||
+      (lastSession.browser !== 'Unknown' && ua.browser !== 'Unknown' && lastSession.browser !== ua.browser) ||
+      (lastSession.operatingSystem !== 'Unknown' && ua.operatingSystem !== 'Unknown' && lastSession.operatingSystem !== ua.operatingSystem)
+    ) {
+      isSuspicious = true;
+      console.log(`⚠️ Suspicious login detected for user: ${user.email} from IP: ${ip}`);
+      await createAuditLog(req, {
+        userId: user.id,
+        action: 'SUSPICIOUS_LOGIN',
+        entity: 'User',
+        entityId: user.id,
+        metadata: { ip, country, browser: ua.browser, os: ua.operatingSystem }
+      });
+    }
+  }
+
+  // Save Session
+  const session = await Session.create({
+    userId: user.id,
+    refreshTokenHash,
+    deviceName: ua.deviceName,
+    browser: ua.browser,
+    operatingSystem: ua.operatingSystem,
+    ipAddress: ip,
+    country,
+    city,
+    userAgent: req.headers['user-agent'] || '',
+    expiresAt,
+  });
+
+  req.sessionId = session.sessionId;
+
+  // Append-only Audit Log (Module 3)
+  await createAuditLog(req, {
+    userId: user.id,
+    action: isSuspicious ? 'LOGIN_SUSPICIOUS' : 'LOGIN',
+    entity: 'User',
+    entityId: user.id,
+    metadata: { sessionId: session.sessionId }
+  });
+
+  // Set HTTP-Only cookies
+  res.cookie('jwt', accessToken, {
+    expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    expires: expiresAt,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+
   const userObj = user.toObject ? user.toObject() : user;
   userObj.password = undefined;
-  res.status(statusCode)
-    .cookie('jwt', token, {
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    })
-    .json({ success: true, token, user: userObj, data: userObj });
+
+  res.status(statusCode).json({
+    success: true,
+    token: accessToken,
+    refreshToken,
+    user: userObj,
+    data: userObj,
+  });
 };
 
 // POST /auth/register
 exports.registerUser = async (req, res, next) => {
   try {
     const { name, email, password, mobileNumber, role, username, gender } = req.body;
-
     const emailLower = email.toLowerCase().trim();
 
-    // Check if email is already taken
     const emailUser = await User.findOne({ email: emailLower });
     if (emailUser && emailUser.isVerified) {
       return res.status(400).json({ success: false, message: 'Email is already registered' });
     }
 
-    // Check if username is already taken
     if (username) {
       const cleanUsername = username.toLowerCase().trim();
       const usernameUser = await User.findOne({ username: cleanUsername });
@@ -52,11 +124,9 @@ exports.registerUser = async (req, res, next) => {
       }
     }
 
-    // Find if there is an existing unverified registration for this email
     let user = await User.findOne({ email: emailLower });
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry (Module 4)
 
     const cleanGender = (gender || 'OTHER').toUpperCase();
     const defaultAvatar = (cleanGender === 'MALE')
@@ -67,12 +137,14 @@ exports.registerUser = async (req, res, next) => {
 
     if (user) {
       user.name = name;
-      user.password = password; // Will be hashed automatically by pre-save hook
+      user.password = password;
       user.role = (role || 'CLIENT').toUpperCase();
       user.gender = cleanGender;
       user.avatar = defaultAvatar;
       user.resetPasswordOtp = otp;
       user.resetPasswordExpires = otpExpires;
+      user.otpAttempts = 0;
+      user.otpLockedUntil = null;
       await user.save();
     } else {
       user = await User.create({
@@ -80,7 +152,7 @@ exports.registerUser = async (req, res, next) => {
         email,
         username,
         mobileNumber,
-        password, // Will be hashed automatically by pre-save hook
+        password,
         role: (role || 'CLIENT').toUpperCase(),
         gender: cleanGender,
         avatar: defaultAvatar,
@@ -89,10 +161,16 @@ exports.registerUser = async (req, res, next) => {
         resetPasswordExpires: otpExpires
       });
       await Earnings.create({ userId: user._id }).catch(() => {});
-      // Bible Vol 13: Wallet is created on signup for every user
       const Wallet = require('../models/Wallet');
       await Wallet.create({ user: user._id, userId: user._id }).catch(() => {});
     }
+
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'REGISTER',
+      entity: 'User',
+      entityId: user.id
+    });
 
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔑 [DEVELOPER ONLY] Registration OTP for ${user.email} is: ${otp}`);
@@ -102,68 +180,86 @@ exports.registerUser = async (req, res, next) => {
       await sendEmail({
         email: user.email,
         subject: 'Verify your WorkQuora Account 🚀',
-        message: `Hi ${user.name},\n\nYour registration OTP is: ${otp}\n\nIt expires in 10 minutes.\n\nWorkQuora Team`,
+        message: `Hi ${user.name},\n\nYour registration OTP is: ${otp}\n\nIt expires in 5 minutes.\n\nWorkQuora Team`,
       });
-    } catch (err) { 
-      console.error('❌ Registration Email sending failed:', err);
-      console.log('Email skipped.'); 
+    } catch (err) {
+      console.error('❌ Registration Email sending failed:', err.message);
     }
 
     res.status(200).json({ success: true, message: 'OTP sent to your email. Please verify.' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // POST /auth/verify-registration
 exports.verifyRegistration = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-
     if (!email || !otp) {
       return res.status(400).json({ success: false, message: 'Email and OTP are required' });
     }
 
     const emailLower = email.toLowerCase().trim();
-    const user = await User.findOne({ email: emailLower }).select('+resetPasswordOtp +resetPasswordExpires');
+    const user = await User.findOne({ email: emailLower }).select('+resetPasswordOtp +resetPasswordExpires +otpAttempts +otpLockedUntil');
 
     if (!user || user.isVerified) {
       return res.status(400).json({ success: false, message: 'User not found or already verified' });
     }
 
+    // Check OTP Lock (Module 4)
+    if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: `OTP verification is locked due to multiple failures. Try again in 15 minutes.`
+      });
+    }
+
     const isDevBypass = process.env.NODE_ENV === 'development' && otp === '123456';
     if (!isDevBypass && (user.resetPasswordOtp !== otp || new Date() > user.resetPasswordExpires)) {
+      // Increment failures
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+      if (user.otpAttempts >= 5) {
+        user.otpLockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins lock
+      }
+      await user.save();
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
     }
 
+    // Reset attempts on success
     user.isVerified = true;
     user.resetPasswordOtp = null;
     user.resetPasswordExpires = null;
-    
-    // Rate Limiting
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
+
+    // Resend Rate Limiting (Module 4)
     const now = new Date();
-    if (user.mobileOtpLastSent && (now - user.mobileOtpLastSent) < 10 * 60 * 1000) {
-      if (user.mobileOtpCount >= 3) {
-        return res.status(429).json({ success: false, message: 'Too many OTP requests. Please try again after 10 minutes.' });
-      }
-    } else {
-      user.mobileOtpCount = 0;
+    if (user.mobileOtpLastSent && (now - user.mobileOtpLastSent) < 60 * 1000) {
+      return res.status(429).json({ success: false, message: 'Please wait 60 seconds before requesting another OTP.' });
     }
 
-    // Generate Mobile OTP and send via SMS
     const mobileOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(mobileOtp, salt);
 
     user.mobileOtp = hashedOtp;
-    user.mobileOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    user.mobileOtpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 mins expiry (Module 4)
     user.mobileOtpCount = (user.mobileOtpCount || 0) + 1;
     user.mobileOtpLastSent = now;
-    
     await user.save();
+
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'EMAIL_VERIFIED',
+      entity: 'User',
+      entityId: user.id
+    });
 
     if (process.env.NODE_ENV === 'development') {
       console.log(`📱 [DEVELOPER ONLY] Mobile OTP for ${user.mobileNumber} is: ${mobileOtp}`);
     }
-    
+
     try {
       await smsService.sendOtp(user.mobileNumber, mobileOtp);
     } catch (err) {
@@ -180,13 +276,12 @@ exports.verifyRegistration = async (req, res, next) => {
 exports.verifyMobile = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-    
     if (!email || !otp) {
       return res.status(400).json({ success: false, message: 'Email and Mobile OTP are required' });
     }
 
     const emailLower = email.toLowerCase().trim();
-    const user = await User.findOne({ email: emailLower }).select('+mobileOtp +mobileOtpExpires');
+    const user = await User.findOne({ email: emailLower }).select('+mobileOtp +mobileOtpExpires +otpAttempts +otpLockedUntil');
 
     if (!user || !user.isVerified) {
       return res.status(400).json({ success: false, message: 'User not found or email not verified' });
@@ -196,9 +291,23 @@ exports.verifyMobile = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Mobile already verified' });
     }
 
+    // OTP Lock (Module 4)
+    if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP verification is locked. Try again in 15 minutes.'
+      });
+    }
+
     const isDevBypass = process.env.NODE_ENV === 'development' && otp === '123456';
     const isMatch = user.mobileOtp ? await bcrypt.compare(otp, user.mobileOtp) : false;
+
     if (!isDevBypass && (!isMatch || new Date() > user.mobileOtpExpires)) {
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+      if (user.otpAttempts >= 5) {
+        user.otpLockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+      }
+      await user.save();
       return res.status(400).json({ success: false, message: 'Invalid or expired Mobile OTP' });
     }
 
@@ -206,10 +315,18 @@ exports.verifyMobile = async (req, res, next) => {
     user.mobileVerified = true;
     user.mobileOtp = null;
     user.mobileOtpExpires = null;
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
     await user.save();
 
-    // All verifications passed, send token to login
-    sendTokenResponse(user, 201, res);
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'PHONE_VERIFIED',
+      entity: 'User',
+      entityId: user.id
+    });
+
+    await sendTokenResponse(user, 201, req, res);
   } catch (error) {
     next(error);
   }
@@ -218,11 +335,9 @@ exports.verifyMobile = async (req, res, next) => {
 // POST /auth/send-mobile-otp
 exports.sendMobileOtp = async (req, res, next) => {
   try {
-    // Can be called by unauthenticated user during registration (pass email)
-    // Or authenticated user from settings (use req.user.id)
     const email = req.body.email;
     const userId = req.user?.id;
-    
+
     if (!email && !userId) {
       return res.status(400).json({ success: false, message: 'Email is required' });
     }
@@ -236,16 +351,12 @@ exports.sendMobileOtp = async (req, res, next) => {
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     if (user.isMobileVerified) return res.status(400).json({ success: false, message: 'Mobile already verified' });
-    if (!user.mobileNumber) return res.status(400).json({ success: false, message: 'No mobile number associated with this account' });
+    if (!user.mobileNumber) return res.status(400).json({ success: false, message: 'No mobile number associated' });
 
-    // Rate Limiting
+    // Cooldown verification (60 seconds resend gap - Module 4)
     const now = new Date();
-    if (user.mobileOtpLastSent && (now - user.mobileOtpLastSent) < 10 * 60 * 1000) {
-      if (user.mobileOtpCount >= 3) {
-        return res.status(429).json({ success: false, message: 'Too many OTP requests. Please try again after 10 minutes.' });
-      }
-    } else {
-      user.mobileOtpCount = 0;
+    if (user.mobileOtpLastSent && (now - user.mobileOtpLastSent) < 60 * 1000) {
+      return res.status(429).json({ success: false, message: 'Please wait 60 seconds before requesting another OTP.' });
     }
 
     const mobileOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -253,7 +364,7 @@ exports.sendMobileOtp = async (req, res, next) => {
     const hashedOtp = await bcrypt.hash(mobileOtp, salt);
 
     user.mobileOtp = hashedOtp;
-    user.mobileOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    user.mobileOtpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
     user.mobileOtpCount = (user.mobileOtpCount || 0) + 1;
     user.mobileOtpLastSent = now;
     await user.save();
@@ -261,7 +372,7 @@ exports.sendMobileOtp = async (req, res, next) => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`📱 [DEVELOPER ONLY] Resend Mobile OTP for ${user.mobileNumber} is: ${mobileOtp}`);
     }
-    
+
     try {
       await smsService.sendOtp(user.mobileNumber, mobileOtp);
     } catch (err) {
@@ -286,15 +397,47 @@ exports.loginUser = async (req, res, next) => {
         { email: searchKey },
         { username: searchKey }
       ]
-    }).select('+password');
+    }).select('+password +failedLoginAttempts +lockedUntil');
 
     if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-    const isMatch = await user.comparePassword(password, user.password);
-    if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    // Account locking verification (Module 5)
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is temporarily locked due to multiple login failures. Try again in 15 minutes.'
+      });
+    }
 
-    sendTokenResponse(user, 200, res);
-  } catch (error) { next(error); }
+    const isMatch = await user.comparePassword(password, user.password);
+    if (!isMatch) {
+      // Increment failures
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+      if (user.failedLoginAttempts >= 5) {
+        user.lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+      }
+      await user.save();
+
+      await createAuditLog(req, {
+        userId: user.id,
+        action: 'LOGIN_FAILED',
+        entity: 'User',
+        entityId: user.id,
+        metadata: { failedAttempts: user.failedLoginAttempts }
+      });
+
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Success logins reset failed parameters
+    user.failedLoginAttempts = 0;
+    user.lockedUntil = null;
+    await user.save();
+
+    await sendTokenResponse(user, 200, req, res);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // GET /auth/me
@@ -308,24 +451,126 @@ exports.getMe = async (req, res, next) => {
     user.bankDetails = await BankDetails.findOne({ userId: req.user.id }).lean();
     user.password = undefined;
     res.status(200).json({ success: true, data: user });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // POST /auth/logout
 exports.logoutUser = async (req, res, next) => {
   try {
+    const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+    if (refreshToken) {
+      const hash = Session.hashToken(refreshToken);
+      await Session.findOneAndUpdate({ refreshTokenHash: hash }, { isRevoked: true });
+    }
+
+    await createAuditLog(req, {
+      userId: req.user?.id || null,
+      action: 'LOGOUT',
+      entity: 'User',
+      entityId: req.user?.id || null
+    });
+
     res.cookie('jwt', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+    res.cookie('refreshToken', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
     res.status(200).json({ success: true, message: 'Logged out' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /auth/logout-all
+exports.logoutAllDevices = async (req, res, next) => {
+  try {
+    await Session.updateMany({ userId: req.user.id }, { isRevoked: true });
+
+    await createAuditLog(req, {
+      userId: req.user.id,
+      action: 'LOGOUT_ALL_DEVICES',
+      entity: 'User',
+      entityId: req.user.id
+    });
+
+    res.cookie('jwt', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+    res.cookie('refreshToken', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+    res.status(200).json({ success: true, message: 'Logged out from all sessions' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /auth/refresh (Module 1 Token Rotation)
+exports.refreshSession = async (req, res, next) => {
+  try {
+    const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({ success: false, message: 'Refresh token is required' });
+    }
+
+    const hash = Session.hashToken(refreshToken);
+    const session = await Session.findOne({ refreshTokenHash: hash, isRevoked: false });
+
+    if (!session || session.expiresAt < new Date()) {
+      return res.status(401).json({ success: false, message: 'Invalid or expired session refresh token' });
+    }
+
+    const user = await User.findById(session.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User associated with session not found' });
+    }
+
+    // Rotate tokens
+    const newAccessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret123', {
+      expiresIn: '1h',
+    });
+
+    const newRefreshToken = crypto.randomBytes(40).toString('hex');
+    const newHash = Session.hashToken(newRefreshToken);
+
+    session.refreshTokenHash = newHash;
+    session.lastUsedAt = new Date();
+    session.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await session.save();
+
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'TOKEN_ROTATION',
+      entity: 'Session',
+      entityId: session.sessionId,
+      metadata: { sessionId: session.sessionId }
+    });
+
+    res.cookie('jwt', newAccessToken, {
+      expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    res.cookie('refreshToken', newRefreshToken, {
+      expires: session.expiresAt,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    res.status(200).json({
+      success: true,
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // POST /auth/social
 exports.socialLogin = async (req, res, next) => {
   try {
     const { provider, token: providerToken, email, name, avatar } = req.body;
-
     let verifiedEmail = email;
-    let verifiedName  = name;
+    let verifiedName = name;
 
     if (provider === 'google' && providerToken) {
       try {
@@ -335,7 +580,7 @@ exports.socialLogin = async (req, res, next) => {
         });
         const payload = ticket.getPayload();
         verifiedEmail = payload.email;
-        verifiedName  = payload.name;
+        verifiedName = payload.name;
       } catch (err) {
         return res.status(401).json({ success: false, message: 'Invalid Google token' });
       }
@@ -366,8 +611,10 @@ exports.socialLogin = async (req, res, next) => {
       await Earnings.create({ userId: user._id }).catch(() => {});
     }
 
-    sendTokenResponse(user, 200, res);
-  } catch (error) { next(error); }
+    await sendTokenResponse(user, 200, req, res);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // PUT /auth/user/assign-role
@@ -379,11 +626,21 @@ exports.assignRole = async (req, res, next) => {
     }
     const user = await User.findByIdAndUpdate(req.user.id, { role: role.toUpperCase() }, { new: true });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    
+
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'ASSIGN_ROLE',
+      entity: 'User',
+      entityId: user.id,
+      metadata: { role: role.toUpperCase() }
+    });
+
     const userObj = user.toObject ? user.toObject() : user;
     userObj.password = undefined;
     res.status(200).json({ success: true, message: 'Role assigned', data: userObj });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // POST /auth/forgot-password
@@ -394,20 +651,28 @@ exports.forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: emailLower });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    const expires = new Date(Date.now() + 5 * 60 * 1000); // 5 mins expiry (Module 4)
 
     user.resetPasswordOtp = otp;
     user.resetPasswordExpires = expires;
     await user.save();
 
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'FORGOT_PASSWORD_REQUEST',
+      entity: 'User',
+      entityId: user.id
+    });
+
     if (process.env.NODE_ENV === 'development') {
       console.log(`Password reset OTP for ${email}: ${otp}`);
     }
-    
+
     res.status(200).json({ success: true, message: 'OTP sent to email (check console for now)' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // POST /auth/reset-password
@@ -415,19 +680,58 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { email, otp, newPassword } = req.body;
     const emailLower = email.toLowerCase().trim();
-    const user = await User.findOne({ email: emailLower }).select('+resetPasswordOtp +resetPasswordExpires');
+    const user = await User.findOne({ email: emailLower }).select('+password +resetPasswordOtp +resetPasswordExpires +passwordHistory');
+
     const isDevBypass = process.env.NODE_ENV === 'development' && otp === '123456';
     if (!user || (!isDevBypass && (user.resetPasswordOtp !== otp || new Date() > user.resetPasswordExpires))) {
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
     }
 
-    user.password = newPassword; // Will be hashed automatically by pre-save hook
+    // Verify Password History constraints (Module 4)
+    if (user.passwordHistory && user.passwordHistory.length > 0) {
+      for (const oldHash of user.passwordHistory) {
+        const isMatch = await bcrypt.compare(newPassword, oldHash);
+        if (isMatch) {
+          return res.status(400).json({ success: false, message: 'Cannot reuse any of your last 5 passwords.' });
+        }
+      }
+    }
+
+    // Check if new password matches current password
+    if (user.password) {
+      const isCurrentMatch = await bcrypt.compare(newPassword, user.password);
+      if (isCurrentMatch) {
+        return res.status(400).json({ success: false, message: 'Cannot reuse your current password.' });
+      }
+    }
+
+    // Rotate Password History
+    const history = user.passwordHistory || [];
+    if (user.password) {
+      history.unshift(user.password);
+    }
+    user.passwordHistory = history.slice(0, 5);
+
+    user.password = newPassword;
     user.resetPasswordOtp = null;
     user.resetPasswordExpires = null;
+    user.passwordChangedAt = new Date();
     await user.save();
 
+    // Revoke all sessions (Force logout)
+    await Session.updateMany({ userId: user.id }, { isRevoked: true });
+
+    await createAuditLog(req, {
+      userId: user.id,
+      action: 'PASSWORD_CHANGE',
+      entity: 'User',
+      entityId: user.id
+    });
+
     res.status(200).json({ success: true, message: 'Password reset successful' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };
 
 // GET /auth/check-username
@@ -446,5 +750,7 @@ exports.checkUsername = async (req, res, next) => {
       return res.status(200).json({ success: true, available: false, message: 'Username is already taken' });
     }
     res.status(200).json({ success: true, available: true, message: 'Username is available' });
-  } catch (error) { next(error); }
+  } catch (error) {
+    next(error);
+  }
 };

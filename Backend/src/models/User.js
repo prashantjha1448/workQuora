@@ -75,6 +75,14 @@ const userSchema = new mongoose.Schema(
     blockedUsers: { type: [String], default: [] },
     withdrawalPin: { type: String, default: null, select: false },
     
+    // Security Hardening Parameters (Phase 2)
+    passwordHistory: { type: [String], default: [] },
+    passwordChangedAt: { type: Date, default: null },
+    otpAttempts: { type: Number, default: 0 },
+    otpLockedUntil: { type: Date, default: null },
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockedUntil: { type: Date, default: null },
+    
     // Social Logins
     googleId: { type: String, default: null },
     facebookId: { type: String, default: null }
@@ -93,6 +101,13 @@ userSchema.virtual('id').get(function () {
 
 // 2dsphere index for radius search (Geo-spatial)
 userSchema.index({ location: '2dsphere' });
+
+// Advanced Search Indexing (Phase 3 compliance)
+userSchema.index(
+  { name: 'text', skills: 'text', title: 'text', bio: 'text' },
+  { weights: { name: 10, skills: 5, title: 3, bio: 1 }, name: 'UserTextSearchIndex' }
+);
+userSchema.index({ role: 1, availabilityStatus: 1, rating: -1 });
 
 // Hash password before saving (Fixed for latest Mongoose)
 userSchema.pre('save', async function () {

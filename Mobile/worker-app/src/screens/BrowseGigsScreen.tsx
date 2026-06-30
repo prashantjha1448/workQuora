@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../shared/theme/theme';
+import AdBanner from '../shared/components/AdBanner';
 
 interface Job {
   _id: string;
@@ -50,40 +51,6 @@ export default function BrowseGigsScreen({ navigation }: BrowseGigsScreenProps) 
 
   const categories = ['All', 'Electrician', 'Plumber', 'Cleaner', 'AC Repair', 'Painter', 'Carpenter'];
 
-  // Advertisement carousel state
-  const [activeAdIndex, setActiveAdIndex] = useState(0);
-  const ads = [
-    {
-      tag: 'PROMOTED',
-      title: 'Unlock Premium Gigs',
-      sub: 'Pro Member Perks. Find the best jobs.',
-      actionLabel: 'Learn More',
-      image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      tag: 'SPONSORED',
-      title: 'Promote Your Profile',
-      sub: 'Get featured at the top of client search results.',
-      actionLabel: 'Boost Now',
-      image: 'https://images.unsplash.com/photo-1521737711867-e3b90473bd58?auto=format&fit=crop&w=600&q=80',
-    },
-    {
-      tag: 'PROMOTED',
-      title: 'WorkQuora Pro Member',
-      sub: 'Enjoy zero commission fees on your first 5 client contracts.',
-      actionLabel: 'Join Pro',
-      image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80',
-    }
-  ];
-
-  // Rotate ads every 3 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveAdIndex((prev) => (prev + 1) % ads.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Fetch nearby jobs from database
   const fetchJobs = async (isRefresh = false, search = searchQuery, cat = selectedCategory) => {
     if (isRefresh) setRefreshing(true);
@@ -96,7 +63,7 @@ export default function BrowseGigsScreen({ navigation }: BrowseGigsScreenProps) 
       const params: any = {
         lat: userLat,
         lng: userLng,
-        radius: 100, // search radius in km
+        radius: 25, // search radius in km
       };
 
       if (search.trim().length > 0) {
@@ -146,49 +113,11 @@ export default function BrowseGigsScreen({ navigation }: BrowseGigsScreenProps) 
     navigation.navigate('GigDetails', { job });
   };
 
-  // Render advertisement sliding card
-  const renderAdCard = () => {
-    const ad = ads[activeAdIndex];
-    return (
-      <View style={styles.adCard}>
-        <Image source={{ uri: ad.image }} style={styles.adCardBg} resizeMode="cover" />
-        <View style={styles.adOverlay} />
-        <View style={styles.adContent}>
-          <View style={styles.adTagContainer}>
-            <Text style={styles.adTagText}>{ad.tag}</Text>
-          </View>
-          <Text style={styles.adTitle}>{ad.title}</Text>
-          
-          <View style={styles.adFooterRow}>
-            <View style={styles.adDotsRow}>
-              {ads.map((_, idx) => (
-                <View
-                  key={idx}
-                  style={[
-                    styles.adDot,
-                    idx === activeAdIndex ? styles.adDotActive : styles.adDotInactive,
-                  ]}
-                />
-              ))}
-            </View>
-            <TouchableOpacity
-              style={styles.adBtn}
-              onPress={() => Alert.alert('WorkQuora Pro', 'This premium feature is coming soon!')}
-            >
-              <Text style={styles.adBtnText}>{ad.actionLabel}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
   // Render job list item
   const renderJobCard = (job: Job, index: number) => {
-    const addressText = job.location?.address || job.address || 'Financial District, Manhattan';
-    // Fallback/dummy distance for mockup alignment if distance is not provided
-    const distanceVal = job.distance !== undefined ? job.distance : (0.8 + index * 0.4);
-    const distanceText = `${distanceVal.toFixed(1)} miles away`;
+    const addressText = job.location?.address || job.address || 'Location not specified';
+    const distanceVal = job.distance ?? 0;
+    const distanceText = `${distanceVal.toFixed(1)} km away`;
 
     // Badges determination
     const isUrgent = 
@@ -198,15 +127,14 @@ export default function BrowseGigsScreen({ navigation }: BrowseGigsScreenProps) 
       job.title?.toLowerCase().includes('emergency') || 
       job.description?.toLowerCase().includes('emergency');
     
-    const isHighPay = job.budget >= 50; // assuming USD / standard budget threshold
+    const isHighPay = job.budget >= 2000; // INR threshold for a "high pay" badge
 
     // Category badge text
     const categoryBadge = job.category ? job.category.toUpperCase() : 'GENERAL';
 
-    // Rate details
-    const isHourly = job.budget < 100;
-    const rateText = isHourly ? `$${job.budget.toFixed(2)}/hr` : `Est. Pay: $${Math.round(job.budget)}`;
-    const rateSubText = isHourly ? 'Flexible hours' : 'Fixed price project';
+    // Rate details (budgetType is not reliably available from geo search; use a flat fixed-price display)
+    const rateText = `₹${Math.round(job.budget).toLocaleString('en-IN')}`;
+    const rateSubText = 'Fixed price';
 
     // ─── Emergency Layout ───
     if (isUrgent) {
@@ -397,14 +325,14 @@ export default function BrowseGigsScreen({ navigation }: BrowseGigsScreenProps) 
                 />
               }
             >
-              {/* Insert cards & loop ad carousel dynamically */}
+              {/* Insert real ad banners & loop dynamically */}
               {jobs.map((job, index) => (
                 <React.Fragment key={job._id || index}>
-                  {index === 2 && renderAdCard()}
+                  {index === 2 && <AdBanner platform="MOBILE" />}
                   {renderJobCard(job, index)}
                 </React.Fragment>
               ))}
-              {jobs.length < 2 && renderAdCard()}
+              {jobs.length < 2 && <AdBanner platform="MOBILE" />}
             </ScrollView>
           )}
         </View>

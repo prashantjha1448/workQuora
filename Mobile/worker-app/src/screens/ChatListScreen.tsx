@@ -45,51 +45,6 @@ export default function ChatListScreen({ navigation }: ChatListScreenProps) {
         convs = response.data.conversations;
       }
 
-      if (convs.length === 0) {
-        // Fallback mock data matching Stitch Chats screen design
-        convs = [
-          {
-            jobId: 'job1',
-            otherUserId: 'user1',
-            jobTitle: 'Mobile App Audit',
-            name: 'Sarah Jenkins',
-            profilePic: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAvo-QuuImRZmKj9gb2kKdRk_m65nCwJ6yDi-1weKLcf1-QkbbiP5PfjaDkGagWYOzW8BgT82C6WyMmWdIwHtwVZ3doTeYvnFK1AxS0pxfh2K5GvIOKf4uqxbMOJVozyLe9Irwxr43BRK4-yxROvtHmvAK_5ZkED3ftuC8x-Dv10EzoDso7buKWdUXOcjIGVH1M1AM6mf_JTeSDzCuRweU6CnSSbsZCfQFXO1QFJEgn3lZpnui4R1sZiriibp7QyGxl37ztQV3mWFy8',
-            lastMessage: 'The project milestones are ready for review. Can you take a look?',
-            lastMessageTime: '2:45 PM',
-            unreadCount: 2,
-          },
-          {
-            jobId: 'job2',
-            otherUserId: 'user2',
-            jobTitle: 'Smart Contract Integration',
-            name: 'Michael Chen',
-            profilePic: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtWctGklO2cxJZNyFcOhH5T9pWbWyk-M-0S7gbsZlXt0M5ULg43SDhl6dwMww0NGK63mzSOktxquu1LvYgxqXBpu0PR2Fpl7nuzENn-ZZvcQUQZZmjRtNZN-uIKWi5xyIX-C02yXMEZjn1GBNernr6iZyjZHWDyjHfZENsAzRnsyIAliDvs9L1HrqrH0jaQPwxTF0b6MKz9UIUhJRNFyuBYy1GyQRU6KWrQc69GDpC250QtqqhZFky3Tgo_RjpmCfFVDhfTVStNt_4',
-            lastMessage: 'Thanks for the update on the smart contract integration!',
-            lastMessageTime: '11:20 AM',
-            unreadCount: 0,
-          },
-          {
-            jobId: 'job3',
-            otherUserId: 'user3',
-            jobTitle: 'UI/UX Redesign Assets',
-            name: 'Elena Rodriguez',
-            profilePic: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVmkOXCVtO4UuckVBxlY9ZoUfNlyAfQRdQJiOIvEyjq8FS_8FgdmfqtKmRpADNU_0xFnbH0Kag3nbIclxsqIuABOx_hM7is7AeTQntWHQKb_KnOEMdjEUYVTuhC-k7-jfcbBcsa0Qgha0B9Ajn_JK4AUzGrek8qxi5VCPtw1xWCyHEhlmySL3ngngYvMt6Cy14esH17i79E_BIlnb5q84vexVVymAQ05L7cjry5DE6txptYi97Irko9tYi6J5BOWA1ztsQJWvJBoia',
-            lastMessage: "I've uploaded the final Figma files to the dashboard. Check them out!",
-            lastMessageTime: 'Yesterday',
-            unreadCount: 0,
-          },
-          {
-            jobId: 'job4',
-            otherUserId: 'user4',
-            jobTitle: 'Corporate Consultation',
-            name: 'David Sterling',
-            profilePic: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDZYDvT2kcTYwyyp2hO1BuownLOWmESire2UOcQi3iJDR8uZR1vQ6tTkYXXa0TMk4igWTHzebJW_W4p1C1j_Yc4ahbiaUefJKhFFoFAFHF-g2U7Y4GJvmOE5g6wQuIBVCJV3DwSIpfletAmpNJRqbcEkAMAlz5hnwJTG9ex7y-0JgvAwoQBVEXlFuRukoP21V7oe2hTgkozsH40aTlxN4kN_jPLtLNpxE5eB8-9jQyaAXqlRO9w-bsj5Dc3lBRHXjO40CH9CF9WzE00',
-            lastMessage: "We'd like to schedule a follow-up call for Wednesday at 10 AM.",
-            lastMessageTime: 'Tuesday',
-            unreadCount: 0,
-          },
-        ];
-      }
       setConversations(convs);
       setFilteredConversations(convs);
     } catch (error) {
@@ -127,27 +82,8 @@ export default function ChatListScreen({ navigation }: ChatListScreenProps) {
     fetchConversations();
   };
 
-  const getStatusBadge = (item: Conversation) => {
-    // Replicating custom context badges from the Stitch mockup
-    if (item.name === 'Elena Rodriguez') {
-      return (
-        <View style={[styles.badgeContainer, { backgroundColor: '#d1fae5' }]}>
-          <Text style={[styles.badgeText, { color: '#065f46' }]}>Paid</Text>
-        </View>
-      );
-    } else if (item.name === 'David Sterling') {
-      return (
-        <View style={[styles.badgeContainer, { backgroundColor: '#dbeafe' }]}>
-          <Text style={[styles.badgeText, { color: '#1e40af' }]}>Interviewing</Text>
-        </View>
-      );
-    }
-    return null;
-  };
-
   const renderConversationItem = ({ item }: { item: Conversation }) => {
     const isUnread = item.unreadCount > 0;
-    const isOnline = item.name === 'Sarah Jenkins' || item.name === 'Michael Chen';
 
     return (
       <TouchableOpacity
@@ -168,7 +104,6 @@ export default function ChatListScreen({ navigation }: ChatListScreenProps) {
           <View style={[styles.avatarBorder, isUnread ? styles.unreadAvatarBorder : styles.readAvatarBorder]}>
             <Image source={{ uri: item.profilePic || 'https://via.placeholder.com/150' }} style={styles.avatar} />
           </View>
-          {isOnline && <View style={styles.onlineDot} />}
         </View>
 
         {/* Message Info */}
@@ -178,7 +113,6 @@ export default function ChatListScreen({ navigation }: ChatListScreenProps) {
               <Text style={[styles.clientName, isUnread && styles.unreadClientName]} numberOfLines={1}>
                 {item.name}
               </Text>
-              {getStatusBadge(item)}
             </View>
             <Text style={[styles.messageTime, isUnread && styles.unreadMessageTime]}>
               {item.lastMessageTime}

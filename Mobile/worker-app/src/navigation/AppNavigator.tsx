@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
   ScrollView,
+  SafeAreaView,
   Image,
   Alert,
   Switch,
@@ -13,7 +14,6 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -24,6 +24,7 @@ import { restoreToken, logoutUserSession } from '../store/authSlice';
 import { Feather } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../shared/theme/theme';
+import { useLanguage, LocaleType } from '../services/i18n';
 
 // Screens
 // Shared Components & Screens
@@ -100,6 +101,12 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
   const { isAuthenticated, user } = useSelector((s: RootState) => s.auth);
   const [profileData, setProfileData] = useState<any>(null);
   const [roleSwitch, setRoleSwitch] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const { locale, setLocale } = useLanguage();
+  const { isDark, toggleThemeMode } = useTheme();
+
+  const languageNames: Record<LocaleType, string> = { en: 'English', hi: 'हिंदी (Hindi)', bn: 'বাংলা (Bengali)', bho: 'भोजपुरी (Bhojpuri)' };
 
   // Edit Profile States
   const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
@@ -174,8 +181,10 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchProfileData();
+    api.get('/notifications').then((res) => setUnreadNotifCount(res.data?.unreadCount || 0)).catch(() => {});
     const unsubscribe = navigation.addListener('focus', () => {
       fetchProfileData();
+      api.get('/notifications').then((res) => setUnreadNotifCount(res.data?.unreadCount || 0)).catch(() => {});
     });
     return unsubscribe;
   }, [navigation, isAuthenticated]);
@@ -251,7 +260,7 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
   const initials = user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
   const completedJobs = profileData?.earnings?.completedJobs || profileData?.totalJobsCompleted || 0;
   const allTimeIncome = profileData?.earnings?.allTimeIncome || 0;
-  const averageRating = profileData?.averageRating || 5.0;
+  const averageRating = profileData?.averageRating ?? 0;
   const isKycComplete = profileData?.kycVerified || profileData?.kyc?.status === 'verified';
   const avatarUrl = profileData?.avatar || profileData?.profilePic || null;
   const userGender = profileData?.gender || user?.gender || 'OTHER';
@@ -296,7 +305,7 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
               )}
             </View>
             <Text style={profileStyles.profileRoleSub}>
-              {profileData?.bio || 'Senior UI/UX Designer & Product Strategy Consultant'}
+              {profileData?.bio || 'WorkQuora Professional'}
             </Text>
           </View>
 
@@ -320,7 +329,9 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
           {/* Stats Grid */}
           <View style={profileStyles.statsContainer}>
             <View style={profileStyles.statBox}>
-              <Text style={[profileStyles.statNum, { color: '#059669' }]}>{averageRating.toFixed(1)}</Text>
+              <Text style={[profileStyles.statNum, { color: '#059669' }]}>
+                {completedJobs > 0 ? averageRating.toFixed(1) : 'New'}
+              </Text>
               <Text style={profileStyles.statLabel}>RATING</Text>
             </View>
             <View style={profileStyles.statBox}>
@@ -368,23 +379,40 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
               <Text style={profileStyles.menuLabel}>Notifications</Text>
               <Text style={profileStyles.menuSubLabel}>Email, Push alerts, SMS updates</Text>
             </View>
-            <View style={profileStyles.badgeContainer}>
-              <Text style={profileStyles.badgeText}>3 NEW</Text>
-            </View>
+            {unreadNotifCount > 0 && (
+              <View style={[profileStyles.badgeContainer, { backgroundColor: '#059669' }]}>
+                <Text style={profileStyles.badgeText}>{unreadNotifCount} NEW</Text>
+              </View>
+            )}
             <Feather name="chevron-right" size={16} color="#9ca3af" />
           </TouchableOpacity>
 
           {/* Language */}
           <TouchableOpacity
             style={profileStyles.menuRow}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={() => setLanguageModalVisible(true)}
           >
             <View style={[profileStyles.menuIconBox, { backgroundColor: '#fef3c7' }]}>
               <Feather name="globe" size={18} color="#d97706" />
             </View>
             <View style={profileStyles.menuTextContainer}>
               <Text style={profileStyles.menuLabel}>Language</Text>
-              <Text style={profileStyles.menuSubLabel}>English (United States)</Text>
+              <Text style={profileStyles.menuSubLabel}>{languageNames[locale] || 'English'}</Text>
+            </View>
+            <Feather name="chevron-right" size={16} color="#9ca3af" />
+          </TouchableOpacity>
+
+          {/* Theme */}
+          <TouchableOpacity
+            style={profileStyles.menuRow}
+            onPress={toggleThemeMode}
+          >
+            <View style={[profileStyles.menuIconBox, { backgroundColor: '#e0e7ff' }]}>
+              <Feather name={isDark ? 'moon' : 'sun'} size={18} color="#4f46e5" />
+            </View>
+            <View style={profileStyles.menuTextContainer}>
+              <Text style={profileStyles.menuLabel}>Theme</Text>
+              <Text style={profileStyles.menuSubLabel}>{isDark ? 'Dark Mode' : 'Light Mode'} — tap to switch</Text>
             </View>
             <Feather name="chevron-right" size={16} color="#9ca3af" />
           </TouchableOpacity>
@@ -508,11 +536,39 @@ function ProfileTabScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* Language Selection Modal */}
+      <Modal visible={languageModalVisible} animationType="slide" transparent onRequestClose={() => setLanguageModalVisible(false)}>
+        <View style={profileStyles.editModalOverlay}>
+          <View style={[profileStyles.editModalCard, { paddingBottom: 24 }]}>
+            <Text style={profileStyles.editModalTitle}>Select Language</Text>
+            {(['en', 'hi', 'bn', 'bho'] as LocaleType[]).map((lang) => (
+              <TouchableOpacity
+                key={lang}
+                style={[
+                  profileStyles.menuRow,
+                  locale === lang && { backgroundColor: '#ecfdf5' },
+                ]}
+                onPress={() => {
+                  setLocale(lang);
+                  setLanguageModalVisible(false);
+                }}
+              >
+                <View style={profileStyles.menuTextContainer}>
+                  <Text style={profileStyles.menuLabel}>{languageNames[lang]}</Text>
+                </View>
+                {locale === lang && <Feather name="check-circle" size={18} color="#059669" />}
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity onPress={() => setLanguageModalVisible(false)} style={{ marginTop: 12, alignItems: 'center' }}>
+              <Text style={{ color: '#6b7280', fontWeight: '700' }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
-// ─── Protected wrapper ────────────────────────────────────────────────────────
 function Protected({
   Screen,
   navigation,
@@ -557,7 +613,6 @@ function ActiveGigsStack({ navigation }: { navigation: any }) {
 // ─── Bottom Tab Navigator ─────────────────────────────────────────────────────
 function MainTabs() {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -568,11 +623,11 @@ function MainTabs() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#8e8e8e',
         tabBarStyle: {
-          height: 56 + (insets.bottom > 0 ? insets.bottom : 8),
+          height: 68,
           backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: '#f1f5f9',
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingBottom: Platform.OS === 'ios' ? 16 : 8,
           paddingTop: 8,
           elevation: 8,
           shadowColor: '#000',
@@ -596,8 +651,8 @@ function MainTabs() {
             Chat: 'Chats',
             ProfileTab: 'Profile',
           };
-          const name = route && route.name ? (icons[route.name] || 'circle') : 'circle';
-          const label = route && route.name ? (labels[route.name] || '') : '';
+          const name = icons[route.name] || 'circle';
+          const label = labels[route.name] || '';
 
           if (focused) {
             return (
@@ -1135,10 +1190,10 @@ const navBarStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 24,
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     height: 38,
-    gap: 4,
+    gap: 6,
   },
   activeTabLabel: {
     fontSize: 12,

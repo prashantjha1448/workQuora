@@ -50,6 +50,10 @@ io.use(async (socket, next) => {
 socketHandler(io);
 chatSocketHandler(io);
 
+// Pre-load background event consumer services to register event listeners (Vol 3)
+require('./services/settlementService');
+require('./services/referralService');
+
 // Express app ko io instance de diya taaki controllers (jaise TaskController) live alerts bhej sakein
 app.set('io', io); 
 
@@ -57,4 +61,7 @@ app.set('io', io);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Master Server & Socket Engine running on port ${PORT}`);
+  
+  const cronService = require('./services/cronService');
+  cronService.startScheduledJobs();
 });

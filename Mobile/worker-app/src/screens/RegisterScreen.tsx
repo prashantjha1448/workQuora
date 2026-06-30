@@ -301,11 +301,11 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
 
             {/* Social Buttons */}
             <View style={styles.socialButtonsRow}>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8} onPress={() => Alert.alert('Social Authentication', 'Google sign-up requires Expo Native App IDs. Coming soon.')}>
                 <FontAwesome name="google" size={18} color="#EA4335" style={styles.socialIcon} />
                 <Text style={styles.socialButtonText}>Google</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.8} onPress={() => Alert.alert('Social Authentication', 'Facebook sign-up requires Expo Native App IDs. Coming soon.')}>
                 <FontAwesome name="facebook" size={18} color="#1877F2" style={styles.socialIcon} />
                 <Text style={styles.socialButtonText}>Facebook</Text>
               </TouchableOpacity>

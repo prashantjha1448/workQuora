@@ -16,7 +16,7 @@ setInterval(() => {
 const createLimiter = ({ windowMs, max, message }) => {
   return async (req, res, next) => {
     // Whitelist dev/testing environment to prevent E2E test blocker conflicts (Vol 11)
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || process.env.ENABLE_DEV_BYPASS === 'true') {
       return next();
     }
     const ip = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';

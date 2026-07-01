@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 
 const srcDir = path.join(__dirname, 'shared', 'src');
-const clientDest = path.join(__dirname, 'client-app', 'src', 'shared');
 const workerDest = path.join(__dirname, 'worker-app', 'src', 'shared');
 
 function copyRecursiveSync(src, dest) {
@@ -32,15 +31,10 @@ function sync() {
   }
 
   // Clear dest directories first to prevent orphaned files
-  [clientDest, workerDest].forEach((dest) => {
-    if (fs.existsSync(dest)) {
-      fs.rmSync(dest, { recursive: true, force: true });
-    }
-  });
+  if (fs.existsSync(workerDest)) {
+    fs.rmSync(workerDest, { recursive: true, force: true });
+  }
 
-  copyRecursiveSync(srcDir, clientDest);
-  console.log(`Synced to client-app: ${clientDest}`);
-  
   copyRecursiveSync(srcDir, workerDest);
   console.log(`Synced to worker-app: ${workerDest}`);
   console.log('Sync completed successfully.');

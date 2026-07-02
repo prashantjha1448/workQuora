@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../../../core/error/app_exception.dart';
+import '../../../core/storage/hive_service.dart';
 import '../data/auth_providers.dart';
 import '../data/models/user_model.dart';
 
@@ -13,8 +15,47 @@ class AuthController extends AsyncNotifier<UserModel?> {
     final hasSession = await repo.hasActiveSession();
     if (!hasSession) return null;
 
+    // Load locally cached user details first to prevent page reloads from
+    // immediately bouncing the user to /login while checking with the server.
+    final cachedData = Hive.box(HiveBoxes.userProfile).get('current_user');
+    if (cachedData != null) {
+      final map = Map<String, dynamic>.from(cachedData as Map);
+      final cachedUser = UserModel.fromJson(map);
+      // Run async background verification to verify token status & get latest details
+      _backgroundFetch();
+      return cachedUser;
+    }
+
     final result = await repo.getCurrentUser();
-    return result.match((failure) => null, (user) => user);
+    return result.match(
+      (failure) => null,
+      (user) {
+        _cacheUser(user);
+        return user;
+      },
+    );
+  }
+
+  void _cacheUser(UserModel user) {
+    Hive.box(HiveBoxes.userProfile).put('current_user', user.toJson());
+  }
+
+  Future<void> _backgroundFetch() async {
+    final repo = ref.read(authRepositoryProvider);
+    final result = await repo.getCurrentUser();
+    result.match(
+      (failure) {
+        // If the server confirms the session is invalid/expired, log out immediately.
+        // Ignore general network or server-down errors so the user remains offline-capable.
+        if (failure.statusCode == 401) {
+          logout();
+        }
+      },
+      (user) {
+        _cacheUser(user);
+        state = AsyncData(user);
+      },
+    );
   }
 
   /// Deliberately does NOT set state to AsyncLoading while the request is in
@@ -31,6 +72,7 @@ class AuthController extends AsyncNotifier<UserModel?> {
     return result.match(
       (failure) => failure,
       (user) {
+        _cacheUser(user);
         state = AsyncData(user);
         return null;
       },
@@ -40,10 +82,14 @@ class AuthController extends AsyncNotifier<UserModel?> {
   Future<void> logout() async {
     final repo = ref.read(authRepositoryProvider);
     await repo.logout();
+    await HiveService.clearAllOnLogout();
     state = const AsyncData(null);
   }
 
-  void setUser(UserModel user) => state = AsyncData(user);
+  void setUser(UserModel user) {
+    _cacheUser(user);
+    state = AsyncData(user);
+  }
 
   /// Re-fetches /auth/me — used after actions elsewhere in the app (e.g.
   /// completing KYC) might have changed flags like `kycVerified` that this
@@ -51,7 +97,13 @@ class AuthController extends AsyncNotifier<UserModel?> {
   Future<void> refreshUser() async {
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.getCurrentUser();
-    result.match((failure) => null, (user) => state = AsyncData(user));
+    result.match(
+      (failure) => null,
+      (user) {
+        _cacheUser(user);
+        state = AsyncData(user);
+      },
+    );
   }
 }
 

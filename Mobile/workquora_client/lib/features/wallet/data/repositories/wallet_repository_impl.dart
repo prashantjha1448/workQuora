@@ -12,14 +12,16 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<Either<AppFailure, T>> _guard<T>(Future<T> Function() action) async {
     try {
       return Right(await action());
-    } on DioException catch (e) {
+    } on DioException catch (e, stack) {
+      AppFailure.logError(e, stack);
       if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
         return Left(AppFailure.network());
       }
       final message = (e.response?.data is Map) ? e.response?.data['message'] as String? : null;
       return Left(AppFailure.fromMessage(message ?? 'Something went wrong.', statusCode: e.response?.statusCode));
-    } catch (_) {
-      return Left(AppFailure.fromMessage('Unexpected error.'));
+    } catch (e, stack) {
+      AppFailure.logError(e, stack);
+      return Left(AppFailure.fromMessage('Unexpected error: $e'));
     }
   }
 

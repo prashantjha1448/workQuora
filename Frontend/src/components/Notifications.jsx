@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { notificationsApi } from '../api/endpoints';
+import { socketService } from '../services/socket';
 
 const useNotifications = () => {
   const qc = useQueryClient();
@@ -11,7 +12,7 @@ const useNotifications = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => notificationsApi.getAll().then((r) => r.data),
-    refetchInterval: 30000,
+    refetchInterval: 60000, // reduced 30s → 60s — socket handles instant push
   });
 
   const markAll = useMutation({
@@ -23,6 +24,26 @@ const useNotifications = () => {
     mutationFn: notificationsApi.markOneRead,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
   });
+
+  // ── Real-time push: new_notification from backend socket ────────────────────
+  useEffect(() => {
+    const socket = socketService.getSocket();
+    if (!socket) return;
+
+    const handleNewNotification = (notification) => {
+      qc.setQueryData(['notifications'], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          notifications: [notification, ...(old.notifications || [])],
+          unreadCount: (old.unreadCount || 0) + 1,
+        };
+      });
+    };
+
+    socket.on('new_notification', handleNewNotification);
+    return () => socket.off('new_notification', handleNewNotification);
+  }, [qc]);
 
   return {
     notifications: data?.notifications || [],

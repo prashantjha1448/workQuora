@@ -89,14 +89,14 @@ const AdminAds = () => {
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2"
+          className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold flex items-center gap-2"
         >
           <Plus size={16} /> Create Ad
         </button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-indigo-500" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary" /></div>
       ) : (
         <div className="bg-[#151521] border border-white/5 rounded-xl overflow-hidden">
           <table className="w-full text-left text-sm text-gray-300">
@@ -120,7 +120,7 @@ const AdminAds = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-xs">
                       {ad.mediaType === 'VIDEO' ? <Video size={14} className="text-blue-400" /> : <ImageIcon size={14} className="text-green-400" />}
-                      <a href={ad.mediaUrl} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">View Media</a>
+                      <a href={ad.mediaUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">View Media</a>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -170,53 +170,53 @@ const AdminAds = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Brand Name</label>
-                  <input type="text" name="brandName" value={formData.brandName} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="text" name="brandName" value={formData.brandName} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Campaign Title</label>
-                  <input type="text" name="title" value={formData.title} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="text" name="title" value={formData.title} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
               </div>
               
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1">Target URL (On Click)</label>
-                <input type="url" name="targetLink" value={formData.targetLink} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" placeholder="https://" />
+                <input type="url" name="targetLink" value={formData.targetLink} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" placeholder="https://" />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1">Description (Optional)</label>
-                <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none h-20" />
+                <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none h-20" />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Media Type</label>
-                  <select name="mediaType" value={formData.mediaType} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none">
+                  <select name="mediaType" value={formData.mediaType} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none">
                     <option value="IMAGE">Image</option>
                     <option value="VIDEO">Video</option>
                   </select>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Upload Media</label>
-                  <input type="file" accept={formData.mediaType === 'IMAGE' ? 'image/*' : 'video/*'} onChange={handleFileChange} required className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 cursor-pointer" />
+                  <input type="file" accept={formData.mediaType === 'IMAGE' ? 'image/*' : 'video/*'} onChange={handleFileChange} required className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Start Date</label>
-                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">End Date</label>
-                  <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} required className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Platform</label>
-                  <select name="platform" value={formData.platform} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none">
+                  <select name="platform" value={formData.platform} onChange={handleInputChange} className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none">
                     <option value="BOTH">Both</option>
                     <option value="WEB">Web Only</option>
                     <option value="MOBILE">Mobile Only</option>
@@ -224,17 +224,17 @@ const AdminAds = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Daily Frequency / User</label>
-                  <input type="number" name="dailyFrequency" value={formData.dailyFrequency} onChange={handleInputChange} min="1" className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="number" name="dailyFrequency" value={formData.dailyFrequency} onChange={handleInputChange} min="1" className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Duration (Seconds)</label>
-                  <input type="number" name="durationSeconds" value={formData.durationSeconds} onChange={handleInputChange} min="1" className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none" />
+                  <input type="number" name="durationSeconds" value={formData.durationSeconds} onChange={handleInputChange} min="1" className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary outline-none" />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-white/5 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-sm font-semibold text-gray-400 hover:text-white">Cancel</button>
-                <button type="submit" disabled={saving || !mediaFile} className="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
+                <button type="submit" disabled={saving || !mediaFile} className="px-5 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : 'Launch Campaign'}
                 </button>
               </div>

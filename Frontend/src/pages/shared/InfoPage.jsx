@@ -40,7 +40,7 @@ const InfoPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
             <div className="p-5 rounded-2xl bg-card border border-border">
               <h4 className="font-extrabold text-foreground mb-2 flex items-center gap-2">
-                <Rocket className="w-4 h-4 text-indigo-500" /> Our Mission
+                <Rocket className="w-4 h-4 text-primary" /> Our Mission
               </h4>
               <p className="text-muted-foreground text-xs leading-relaxed">
                 Empower Indian service professionals and freelancers to find high-paying jobs in their immediate vicinity, enabling offline-to-online workspace transitions.
@@ -76,7 +76,7 @@ const InfoPage = () => {
               { step: '4', title: 'Approve & Release', desc: 'Collaborate via integrated real-time chats. Once work meets expectations, authorize release of payment.' }
             ].map((s) => (
               <div key={s.step} className="flex gap-4 p-4 rounded-2xl bg-card border border-border items-start">
-                <span className="w-8 h-8 rounded-full flex items-center justify-center bg-indigo-500/10 text-indigo-500 font-black shrink-0">{s.step}</span>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary font-black shrink-0">{s.step}</span>
                 <div>
                   <h4 className="font-extrabold text-foreground text-sm">{s.title}</h4>
                   <p className="text-muted-foreground text-xs mt-1 leading-relaxed">{s.desc}</p>
@@ -159,12 +159,12 @@ const InfoPage = () => {
               { role: 'Backend Node.js Developer (Geo-indexing)', dept: 'Engineering', loc: 'Bhopal / Hybrid' },
               { role: 'UI/UX Product Designer', dept: 'Design', loc: 'Remote' },
             ].map((j, i) => (
-              <div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-card border border-border hover:border-indigo-500/40 transition-colors">
+              <div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors">
                 <div>
                   <p className="text-xs font-bold text-foreground">{j.role}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{j.dept} · {j.loc}</p>
                 </div>
-                <span className="text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-full font-bold">Apply Now</span>
+                <span className="text-[10px] bg-primary/10 text-primary dark:text-primary border border-primary/20 px-2.5 py-1 rounded-full font-bold">Apply Now</span>
               </div>
             ))}
           </div>
@@ -302,12 +302,12 @@ const InfoPage = () => {
               </div>
             ))}
           </div>
-          <div className="p-5 rounded-2xl border border-indigo-500/10 bg-indigo-500/5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="p-5 rounded-2xl border border-primary/10 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400">Scale your business operations today</p>
+              <p className="text-xs font-bold text-primary dark:text-primary">Scale your business operations today</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">Talk to our enterprise consultants for a custom integration demo.</p>
             </div>
-            <Link to="/info/contact-us" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shrink-0">
+            <Link to="/info/contact-us" className="px-4 py-2 bg-primary hover:bg-primary/80 text-white rounded-xl text-xs font-bold transition-all shrink-0">
               Request Demo
             </Link>
           </div>
@@ -447,7 +447,7 @@ const InfoPage = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center my-6">
             <div className="p-5 rounded-2xl bg-card border border-border">
-              <h4 className="text-3xl font-black text-indigo-600 dark:text-indigo-400">4.8 / 5</h4>
+              <h4 className="text-3xl font-black text-primary dark:text-primary">4.8 / 5</h4>
               <p className="text-[10px] text-muted-foreground mt-1 uppercase font-bold tracking-wider">App Store Rating</p>
             </div>
             <div className="p-5 rounded-2xl bg-card border border-border">
@@ -479,13 +479,13 @@ const InfoPage = () => {
               { title: 'Setting Rates: Hourly vs Milestone Billing', desc: 'Analyze standard charges for plumbers, developers, designers, and write-ups across tier-2 cities.', time: '5 min read' },
               { title: 'Ensuring Personal Safety on Offline Job Visits', desc: 'Best practices for verifying client details, coordinating phone communication, and escrow checks.', time: '6 min read' }
             ].map((blog, i) => (
-              <div key={i} className="p-5 rounded-2xl bg-card border border-border flex flex-col justify-between hover:border-indigo-500/30 transition-all group cursor-pointer">
+              <div key={i} className="p-5 rounded-2xl bg-card border border-border flex flex-col justify-between hover:border-primary/30 transition-all group cursor-pointer">
                 <div>
-                  <span className="text-[9px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded font-extrabold">{blog.time}</span>
-                  <h5 className="font-extrabold text-foreground text-xs mt-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{blog.title}</h5>
+                  <span className="text-[9px] bg-primary/10 text-primary dark:text-primary px-2 py-0.5 rounded font-extrabold">{blog.time}</span>
+                  <h5 className="font-extrabold text-foreground text-xs mt-2 group-hover:text-primary dark:group-hover:text-primary transition-colors">{blog.title}</h5>
                   <p className="text-muted-foreground text-[11px] mt-1 leading-relaxed line-clamp-2">{blog.desc}</p>
                 </div>
-                <div className="flex items-center text-[10px] font-bold text-indigo-500 mt-4 group-hover:translate-x-1 transition-transform">
+                <div className="flex items-center text-[10px] font-bold text-primary mt-4 group-hover:translate-x-1 transition-transform">
                   Read Article <ChevronRight className="w-3 h-3" />
                 </div>
               </div>

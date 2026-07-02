@@ -228,7 +228,7 @@ const FreelancerPublicProfile = () => {
                       emerald: 'text-emerald-500',
                       blue: 'text-blue-500',
                       amber: 'text-amber-500',
-                      indigo: 'text-indigo-500',
+                      indigo: 'text-primary',
                     };
                     return (
                       <div key={label} className="bg-background rounded-xl p-4 border border-border/60 text-center">

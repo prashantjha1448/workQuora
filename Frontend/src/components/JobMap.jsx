@@ -39,7 +39,7 @@ const JobMap = ({ jobs = [], center = [23.2599, 77.4126], isFreelancerMap = fals
                   <p className="text-sm text-gray-600 mb-2">{job.category || job.company}</p>
                   <p className="font-bold text-emerald-600 mb-3">{job.budget}</p>
                   <button onClick={() => navigate(isFreelancerMap ? `/freelancer/${job._id || job.id}` : `/job/${job._id || job.id}`)}
-                    className="w-full bg-indigo-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors cursor-pointer">
+                    className="w-full bg-primary text-white py-1.5 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors cursor-pointer">
                     {isFreelancerMap ? 'View Profile' : 'View Details'}
                   </button>
                 </div>

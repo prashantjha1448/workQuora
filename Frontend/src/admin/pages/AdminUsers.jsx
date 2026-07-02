@@ -112,7 +112,7 @@ const AdminUsers = ({ roleProp }) => {
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Search by name, email, mobile, username, or ID..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-gray-200 placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-indigo-500/30"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-gray-200 placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }} />
         </div>
 
@@ -127,7 +127,7 @@ const AdminUsers = ({ roleProp }) => {
       <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
           <>
@@ -172,7 +172,7 @@ const AdminUsers = ({ roleProp }) => {
                       <td className="px-5 py-3 text-[10px] text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-1.5">
-                          <button onClick={() => viewUser(u._id)} title="View" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-indigo-400"><Eye className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => viewUser(u._id)} title="View" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-primary"><Eye className="w-3.5 h-3.5" /></button>
                           {u.isAvailable !== false
                             ? <button onClick={() => handleAction(u._id, 'suspend')} title="Suspend" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-yellow-400"><UserX className="w-3.5 h-3.5" /></button>
                             : <button onClick={() => handleAction(u._id, 'activate')} title="Activate" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-emerald-400"><UserCheck className="w-3.5 h-3.5" /></button>}
@@ -205,13 +205,13 @@ const AdminUsers = ({ roleProp }) => {
           <div className="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border p-6"
             onClick={(e) => e.stopPropagation()}
             style={{ background: '#12121e', borderColor: 'rgba(255,255,255,0.08)' }}>
-            {detailLoading ? <Loader2 className="w-6 h-6 animate-spin text-indigo-400 mx-auto" /> : (
+            {detailLoading ? <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /> : (
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <h2 className="text-lg font-bold text-white">User Profile</h2>
                     {!isEditing ? (
-                      <button onClick={startEditing} className="px-3 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg text-xs font-bold transition-colors">Edit Profile</button>
+                      <button onClick={startEditing} className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold transition-colors">Edit Profile</button>
                     ) : (
                       <div className="flex gap-2">
                         <button onClick={handleSaveProfile} disabled={editSaving} className="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold transition-colors">{editSaving ? 'Saving...' : 'Save'}</button>
@@ -228,27 +228,27 @@ const AdminUsers = ({ roleProp }) => {
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Name</label>
                       <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5" />
+                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5" />
                     </div>
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Email</label>
                       <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5" />
+                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5" />
                     </div>
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Username</label>
                       <input type="text" value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5" />
+                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5" />
                     </div>
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Mobile</label>
                       <input type="text" value={editForm.mobileNumber} onChange={(e) => setEditForm({ ...editForm, mobileNumber: e.target.value })}
-                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5" />
+                        className="bg-transparent text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5" />
                     </div>
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Role</label>
                       <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5">
+                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5">
                         <option value="CLIENT">CLIENT</option>
                         <option value="FREELANCER">FREELANCER</option>
                       </select>
@@ -256,7 +256,7 @@ const AdminUsers = ({ roleProp }) => {
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">Status</label>
                       <select value={editForm.isAvailable} onChange={(e) => setEditForm({ ...editForm, isAvailable: e.target.value === 'true' })}
-                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5">
+                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5">
                         <option value="true">Active</option>
                         <option value="false">Suspended</option>
                       </select>
@@ -264,7 +264,7 @@ const AdminUsers = ({ roleProp }) => {
                     <div className="flex flex-col gap-1 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <label className="text-[10px] font-bold text-gray-500 uppercase">KYC Verified</label>
                       <select value={editForm.isKycVerified} onChange={(e) => setEditForm({ ...editForm, isKycVerified: e.target.value === 'true', isEmailVerified: e.target.value === 'true' })}
-                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-indigo-500 py-0.5">
+                        className="bg-[#12121e] text-xs font-semibold text-gray-200 outline-none border-b border-gray-700 focus:border-primary py-0.5">
                         <option value="true">Verified</option>
                         <option value="false">Not Verified</option>
                       </select>
@@ -305,7 +305,7 @@ const AdminUsers = ({ roleProp }) => {
                         </div>
                         {selectedUser.kyc.documentUrls?.aadhaarDocUrl && (
                           <div className="mt-2">
-                            <a href={selectedUser.kyc.documentUrls.aadhaarDocUrl} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">View Aadhaar Document</a>
+                            <a href={selectedUser.kyc.documentUrls.aadhaarDocUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">View Aadhaar Document</a>
                           </div>
                         )}
                         {!selectedUser.kyc.aadhaarVerified && (
@@ -324,7 +324,7 @@ const AdminUsers = ({ roleProp }) => {
                         </div>
                         {selectedUser.kyc.documentUrls?.panDocUrl && (
                           <div className="mt-2">
-                            <a href={selectedUser.kyc.documentUrls.panDocUrl} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">View PAN Document</a>
+                            <a href={selectedUser.kyc.documentUrls.panDocUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">View PAN Document</a>
                           </div>
                         )}
                         {!selectedUser.kyc.panVerified && (
@@ -350,7 +350,7 @@ const AdminUsers = ({ roleProp }) => {
                         )}
                         {selectedUser.kyc.documentUrls?.bankDocUrl && (
                           <div className="mt-2">
-                            <a href={selectedUser.kyc.documentUrls.bankDocUrl} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">View Bank Proof</a>
+                            <a href={selectedUser.kyc.documentUrls.bankDocUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">View Bank Proof</a>
                           </div>
                         )}
                         {!selectedUser.kyc.bankVerified && (
@@ -369,7 +369,7 @@ const AdminUsers = ({ roleProp }) => {
                         </div>
                         {selectedUser.kyc.documentUrls?.selfieUrl && (
                           <div className="mt-2">
-                            <a href={selectedUser.kyc.documentUrls.selfieUrl} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline inline-block mb-2">View Selfie Document</a>
+                            <a href={selectedUser.kyc.documentUrls.selfieUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-block mb-2">View Selfie Document</a>
                             <img src={selectedUser.kyc.documentUrls.selfieUrl} alt="Selfie" className="w-32 h-32 rounded-lg object-cover border" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
                           </div>
                         )}

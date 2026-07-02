@@ -123,7 +123,7 @@ const AdminLayout = () => {
             <div className="text-xs text-gray-500">
               <span className="text-gray-300 font-semibold">{admin?.name}</span>
               <span className="mx-1.5">·</span>
-              <span className={admin?.isSuperAdmin ? 'text-yellow-400' : 'text-indigo-400'}>{admin?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}</span>
+              <span className={admin?.isSuperAdmin ? 'text-yellow-400' : 'text-primary'}>{admin?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}</span>
             </div>
           </div>
         </header>

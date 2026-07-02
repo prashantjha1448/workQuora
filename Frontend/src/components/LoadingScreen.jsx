@@ -31,7 +31,7 @@ const LoadingScreen = () => {
         >
           {/* Background mesh effects */}
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
           {/* Centered content block */}
           <div className="relative flex flex-col items-center max-w-md w-full px-6 text-center select-none">

@@ -31,7 +31,7 @@ const AdminAnalytics = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -146,10 +146,10 @@ const AdminAnalytics = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-indigo-400" />
+            <Users className="w-4 h-4 text-primary" />
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">User Registrations</h3>
           </div>
-          <span className="text-xs font-semibold text-indigo-400">Max: {maxVal}</span>
+          <span className="text-xs font-semibold text-primary">Max: {maxVal}</span>
         </div>
         <div className="relative p-4 rounded-2xl border bg-white/[0.01]" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
@@ -178,7 +178,7 @@ const AdminAnalytics = () => {
                   {/* Background full bar area for easy hover */}
                   <rect x={x - 2} y={padding} width={barWidth + 4} height={height - 2 * padding} fill="transparent" />
                   {/* Actual Visual Bar */}
-                  <rect x={x} y={y} width={barWidth} height={barHeight} rx="3" fill="linear-gradient(to top, #6366f1, #8b5cf6)" style={{ fill: '#6366f1' }} className="transition-all group-hover:fill-indigo-400" />
+                  <rect x={x} y={y} width={barWidth} height={barHeight} rx="3" fill="linear-gradient(to top, #6366f1, #8b5cf6)" style={{ fill: '#6366f1' }} className="transition-all group-hover:fill-primary" />
                   {/* Tooltip */}
                   <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-200">
                     <rect x={x + barWidth / 2 - 25} y={y - 25} width="50" height="18" rx="5" fill="#181829" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />

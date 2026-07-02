@@ -68,7 +68,7 @@ const AdminLogin = () => {
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                   placeholder="admin@workquora.com"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all focus:ring-2 focus:ring-primary/40"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
               </div>
             </div>
@@ -79,7 +79,7 @@ const AdminLogin = () => {
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-12 py-3 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full pl-11 pr-12 py-3 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all focus:ring-2 focus:ring-primary/40"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} />
                 <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

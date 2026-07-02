@@ -42,10 +42,10 @@ const SelectRole = () => {
           <div
             onClick={() => setSelectedRole('client')}
             className={`p-6 rounded-2xl border cursor-pointer text-left transition-all duration-300 ${
-              selectedRole === 'client' ? 'bg-indigo-600/10 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/10'
+              selectedRole === 'client' ? 'bg-primary/10 border-primary shadow-[0_0_30px_rgba(99,102,241,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/10'
             }`}
           >
-            <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl w-max mb-4"><Briefcase size={24} /></div>
+            <div className="p-3 bg-primary/10 text-primary rounded-xl w-max mb-4"><Briefcase size={24} /></div>
             <h3 className="text-xl font-bold text-white mb-1">I want to Hire</h3>
             <p className="text-sm text-zinc-400">Post local jobs, track nearby freelancers, and manage tasks.</p>
           </div>

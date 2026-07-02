@@ -86,7 +86,7 @@ const AdminAuditLogs = () => {
       {/* Table container */}
       <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : logs.length === 0 ? (
           <div className="text-center py-12 text-gray-500 text-sm">No audit logs found.</div>
         ) : (
@@ -129,7 +129,7 @@ const AdminAuditLogs = () => {
                         <td className="px-5 py-3">
                           <button
                             onClick={() => viewLogDetail(log._id)}
-                            className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-indigo-400 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-primary transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -160,7 +160,7 @@ const AdminAuditLogs = () => {
             style={{ background: '#12121e', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-indigo-400" />
+                <ShieldAlert className="w-5 h-5 text-primary" />
                 <h2 className="text-lg font-bold text-white">Audit Log Details</h2>
               </div>
               <button onClick={() => setSelectedLog(null)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white"><X className="w-4 h-4" /></button>

@@ -184,7 +184,7 @@ const AdminSettings = () => {
           onClick={() => setActiveTab('profile')}
           className={`pb-3 text-xs font-semibold tracking-wider uppercase border-b-2 transition-all ${
             activeTab === 'profile'
-              ? 'border-indigo-500 text-white'
+              ? 'border-primary text-white'
               : 'border-transparent text-gray-400 hover:text-gray-200'
           }`}
         >
@@ -195,7 +195,7 @@ const AdminSettings = () => {
             onClick={() => setActiveTab('admins')}
             className={`pb-3 text-xs font-semibold tracking-wider uppercase border-b-2 transition-all ${
               activeTab === 'admins'
-                ? 'border-indigo-500 text-white'
+                ? 'border-primary text-white'
                 : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
@@ -216,7 +216,7 @@ const AdminSettings = () => {
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-white">{admin?.name}</h2>
-                <p className="text-xs text-indigo-400 font-semibold">{isSuperAdmin ? '🔰 Super Administrator' : '🛡️ Standard Admin'}</p>
+                <p className="text-xs text-primary font-semibold">{isSuperAdmin ? '🔰 Super Administrator' : '🛡️ Standard Admin'}</p>
               </div>
             </div>
 
@@ -254,7 +254,7 @@ const AdminSettings = () => {
           {/* Change Password */}
           <div className="p-6 rounded-2xl border space-y-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-indigo-400" />
+              <Lock className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold text-white">Change Account Password</h2>
             </div>
             
@@ -267,7 +267,7 @@ const AdminSettings = () => {
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                 />
               </div>
@@ -280,7 +280,7 @@ const AdminSettings = () => {
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                 />
               </div>
@@ -295,14 +295,14 @@ const AdminSettings = () => {
                     required
                     disabled={!otpSent}
                     placeholder="Enter OTP code"
-                    className="flex-1 px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-40"
+                    className="flex-1 px-3 py-2.5 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-40"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   />
                   <button
                     type="button"
                     onClick={requestOtp}
                     disabled={sendingOtp || currentPassword.length === 0}
-                    className="px-4 text-xs font-bold text-white rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-30 transition-colors"
+                    className="px-4 text-xs font-bold text-white rounded-xl bg-primary hover:bg-primary/80 disabled:opacity-30 transition-colors"
                   >
                     {sendingOtp ? 'Sending...' : otpSent ? 'Resend' : 'Send OTP'}
                   </button>
@@ -312,7 +312,7 @@ const AdminSettings = () => {
               <button
                 type="submit"
                 disabled={changingPassword || !otpSent}
-                className="w-full py-2.5 rounded-xl text-xs font-bold text-white transition-all bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 rounded-xl text-xs font-bold text-white transition-all bg-primary hover:bg-primary/80 disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {changingPassword ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Updating...</> : 'Update Password'}
               </button>
@@ -328,7 +328,7 @@ const AdminSettings = () => {
             <h2 className="text-sm font-bold text-white">System Administrators</h2>
             <button
               onClick={() => setCreateOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary/80 transition-colors flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
               Create Admin Account
@@ -338,7 +338,7 @@ const AdminSettings = () => {
           {/* List Admins */}
           <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
             {loadingAdmins ? (
-              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : admins.length === 0 ? (
               <div className="text-center py-12 text-gray-500 text-sm">No administrators found.</div>
             ) : (
@@ -358,7 +358,7 @@ const AdminSettings = () => {
                         <td className="px-5 py-3 text-gray-400">{adm.email}</td>
                         <td className="px-5 py-3">
                           <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
-                            adm.isSuperAdmin ? 'bg-amber-500/10 text-amber-400' : 'bg-indigo-500/10 text-indigo-400'
+                            adm.isSuperAdmin ? 'bg-amber-500/10 text-amber-400' : 'bg-primary/10 text-primary'
                           }`}>
                             {adm.role}
                           </span>
@@ -378,7 +378,7 @@ const AdminSettings = () => {
                             <button
                               onClick={() => viewAdminActivity(adm._id)}
                               title="Audit Trail"
-                              className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-indigo-400 transition-colors"
+                              className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-primary transition-colors"
                             >
                               <Activity className="w-3.5 h-3.5" />
                             </button>
@@ -429,7 +429,7 @@ const AdminSettings = () => {
             style={{ background: '#12121e', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Shield className="w-4 h-4 text-indigo-400" />
+                <Shield className="w-4 h-4 text-primary" />
                 Create Administrator
               </h2>
               <button type="button" onClick={() => setCreateOpen(false)} className="p-1 rounded-lg hover:bg-white/5 text-gray-400"><X className="w-4 h-4" /></button>
@@ -498,7 +498,7 @@ const AdminSettings = () => {
                       type="checkbox"
                       checked={createPerms.includes(perm)}
                       onChange={() => toggleCreatePerm(perm)}
-                      className="rounded accent-indigo-600"
+                      className="rounded accent-primary"
                     />
                     <span className="capitalize">{perm.replace('_', ' ')}</span>
                   </label>
@@ -517,7 +517,7 @@ const AdminSettings = () => {
               <button
                 type="submit"
                 disabled={creatingAdmin}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary/80 disabled:opacity-50 flex items-center gap-1.5"
               >
                 {creatingAdmin ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating...</> : 'Create Admin'}
               </button>
@@ -538,7 +538,7 @@ const AdminSettings = () => {
 
             <div className="space-y-2">
               {loadingLogs ? (
-                <div className="flex justify-center py-6"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+                <div className="flex justify-center py-6"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
               ) : selectedAdminLogs.length === 0 ? (
                 <p className="text-center text-xs text-gray-500 py-6">No logs recorded for this administrator.</p>
               ) : (

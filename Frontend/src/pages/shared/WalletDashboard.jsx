@@ -47,7 +47,7 @@ const WalletDashboard = () => {
           <div className="bg-gray-800 border border-gray-700 rounded-3xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold">Payment Methods</h3>
-              <button className="text-indigo-400 text-sm font-bold hover:text-indigo-300">Add New</button>
+              <button className="text-primary text-sm font-bold hover:text-primary/70">Add New</button>
             </div>
             
             <div className="space-y-4">

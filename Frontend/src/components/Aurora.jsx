@@ -34,7 +34,7 @@ const Aurora = () => {
       />
 
       <motion.div
-        className="absolute top-[40%] left-[30%] w-[35vw] h-[35vw] rounded-full bg-indigo-500/5 blur-[110px]"
+        className="absolute top-[40%] left-[30%] w-[35vw] h-[35vw] rounded-full bg-primary/5 blur-[110px]"
         animate={{
           x: [0, 30, -30, 0],
           y: [0, -20, 40, 0],

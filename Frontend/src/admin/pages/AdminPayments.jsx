@@ -141,7 +141,7 @@ const AdminPayments = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`pb-3 text-xs font-semibold tracking-wider uppercase border-b-2 transition-all ${
               activeTab === tab.id
-                ? 'border-indigo-500 text-white'
+                ? 'border-primary text-white'
                 : 'border-transparent text-gray-400 hover:text-gray-200'
             }`}
           >
@@ -193,7 +193,7 @@ const AdminPayments = () => {
           {/* Table */}
           <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
             {loadingTxns ? (
-              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : transactions.length === 0 ? (
               <div className="text-center py-12 text-gray-500 text-sm">No transactions found.</div>
             ) : (
@@ -233,7 +233,7 @@ const AdminPayments = () => {
                           <td className="px-5 py-3">
                             <button
                               onClick={() => viewTransactionDetail(t._id)}
-                              className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-indigo-400 transition-colors"
+                              className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-primary transition-colors"
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </button>
@@ -262,7 +262,7 @@ const AdminPayments = () => {
         <div className="space-y-4">
           <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
             {loadingWallets ? (
-              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : wallets.length === 0 ? (
               <div className="text-center py-12 text-gray-500 text-sm">No wallets found.</div>
             ) : (
@@ -321,17 +321,17 @@ const AdminPayments = () => {
       {activeTab === 'earnings' && (
         <div className="space-y-6">
           {loadingEarnings ? (
-            <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+            <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : !earnings ? (
             <div className="text-center py-12 text-gray-500 text-sm">Failed to retrieve earnings overview.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="rounded-2xl border p-6 space-y-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-indigo-400" />
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-primary" />
                   </div>
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase bg-indigo-500/10 px-2 py-0.5 rounded-full">All-Time</span>
+                  <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">All-Time</span>
                 </div>
                 <div>
                   <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Platform Revenue</h3>
@@ -417,7 +417,7 @@ const AdminPayments = () => {
                 <div className="pt-4 border-t border-white/5 flex justify-end">
                   <button
                     onClick={() => setRefundModalOpen(true)}
-                    className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary/80 transition-colors"
                   >
                     Initiate Refund
                   </button>
@@ -453,7 +453,7 @@ const AdminPayments = () => {
                 required
                 placeholder="e.g. Project dispute arbitration, accidental double payment..."
                 rows="3"
-                className="w-full px-3 py-2 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-indigo-500/30"
+                className="w-full px-3 py-2 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30"
                 style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)' }}
               />
             </div>

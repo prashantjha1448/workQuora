@@ -25,9 +25,9 @@ const FreelancerNearbyMap = () => {
       <div className="absolute inset-0 z-0 opacity-40">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="absolute top-1/2 left-2/3 -translate-x-1/2 -translate-y-1/2">
-          <div className="w-4 h-4 bg-indigo-500 rounded-full relative z-10 shadow-[0_0_20px_#6366f1]"></div>
-          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-500/50 ${isLoading ? 'animate-ping w-96 h-96 opacity-0 transition-all duration-1000' : 'w-32 h-32 opacity-20'}`}></div>
-          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-500/20 ${isLoading ? 'animate-ping w-[800px] h-[800px] opacity-0 transition-all delay-300' : 'w-64 h-64 opacity-10'}`}></div>
+          <div className="w-4 h-4 bg-primary rounded-full relative z-10 shadow-[0_0_20px_#6366f1]"></div>
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/50 ${isLoading ? 'animate-ping w-96 h-96 opacity-0 transition-all duration-1000' : 'w-32 h-32 opacity-20'}`}></div>
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 ${isLoading ? 'animate-ping w-[800px] h-[800px] opacity-0 transition-all delay-300' : 'w-64 h-64 opacity-10'}`}></div>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ const FreelancerNearbyMap = () => {
               </button>
             </div>
             <div className="flex items-center gap-2 text-sm text-zinc-400 bg-white/5 py-2 px-3 rounded-xl border border-white/5 w-full">
-              <Navigation className="w-4 h-4 text-indigo-400" />
+              <Navigation className="w-4 h-4 text-primary" />
               <span>Current: <strong className="text-white">{city}</strong></span>
             </div>
           </div>
@@ -52,12 +52,12 @@ const FreelancerNearbyMap = () => {
           <div className="p-6 bg-gradient-to-b from-transparent to-black/20">
             <div className="flex justify-between items-end mb-4">
               <p className="text-sm font-medium text-zinc-400">Discovery Radius</p>
-              <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-lg">
+              <div className="flex items-center gap-1.5 text-primary font-bold text-lg">
                 <Crosshair className="w-4 h-4" /> {radiusKm} <span className="text-sm font-medium text-zinc-500">KM</span>
               </div>
             </div>
             <div className="relative w-full h-2 bg-zinc-800 rounded-full">
-              <div className="absolute top-0 left-0 h-full bg-indigo-500 rounded-full shadow-[0_0_10px_#6366f1]"
+              <div className="absolute top-0 left-0 h-full bg-primary rounded-full shadow-[0_0_10px_#6366f1]"
                 style={{ width: `${(radiusKm / 200) * 100}%` }}></div>
               <input type="range" min="1" max="200" value={radiusKm}
                 onChange={(e) => dispatch(setDiscoveryRadius(parseInt(e.target.value)))}
@@ -72,7 +72,7 @@ const FreelancerNearbyMap = () => {
           <div className="flex-1 overflow-y-auto p-6 pt-2 space-y-4">
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm font-medium text-white">Live Opportunities</p>
-              {isLoading && <span className="text-xs text-indigo-400 animate-pulse">Scanning...</span>}
+              {isLoading && <span className="text-xs text-primary animate-pulse">Scanning...</span>}
             </div>
 
             {jobsFeed.length === 0 ? (
@@ -81,16 +81,16 @@ const FreelancerNearbyMap = () => {
                   <MapPin className="w-5 h-5 text-zinc-500" />
                 </div>
                 <p className="text-zinc-400 text-sm">No jobs found in this radius.</p>
-                <button onClick={() => dispatch(setDiscoveryRadius(50))} className="text-indigo-400 text-sm font-medium mt-2 hover:text-indigo-300">
+                <button onClick={() => dispatch(setDiscoveryRadius(50))} className="text-primary text-sm font-medium mt-2 hover:text-primary/70">
                   Expand to 50 KM
                 </button>
               </div>
             ) : (
               jobsFeed.map((job) => (
                 <div key={job._id || job.id}
-                  className="group relative bg-[#09090B] border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1">
+                  className="group relative bg-[#09090B] border border-white/5 hover:border-primary/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-white font-medium text-sm group-hover:text-indigo-400 transition-colors pr-4">{job.title}</h3>
+                    <h3 className="text-white font-medium text-sm group-hover:text-primary transition-colors pr-4">{job.title}</h3>
                     {job.urgent && (
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] uppercase font-bold rounded-full whitespace-nowrap">
                         <Zap className="w-3 h-3 fill-current" /> Urgent

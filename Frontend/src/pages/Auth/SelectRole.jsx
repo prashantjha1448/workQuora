@@ -25,14 +25,14 @@ const SelectRole = () => {
     <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-2xl">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-10">
-          <div className="bg-indigo-600 p-2 rounded-xl">
+          <div className="bg-primary p-2 rounded-xl">
             <MapPin className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-extrabold tracking-tight">WorkQuora</span>
@@ -50,16 +50,16 @@ const SelectRole = () => {
               onClick={() => setSelected('CLIENT')}
               className={`p-6 rounded-2xl border text-left transition-all duration-200 relative group ${
                 selected === 'CLIENT'
-                  ? 'bg-indigo-500/10 border-indigo-500 shadow-lg shadow-indigo-500/10'
+                  ? 'bg-primary/10 border-primary shadow-lg shadow-indigo-500/10'
                   : 'bg-gray-800/50 border-gray-700 hover:border-gray-500'
               }`}
             >
               {selected === 'CLIENT' && (
-                <div className="absolute top-4 right-4 bg-indigo-500 text-white p-1 rounded-full">
+                <div className="absolute top-4 right-4 bg-primary text-white p-1 rounded-full">
                   <Check size={12} />
                 </div>
               )}
-              <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl w-max mb-4">
+              <div className="p-2.5 bg-primary/10 text-primary rounded-xl w-max mb-4">
                 <Briefcase size={22} />
               </div>
               <h3 className="text-lg font-bold mb-1">I'm a Client</h3>
@@ -67,9 +67,9 @@ const SelectRole = () => {
                 Post jobs, find local talent nearby, and manage projects with escrow protection.
               </p>
               <ul className="mt-4 space-y-1 text-xs text-gray-500">
-                <li className="flex items-center gap-1.5"><Check size={10} className="text-indigo-400" /> Post jobs with location radius</li>
-                <li className="flex items-center gap-1.5"><Check size={10} className="text-indigo-400" /> View freelancers on live map</li>
-                <li className="flex items-center gap-1.5"><Check size={10} className="text-indigo-400" /> Secure escrow payments</li>
+                <li className="flex items-center gap-1.5"><Check size={10} className="text-primary" /> Post jobs with location radius</li>
+                <li className="flex items-center gap-1.5"><Check size={10} className="text-primary" /> View freelancers on live map</li>
+                <li className="flex items-center gap-1.5"><Check size={10} className="text-primary" /> Secure escrow payments</li>
               </ul>
             </button>
 

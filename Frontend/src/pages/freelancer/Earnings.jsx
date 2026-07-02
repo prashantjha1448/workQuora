@@ -64,9 +64,9 @@ const Earnings = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-indigo-600/10 via-card to-card border border-indigo-500/30 p-6 rounded-3xl shadow-sm">
+              <div className="bg-gradient-to-br from-indigo-600/10 via-card to-card border border-primary/30 p-6 rounded-3xl shadow-sm">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="bg-indigo-500/20 p-3 rounded-xl"><DollarSign className="w-6 h-6 text-indigo-600 dark:text-indigo-400" /></div>
+                  <div className="bg-primary/20 p-3 rounded-xl"><DollarSign className="w-6 h-6 text-primary dark:text-primary" /></div>
                   {data?.growthPercent != null && (
                     <span className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" /> +{data.growthPercent}%
@@ -139,7 +139,7 @@ const Earnings = () => {
               ) : (
                 <div className="space-y-6">
                   {[
-                    { label: 'Within 5km', value: '0%', color: 'bg-indigo-500' },
+                    { label: 'Within 5km', value: '0%', color: 'bg-primary' },
                     { label: '5 – 15km', value: '0%', color: 'bg-blue-500' },
                     { label: '15 – 30km', value: '0%', color: 'bg-purple-500' },
                     { label: '30km+', value: '0%', color: 'bg-gray-600' },
@@ -156,9 +156,9 @@ const Earnings = () => {
                   ))}
                 </div>
               )}
-              <div className="mt-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
-                  <strong className="text-indigo-600 dark:text-indigo-400">Tip: </strong>Focus on nearby jobs to maximize earnings and response time.
+              <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-2xl">
+                <p className="text-xs text-indigo-700 dark:text-primary/70 leading-relaxed">
+                  <strong className="text-primary dark:text-primary">Tip: </strong>Focus on nearby jobs to maximize earnings and response time.
                 </p>
               </div>
             </div>

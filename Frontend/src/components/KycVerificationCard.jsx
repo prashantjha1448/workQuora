@@ -227,7 +227,7 @@ const KycVerificationCard = ({ hideOnComplete = true }) => {
   return (
     <div className="w-full bg-card border border-border rounded-3xl p-6 relative overflow-hidden mb-6 shadow-xl">
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-start gap-4 mb-6 relative z-10">

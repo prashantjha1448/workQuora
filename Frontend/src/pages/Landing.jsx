@@ -84,7 +84,7 @@ const Landing = () => {
             
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-full transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-98 shadow-md"
+              className="bg-primary hover:bg-primary text-white font-bold py-3 px-6 rounded-full transition-all flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-98 shadow-md"
             >
               <span>Search</span>
               <ArrowRight className="w-4 h-4" />
@@ -98,7 +98,7 @@ const Landing = () => {
             <button
               key={cat.label}
               onClick={() => navigate(`/discover?category=${cat.label.toLowerCase()}`)}
-              className="px-4 py-2 bg-slate-100/70 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-xs font-semibold text-slate-600 dark:text-muted-foreground hover:text-indigo-600 dark:hover:text-white rounded-full transition-all cursor-pointer"
+              className="px-4 py-2 bg-slate-100/70 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-primary/50 hover:bg-primary/5 text-xs font-semibold text-slate-600 dark:text-muted-foreground hover:text-primary dark:hover:text-white rounded-full transition-all cursor-pointer"
             >
               <span className="mr-1.5">{cat.emoji}</span>
               <span>{cat.label}</span>

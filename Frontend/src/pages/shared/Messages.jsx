@@ -732,11 +732,11 @@ const Messages = () => {
                         <div className={`p-3 rounded-2xl text-sm ${
                           isOwn 
                             ? user?.role?.toLowerCase() === 'client'
-                              ? 'bg-indigo-600 text-white rounded-tr-none'
+                              ? 'bg-primary text-white rounded-tr-none'
                               : 'bg-emerald-600 text-white rounded-tr-none'
                             : user?.role?.toLowerCase() === 'client'
                               ? 'bg-emerald-600/10 text-foreground border border-emerald-500/20 rounded-tl-none'
-                              : 'bg-indigo-600/10 text-foreground border border-indigo-500/20 rounded-tl-none'
+                              : 'bg-primary/10 text-foreground border border-primary/20 rounded-tl-none'
                         }`}>
                           {msg.fileType === 'image' && msg.fileUrl && (
                             <img 

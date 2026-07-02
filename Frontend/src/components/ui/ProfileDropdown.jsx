@@ -115,7 +115,7 @@ const ProfileDropdown = () => {
             <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-border/40">
               <span className={`inline-flex items-center text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
                 isClient 
-                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' 
+                  ? 'bg-primary/10 text-primary border-primary/20' 
                   : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
               }`}>
                 {isClient ? 'Client' : 'Freelancer'}
@@ -169,7 +169,7 @@ const ProfileDropdown = () => {
               className="w-full flex items-center justify-between px-3 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-all duration-200 text-left font-semibold group"
             >
               <div className="flex items-center gap-3">
-                <User size={15} className="text-muted-foreground group-hover:text-indigo-500 transition-colors" /> 
+                <User size={15} className="text-muted-foreground group-hover:text-primary transition-colors" /> 
                 <span>My Profile</span>
               </div>
               <ChevronRight size={12} className="text-muted-foreground/45 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />

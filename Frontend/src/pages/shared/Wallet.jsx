@@ -212,7 +212,7 @@ const Wallet = () => {
           /* 1. KEY LOCK SETUP REQUIRED (No PIN created during KYC) */
           <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden mt-12">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
             
             <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-500/20 text-amber-500">
               <AlertTriangle className="w-8 h-8 animate-bounce text-amber-500" />
@@ -234,7 +234,7 @@ const Wallet = () => {
           /* 2. PIN SECURE UNLOCK CARD (Locked by default) */
           <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden mt-12">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 text-primary">
               <Lock className="w-8 h-8 animate-pulse text-primary" />
@@ -597,7 +597,7 @@ const Wallet = () => {
                 <button
                   type="submit"
                   disabled={isWithdrawing || !withdrawAmount || Number(withdrawAmount) > balance || withdrawalPin.length !== 4}
-                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/50 rounded-xl font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="flex-1 py-3 bg-primary hover:bg-primary/80 disabled:bg-primary/50 rounded-xl font-bold text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   {isWithdrawing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Withdrawal'}
                 </button>

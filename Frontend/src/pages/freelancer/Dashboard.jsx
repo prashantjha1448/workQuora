@@ -95,7 +95,7 @@ const FreelancerDashboard = () => {
             {stats.map(({ label, value, icon: Icon, color }) => {
               const colorMap = {
                 emerald: 'bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-emerald-400',
-                indigo: 'bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400',
+                indigo: 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
                 blue: 'bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 dark:text-blue-400',
                 amber: 'bg-amber-500/10 text-amber-500 dark:bg-amber-500/20 dark:text-amber-400',
               };

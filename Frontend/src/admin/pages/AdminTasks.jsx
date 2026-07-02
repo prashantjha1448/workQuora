@@ -63,7 +63,7 @@ const AdminTasks = () => {
 
       <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
         {loading ? (
-          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -88,7 +88,7 @@ const AdminTasks = () => {
                       <td className="px-5 py-3 text-[10px] text-gray-500">{new Date(t.createdAt).toLocaleDateString()}</td>
                       <td className="px-5 py-3">
                         <div className="flex gap-1.5">
-                          <button onClick={() => viewDetail(t._id)} title="View" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-indigo-400"><Eye className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => viewDetail(t._id)} title="View" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-primary"><Eye className="w-3.5 h-3.5" /></button>
                           {t.status !== 'cancelled' && <button onClick={() => handleAction(t._id, 'cancel')} title="Cancel" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-red-400"><XCircle className="w-3.5 h-3.5" /></button>}
                           {t.status !== 'completed' && <button onClick={() => handleAction(t._id, 'complete')} title="Complete" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-emerald-400"><CheckCircle className="w-3.5 h-3.5" /></button>}
                           {t.status !== 'open' && <button onClick={() => handleAction(t._id, 'reopen')} title="Reopen" className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-yellow-400"><RotateCcw className="w-3.5 h-3.5" /></button>}

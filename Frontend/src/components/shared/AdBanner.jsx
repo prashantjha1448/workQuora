@@ -123,11 +123,11 @@ const AdCard = ({ ad, className = '' }) => {
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pt-12">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold text-indigo-400 mb-0.5">{ad.brandName}</p>
+            <p className="text-xs font-bold text-primary mb-0.5">{ad.brandName}</p>
             <h3 className="text-sm font-bold text-white line-clamp-1">{ad.title}</h3>
             {ad.description && <p className="text-xs text-gray-300 mt-1 line-clamp-2">{ad.description}</p>}
           </div>
-          <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white backdrop-blur-md group-hover:bg-indigo-500 transition-colors">
+          <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white backdrop-blur-md group-hover:bg-primary transition-colors">
             <ExternalLink size={14} />
           </div>
         </div>

@@ -195,7 +195,7 @@ const Navbar = () => {
               <NavLink 
                 to="/" 
                 className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                  isActive ? 'bg-white dark:bg-white/5 text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                  isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
                 <Home size={14} /><span>Home</span>
@@ -204,7 +204,7 @@ const Navbar = () => {
             <NavLink 
               to="/discover" 
               className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                isActive ? 'bg-white dark:bg-white/5 text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               <Compass size={14} /><span>Discover</span>
@@ -213,7 +213,7 @@ const Navbar = () => {
               <NavLink 
                 to="/shared/messages" 
                 className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all relative ${
-                  isActive ? 'bg-white dark:bg-white/5 text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                  isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
                 <MessageSquare size={14} />
@@ -230,16 +230,16 @@ const Navbar = () => {
                 <NavLink 
                   to="/client/post-job" 
                   className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    isActive ? 'bg-white dark:bg-white/5 text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                    isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
-                  <PlusCircle size={14} className="text-indigo-600 dark:text-indigo-400" /><span>Post Job</span>
+                  <PlusCircle size={14} className="text-primary dark:text-primary" /><span>Post Job</span>
                 </NavLink>
               ) : (
                 <NavLink 
                   to="/freelancer/earnings" 
                   className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    isActive ? 'bg-white dark:bg-white/5 text-indigo-600 dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                    isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
                   }`}
                 >
                   <Wallet size={14} className="text-emerald-600 dark:text-emerald-400" /><span>Earnings</span>
@@ -269,36 +269,36 @@ const Navbar = () => {
                 <p className="text-xs font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-widest mb-3">Set Location Radar</p>
 
                 <button onClick={handleAutoLocationFetch} disabled={locLoading}
-                  className="w-full flex items-center justify-between gap-3 px-3.5 py-3 bg-indigo-50 dark:bg-indigo-500/5 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-xl text-xs font-bold text-indigo-600 dark:text-indigo-400 transition-all mb-4 group">
+                  className="w-full flex items-center justify-between gap-3 px-3.5 py-3 bg-indigo-50 dark:bg-primary/5 hover:bg-indigo-100 dark:hover:bg-primary/10 border border-indigo-200 dark:border-primary/20 rounded-xl text-xs font-bold text-primary dark:text-primary transition-all mb-4 group">
                   <div className="flex items-center gap-2.5">
                     {locLoading ? <Loader2 size={14} className="animate-spin" /> : <Crosshair size={14} className="group-hover:rotate-90 transition-transform" />}
                     <span>Use Current GPS</span>
                   </div>
-                  <span className="text-[9px] bg-indigo-100 dark:bg-indigo-500/10 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400 uppercase font-bold">GPS</span>
+                  <span className="text-[9px] bg-indigo-100 dark:bg-primary/10 px-1.5 py-0.5 rounded text-primary dark:text-primary uppercase font-bold">GPS</span>
                 </button>
 
                 <form onSubmit={handlePincodeSubmit} className="mb-3">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wider block mb-1.5">Pincode</label>
-                  <div className="flex bg-slate-50 dark:bg-background border border-slate-200 dark:border-white/5 rounded-xl px-3 py-2 items-center focus-within:border-indigo-500/40 transition-all">
+                  <div className="flex bg-slate-50 dark:bg-background border border-slate-200 dark:border-white/5 rounded-xl px-3 py-2 items-center focus-within:border-primary/40 transition-all">
                     <MapPinned size={14} className="text-slate-400 dark:text-muted-foreground mr-2" />
                     <input type="text" maxLength="6" placeholder="e.g. 462001"
                       value={pincodeInput} onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
                       className="bg-transparent border-none outline-none w-full text-xs text-slate-800 dark:text-foreground placeholder:text-slate-400 dark:placeholder:text-muted-foreground/60 font-medium" />
                     {pincodeInput.length === 6 && (
-                      <button type="submit" className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Apply</button>
+                      <button type="submit" className="text-xs text-primary dark:text-primary font-bold hover:underline">Apply</button>
                     )}
                   </div>
                 </form>
 
                 <form onSubmit={handleManualSearchSubmit}>
                   <label className="text-[10px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wider block mb-1.5">City / Region</label>
-                  <div className="flex bg-slate-50 dark:bg-background border border-slate-200 dark:border-white/5 rounded-xl px-3 py-2 items-center focus-within:border-indigo-500/40 transition-all">
+                  <div className="flex bg-slate-50 dark:bg-background border border-slate-200 dark:border-white/5 rounded-xl px-3 py-2 items-center focus-within:border-primary/40 transition-all">
                     <Search size={14} className="text-slate-400 dark:text-muted-foreground mr-2" />
                     <input type="text" placeholder="e.g. MP Nagar, Bhopal"
                       value={manualCityInput} onChange={(e) => setManualCityInput(e.target.value)}
                       className="bg-transparent border-none outline-none w-full text-xs text-slate-800 dark:text-foreground placeholder:text-slate-400 dark:placeholder:text-muted-foreground/60 font-medium" />
                     {manualCityInput.trim() && (
-                      <button type="submit" className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Go</button>
+                      <button type="submit" className="text-xs text-primary dark:text-primary font-bold hover:underline">Go</button>
                     )}
                   </div>
                 </form>
@@ -324,7 +324,7 @@ const Navbar = () => {
           {/* Theme switcher */}
           <button onClick={toggleTheme}
             className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 hover:text-slate-800 dark:text-gray-400 dark:hover:text-white transition-all cursor-pointer">
-            {theme === 'dark' ? <Sun size={15} className="text-yellow-400" /> : <Moon size={15} className="text-indigo-600 dark:text-indigo-400" />}
+            {theme === 'dark' ? <Sun size={15} className="text-yellow-400" /> : <Moon size={15} className="text-primary dark:text-primary" />}
           </button>
 
           <div className="h-5 w-px bg-slate-200 dark:bg-white/10 mx-1"></div>
@@ -335,7 +335,7 @@ const Navbar = () => {
           ) : (
             <NavLink
               to="/auth"
-              className="px-5 py-2 rounded-full font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/10 cursor-pointer"
+              className="px-5 py-2 rounded-full font-bold text-xs text-white bg-primary hover:bg-primary/80 transition-all shadow-lg shadow-indigo-600/10 cursor-pointer"
             >
               Sign Up
             </NavLink>
@@ -346,7 +346,7 @@ const Navbar = () => {
         <div className="flex lg:hidden items-center gap-3">
           <button onClick={toggleTheme}
             className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-muted-foreground dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
-            {theme === 'dark' ? <Sun size={15} className="text-yellow-400" /> : <Moon size={15} className="text-indigo-600 dark:text-indigo-400" />}
+            {theme === 'dark' ? <Sun size={15} className="text-yellow-400" /> : <Moon size={15} className="text-primary dark:text-primary" />}
           </button>
           
           {user && <Notifications />}
@@ -398,7 +398,7 @@ const Navbar = () => {
                 )}
                 {user?.role?.toLowerCase() === 'client' ? (
                   <Link to="/client/post-job" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-foreground transition-colors">
-                    <PlusCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Post a Job
+                    <PlusCircle className="w-4 h-4 text-primary dark:text-primary" /> Post a Job
                   </Link>
                 ) : user ? (
                   <Link to="/freelancer/earnings" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-foreground transition-colors">
@@ -411,11 +411,11 @@ const Navbar = () => {
               <div className="border-t border-slate-200 dark:border-white/5 pt-4 space-y-2.5">
                 <p className="text-[10px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-widest">Radar location: {activeCity}</p>
                 <button onClick={() => { handleAutoLocationFetch(); setMobileOpen(false); }}
-                  className="w-full flex items-center justify-between gap-2.5 px-3 py-2 bg-indigo-50 dark:bg-indigo-500/5 hover:bg-indigo-100 dark:hover:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 rounded-xl text-xs font-semibold">
+                  className="w-full flex items-center justify-between gap-2.5 px-3 py-2 bg-indigo-50 dark:bg-primary/5 hover:bg-indigo-100 dark:hover:bg-primary/10 text-primary dark:text-primary border border-indigo-100 dark:border-primary/20 rounded-xl text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     <Crosshair className="w-3.5 h-3.5" /> <span>Use GPS Location</span>
                   </div>
-                  <span className="text-[8px] bg-indigo-100 dark:bg-indigo-500/10 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-extrabold">GPS</span>
+                  <span className="text-[8px] bg-indigo-100 dark:bg-primary/10 px-1.5 py-0.5 rounded text-primary dark:text-primary font-extrabold">GPS</span>
                 </button>
               </div>
             </div>
@@ -425,7 +425,7 @@ const Navbar = () => {
               {user ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-500 font-bold text-white text-xs overflow-hidden">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary font-bold text-white text-xs overflow-hidden">
                       {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user.name?.[0]}
                     </div>
                     <div className="min-w-0">
@@ -439,7 +439,7 @@ const Navbar = () => {
                 <Link
                   to="/auth"
                   onClick={() => setMobileOpen(false)}
-                  className="w-full py-2.5 block text-center rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
+                  className="w-full py-2.5 block text-center rounded-xl bg-primary hover:bg-primary/80 text-white font-bold text-xs"
                 >
                   Log In / Sign Up
                 </Link>

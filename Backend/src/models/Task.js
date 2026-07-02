@@ -37,4 +37,8 @@ const taskSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+taskSchema.index({ freelancer: 1, status: 1 });
+taskSchema.index({ client: 1, status: 1 });
+taskSchema.index({ freelancer: 1, client: 1, status: 1 });
+
 module.exports = mongoose.model('Task', taskSchema);

@@ -8,11 +8,13 @@ import { socketService } from '../services/socket';
 
 const useNotifications = () => {
   const qc = useQueryClient();
+  const token = useSelector((s) => s.auth.token);
+  const userId = useSelector((s) => s.auth.user?._id || s.auth.user?.id);
 
   const { data, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: () => notificationsApi.getAll().then((r) => r.data),
-    refetchInterval: 60000, // reduced 30s → 60s — socket handles instant push
+    refetchInterval: 60000, // fallback poll — socket delivers instantly when connected
   });
 
   const markAll = useMutation({
@@ -25,14 +27,25 @@ const useNotifications = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
-  // ── Real-time push: new_notification from backend socket ────────────────────
+  // ── Real-time push: backend emits 'receive_notification' to a per-user
+  // socket room (Backend/src/utils/notification.js). Membership in that room
+  // is tied to the socket instance via 'join_user_room' and is NOT persisted
+  // across reconnects, so it has to be (re)requested on every 'connect', not
+  // just once on mount. socketService.connect() is idempotent — safe to call
+  // here even if Messages.jsx has already opened the same socket.
   useEffect(() => {
-    const socket = socketService.getSocket();
-    if (!socket) return;
+    if (!token || !userId) return;
+    const socket = socketService.connect(token);
+
+    const joinRoom = () => socketService.joinUserRoom(userId);
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
 
     const handleNewNotification = (notification) => {
       qc.setQueryData(['notifications'], (old) => {
         if (!old) return old;
+        // Guard a duplicate delivery if the 60s poll and the socket push land together
+        if (old.notifications?.some((n) => n._id === notification._id)) return old;
         return {
           ...old,
           notifications: [notification, ...(old.notifications || [])],
@@ -40,10 +53,13 @@ const useNotifications = () => {
         };
       });
     };
+    socket.on('receive_notification', handleNewNotification);
 
-    socket.on('new_notification', handleNewNotification);
-    return () => socket.off('new_notification', handleNewNotification);
-  }, [qc]);
+    return () => {
+      socket.off('connect', joinRoom);
+      socket.off('receive_notification', handleNewNotification);
+    };
+  }, [token, userId, qc]);
 
   return {
     notifications: data?.notifications || [],

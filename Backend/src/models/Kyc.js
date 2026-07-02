@@ -18,7 +18,7 @@ const kycSchema = new mongoose.Schema(
       enum: ['pending', 'verified', 'rejected'],
       default: 'pending',
     },
-    mobileVerified:  { type: Boolean, default: false },
+    isMobileVerified:  { type: Boolean, default: false },
     panVerified:     { type: Boolean, default: false },
     // Canonical field (double-a) — used throughout kycController & adminKycController
     aadhaarVerified: { type: Boolean, default: false },
@@ -62,8 +62,16 @@ const kycSchema = new mongoose.Schema(
     submittedAt: { type: Date, default: null },
     verifiedAt:  { type: Date, default: null },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
+
+kycSchema.virtual('mobileVerified')
+  .get(function() { return this.isMobileVerified; })
+  .set(function(val) { this.isMobileVerified = val; });
 
 /**
  * Keep both spellings in sync on every save.

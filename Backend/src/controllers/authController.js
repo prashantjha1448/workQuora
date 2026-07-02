@@ -313,7 +313,6 @@ exports.verifyMobile = async (req, res, next) => {
     }
 
     user.isMobileVerified = true;
-    user.mobileVerified = true;
     user.mobileOtp = null;
     user.mobileOtpExpires = null;
     user.otpAttempts = 0;

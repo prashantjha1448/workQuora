@@ -11,7 +11,7 @@ const checkAndUpdateGlobalStatus = async (kycId) => {
   const kyc = await Kyc.findById(kycId);
   if (!kyc) return;
 
-  const allVerified = kyc.mobileVerified && kyc.panVerified && kyc.aadhaarVerified && kyc.bankVerified && kyc.selfieVerified;
+  const allVerified = kyc.isMobileVerified && kyc.panVerified && kyc.aadhaarVerified && kyc.bankVerified && kyc.selfieVerified;
   const coreVerified = kyc.panVerified && kyc.aadhaarVerified;
 
   if (allVerified && kyc.status !== 'verified') {
@@ -66,7 +66,7 @@ exports.verifyOtp = async (req, res, next) => {
 
     const kyc = await Kyc.findOne({ userId: req.user.id }).select('+aadharOtp +aadharOtpExpiry');
     if (!kyc) return res.status(404).json({ success: false, message: 'KYC record not found' });
-    if (kyc.mobileVerified) return res.status(400).json({ success: false, message: 'Mobile already verified' });
+    if (kyc.isMobileVerified) return res.status(400).json({ success: false, message: 'Mobile already verified' });
 
     if (kyc.aadharOtp !== otp) {
       return res.status(400).json({ success: false, message: 'Invalid OTP' });
@@ -75,7 +75,7 @@ exports.verifyOtp = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'OTP has expired' });
     }
 
-    kyc.mobileVerified = true;
+    kyc.isMobileVerified = true;
     kyc.aadharOtp = null;
     kyc.aadharOtpExpiry = null;
     await kyc.save();
@@ -326,7 +326,7 @@ exports.resetKyc = async (req, res, next) => {
   try {
     await Kyc.findOneAndUpdate({ userId: req.user.id }, {
       status: 'pending',
-      mobileVerified: false,
+      isMobileVerified: false,
       panVerified: false,
       aadhaarVerified: false,
       bankVerified: false,

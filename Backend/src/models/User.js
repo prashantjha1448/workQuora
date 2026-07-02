@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema(
     mobileNumber: { type: String },
     isMobileEdited: { type: Boolean, default: false }, // Rule: Can only edit mobile once
     isMobileVerified: { type: Boolean, default: false },
-    mobileVerified: { type: Boolean, default: false },
     mobileOtp: { type: String, default: null, select: false },
     mobileOtpExpires: { type: Date, default: null, select: false },
     mobileOtpCount: { type: Number, default: 0 },
@@ -106,6 +105,10 @@ userSchema.virtual('isVerified')
 userSchema.virtual('kycVerified')
   .get(function() { return this.isKycVerified; })
   .set(function(val) { this.isKycVerified = val; });
+
+userSchema.virtual('mobileVerified')
+  .get(function() { return this.isMobileVerified; })
+  .set(function(val) { this.isMobileVerified = val; });
 
 // 2dsphere index for radius search (Geo-spatial)
 userSchema.index({ location: '2dsphere' });

@@ -6,7 +6,7 @@ const recalculateKycStatus = async (kycId, io) => {
   const kyc = await Kyc.findById(kycId);
   if (!kyc) return;
 
-  const isVerified = kyc.mobileVerified && kyc.panVerified && kyc.aadhaarVerified && kyc.bankVerified && kyc.selfieVerified;
+  const isVerified = kyc.isMobileVerified && kyc.panVerified && kyc.aadhaarVerified && kyc.bankVerified && kyc.selfieVerified;
   
   if (isVerified) {
     kyc.status = 'verified';

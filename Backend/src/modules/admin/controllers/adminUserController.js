@@ -342,7 +342,7 @@ exports.updateUserProfile = async (req, res, next) => {
         kyc.aadhaarVerified = isKycVerified;
         kyc.bankVerified = isKycVerified;
         kyc.selfieVerified = isKycVerified;
-        kyc.mobileVerified = isKycVerified;
+        kyc.isMobileVerified = isKycVerified;
         if (isKycVerified) kyc.verifiedAt = new Date();
         await kyc.save();
       }

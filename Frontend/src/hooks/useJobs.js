@@ -9,7 +9,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobsApi, geoApi } from '../api/endpoints';
-import { getApiData } from '../api/client';
+import { getApiData } from '../services/api';
 import toast from 'react-hot-toast';
 
 export const useJobs = () => {

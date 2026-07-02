@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { Phone, ArrowRight,  Lock, ShieldCheck } from 'lucide-react';
 import { authApi } from '../../../api/endpoints';
 import { loginSuccess } from '../../../actions/authSlice';
-import { getAuthPayload } from '../../../api/axiosClient';
+import { getAuthPayload } from '../../../services/api';
 
 const Login = () => {
   const navigate = useNavigate();

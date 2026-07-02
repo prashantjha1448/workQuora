@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi } from '../api/endpoints';
-import { getApiData } from '../api/client';   // ← client.js se, endpoints.js se nahi
+import { getApiData } from '../services/api';
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();

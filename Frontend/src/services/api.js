@@ -4,6 +4,7 @@ import { logout } from '../actions/authSlice';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1',
+  timeout: 15000,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -26,4 +27,8 @@ api.interceptors.response.use(
 );
 
 export const getApiData = (res) => res?.data?.data ?? res?.data ?? null;
+export const getAuthPayload = (res) => ({
+  user: res?.data?.user ?? res?.data?.data?.user,
+  token: res?.data?.token ?? res?.data?.data?.token,
+});
 export default api;

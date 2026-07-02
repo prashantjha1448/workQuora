@@ -9,7 +9,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { analyticsApi } from '../api/endpoints';
-import { getApiData } from '../api/client';
+import { getApiData } from '../services/api';
 
 export const useDashboard = () => {
   const role = useSelector((s) => s.auth.role); // 'CLIENT' | 'FREELANCER'

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../api/axiosClient';
+import api from '../services/api';
 
 export const fetchFreelancerProfile = createAsyncThunk('freelancer/fetchProfile', async (_, { rejectWithValue }) => {
   try {

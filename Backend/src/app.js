@@ -40,6 +40,10 @@ const { mongoSanitize } = require('./middlewares/securityMiddleware');
 
 const app = express();
 
+// CORS must be at the very top to handle preflight OPTIONS requests before
+// other middleware (helmet, tracing, version managers) intercept or modify headers.
+app.use(cors({ origin: true, credentials: true }));
+
 const compression = require('compression');
 app.use(compression());
 
@@ -76,7 +80,6 @@ app.use(helmet({
   noSniff: true
 }));
 
-app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
 // Body Size Limit Hardening (Module 7)

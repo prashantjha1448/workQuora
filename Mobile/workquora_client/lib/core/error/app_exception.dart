@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 /// Typed failure passed up through repositories (no raw exceptions leaking
 /// into the UI layer — keeps presentation code simple and testable).
 class AppFailure {

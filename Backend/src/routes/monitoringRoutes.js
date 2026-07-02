@@ -211,6 +211,7 @@ if (process.env.NODE_ENV !== 'production') {
 
       // 8. Referral verification
       const referrerId = `referrer_${randomId}`;
+      await Earnings.create([{ userId: referrerId, walletBalance: 0 }], { session });
       await Referral.create([{ referrerId, referredUserId: freelancerId, rewardAmount: 100, status: 'pending' }], { session, ordered: true });
       await referralService.rewardReferrer(freelancerId, session);
 
@@ -226,6 +227,21 @@ if (process.env.NODE_ENV !== 'production') {
 
       await session.commitTransaction();
       session.endSession();
+
+      try {
+        const settlementService = require('../services/settlementService');
+        await settlementService.processMilestoneSettlement({
+          escrowId: escrow._id,
+          milestoneId,
+          amount: escrow.milestones[0].amount,
+          freelancerId,
+          clientId,
+          jobId,
+          currency: 'INR'
+        });
+      } catch (settleErr) {
+        console.error('test-phase4 manual settlement fail:', settleErr.message);
+      }
 
       // Wait a short delay for background event provider subscribers to finish processing (Vol 3)
       await new Promise(resolve => setTimeout(resolve, 200));

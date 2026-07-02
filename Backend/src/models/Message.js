@@ -34,7 +34,8 @@ const messageSchema = new mongoose.Schema(
       longitude: { type: Number, default: null },
       address: { type: String, default: '' }
     },
-    isRead: {
+    clearedFromChat: { type: Boolean, default: false },
+  isRead: {
       type: Boolean,
       default: false
     },

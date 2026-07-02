@@ -444,29 +444,47 @@ exports.completeJob = async (req, res, next) => {
     // If both client and freelancer approve completion
     if (job.completionRequestedByClient && job.completionRequestedByFreelancer) {
       job.status = 'completed';
-      
-      // Release payment to freelancer's wallet
-      const payoutAmount = job.budget || 0;
+
+      // ── Uber-style settlement: platform fee + GST on the fee ──────────────
+      const gross = job.budget || 0;
       const freelancerId = job.assignedTo;
 
-      // Deduct from Client's Escrow
+      const commissionService = require('../services/commissionService');
+      const { commissionAmount, ratePercent } =
+        await commissionService.calculatePlatformCommission(freelancerId, gross);
+
+      const GST_PERCENT = Number(process.env.GST_PERCENT || 18);
+      const platformFee = Math.round(commissionAmount * 100) / 100;
+      const gstOnFee = Math.round((platformFee * GST_PERCENT / 100) * 100) / 100;
+      const totalDeduction = Math.round((platformFee + gstOnFee) * 100) / 100;
+      const netPayout = Math.round((gross - totalDeduction) * 100) / 100;
+
+      // Deduct FULL gross from Client's Escrow (client funded the whole job)
       await Earnings.findOneAndUpdate(
         { userId: job.client },
-        { $inc: { escrowBalance: -payoutAmount } }
+        { $inc: { escrowBalance: -gross } }
       );
 
-      // Add to Freelancer's Wallet & Income Ledger
+      // Credit NET to the worker
       await Earnings.findOneAndUpdate(
         { userId: freelancerId },
         {
           $inc: {
-            walletBalance: payoutAmount,
-            todayIncome: payoutAmount,
-            allTimeIncome: payoutAmount,
+            walletBalance: netPayout,
+            todayIncome: netPayout,
+            allTimeIncome: netPayout,
             completedJobs: 1
           }
         },
         { upsert: true }
+      );
+
+      // Soft-clear the chat for this job: retained in DB for audit, but
+      // hidden from both users' conversation list + history.
+      const Message = require('../models/Message');
+      await Message.updateMany(
+        { job: job._id },
+        { $set: { clearedFromChat: true } }
       );
 
       // Set associated Task status to completed if it exists
@@ -482,9 +500,18 @@ exports.completeJob = async (req, res, next) => {
         sender: job.client,
         receiver: String(freelancerId),
         job: job._id,
-        amount: payoutAmount,
+        amount: netPayout,
         type: 'escrow_release',
-        status: 'completed'
+        status: 'completed',
+        breakdown: {
+          gross,
+          platformFee,
+          platformFeePercent: ratePercent,
+          gstPercent: GST_PERCENT,
+          gstOnFee,
+          totalDeduction,
+          netPayout,
+        }
       });
 
       // Notify both parties

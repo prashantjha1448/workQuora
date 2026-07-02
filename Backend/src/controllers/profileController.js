@@ -262,3 +262,14 @@ exports.unblockUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// DELETE /profile/photo — remove the user's avatar (Phase 5, worker app)
+exports.deleteProfilePhoto = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.profilePic = null;
+    await user.save();
+    res.status(200).json({ success: true, message: 'Photo removed', profilePic: null });
+  } catch (e) { next(e); }
+};

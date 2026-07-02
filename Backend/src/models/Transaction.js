@@ -26,7 +26,8 @@ const transactionSchema = new mongoose.Schema(
       enum: ['escrow_deposit', 'escrow_release', 'refund', 'withdrawal', 'deposit'],
       required: true
     },
-    status: {
+    breakdown: { type: Object },
+  status: {
       type: String,
       enum: ['pending', 'completed', 'failed'],
       default: 'pending'

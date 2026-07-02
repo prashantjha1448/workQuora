@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const { getProfile, updateProfile, updateKyc, updateBankDetails, uploadProfilePhoto, getPublicProfile, blockUser, unblockUser } = require('../controllers/profileController');
+const { getProfile, updateProfile, updateKyc, updateBankDetails, uploadProfilePhoto, getPublicProfile, blockUser, unblockUser , deleteProfilePhoto} = require('../controllers/profileController');
 const { protect } = require('../middlewares/authMiddleware');
 const upload  = require('../middlewares/uploadMiddleware');
 
@@ -12,6 +12,7 @@ router.get('/me',            getProfile);
 router.put('/update',        updateProfile);
 router.post('/kyc',          updateKyc);
 router.post('/bank',         updateBankDetails);
+router.delete('/photo', protect, deleteProfilePhoto);
 router.post('/photo', upload.single('photo'), uploadProfilePhoto);
 router.post('/block/:userId', blockUser);
 router.post('/unblock/:userId', unblockUser);

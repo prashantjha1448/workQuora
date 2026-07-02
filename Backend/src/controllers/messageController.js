@@ -162,6 +162,7 @@ exports.getMessages = async (req, res, next) => {
 
     const messages = await Message.find({
       job: validJobId,
+      clearedFromChat: { $ne: true },
       $or: [
         { sender: req.user.id, receiver: otherUserId },
         { sender: otherUserId, receiver: req.user.id },
@@ -184,6 +185,7 @@ exports.getConversations = async (req, res, next) => {
     const userId = req.user.id;
 
     const messages = await Message.find({
+      clearedFromChat: { $ne: true },
       $or: [{ sender: userId }, { receiver: userId }],
     }).populate('job', 'title').sort({ createdAt: -1 });
 

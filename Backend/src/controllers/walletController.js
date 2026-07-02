@@ -379,3 +379,22 @@ exports.verifyPin = async (req, res, next) => {
     next(error);
   }
 };
+
+// POST /api/v1/wallet/set-pin  { pin, oldPin? } — Phase 5 (worker app)
+// PIN stored bcrypt-hashed; if one exists, oldPin must match to change it.
+exports.setWithdrawalPin = async (req, res, next) => {
+  try {
+    const { pin, oldPin } = req.body;
+    if (!pin || !/^\d{4,6}$/.test(String(pin)))
+      return res.status(400).json({ success: false, message: 'PIN must be 4-6 digits' });
+    const wallet = await getOrCreateWallet(req.user.id);
+    if (wallet.withdrawalPin) {
+      if (!oldPin) return res.status(400).json({ success: false, message: 'Old PIN required to change PIN' });
+      const ok = await bcrypt.compare(String(oldPin), wallet.withdrawalPin);
+      if (!ok) return res.status(400).json({ success: false, message: 'Old PIN is incorrect' });
+    }
+    wallet.withdrawalPin = await bcrypt.hash(String(pin), 10);
+    await wallet.save();
+    res.status(200).json({ success: true, message: 'PIN set successfully' });
+  } catch (e) { next(e); }
+};

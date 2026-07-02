@@ -22,7 +22,7 @@ class RecommendationService {
       score += skillRatio * 30;
 
       // 2. Rating Score (up to 20 points)
-      const rating = f.rating || 0;
+      const rating = f.averageRating || 0;
       score += (rating / 5) * 20;
 
       // 3. Proximity Location distance score (up to 15 points)

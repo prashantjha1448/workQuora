@@ -108,7 +108,7 @@ class SearchService {
 
     // 3. Min Rating
     if (filters.minRating !== undefined) {
-      query.rating = { $gte: Number(filters.minRating) };
+      query.averageRating = { $gte: Number(filters.minRating) };
     }
 
     // 4. Hourly Rate ranges
@@ -153,7 +153,7 @@ class SearchService {
     }
 
     const projection = {};
-    let sort = { rating: -1 };
+    let sort = { averageRating: -1 };
 
     if (filters.keyword) {
       projection.score = { $meta: 'textScore' };
@@ -161,7 +161,7 @@ class SearchService {
     }
 
     return User.find(query, projection)
-      .select('name username email role skills rating hourlyRate availabilityStatus isVerified kycVerified location experienceYears profilePicture bio')
+      .select('name username email role skills averageRating hourlyRate availabilityStatus isVerified kycVerified location experienceYears profilePicture bio')
       .sort(sort)
       .lean();
   }

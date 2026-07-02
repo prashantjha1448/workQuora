@@ -398,10 +398,15 @@ const Wallet = () => {
                   <h3 className="font-bold text-lg text-foreground">Transaction History</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Real-time ledger of top-ups, escrows, and withdrawals.</p>
                 </div>
-                {txLoading && <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />}
               </div>
 
-              {transactions.length === 0 && !txLoading ? (
+              {txLoading ? (
+                <div className="p-6 space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : transactions.length === 0 ? (
                 <div className="p-16 text-center text-muted-foreground">
                   <WalletIcon className="w-12 h-12 mx-auto mb-4 opacity-20 text-muted-foreground" />
                   <p className="font-semibold text-base text-foreground/80">No transactions recorded</p>

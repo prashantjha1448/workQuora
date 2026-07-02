@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Search, Loader2, ChevronLeft, ChevronRight, Shield, ShieldX, Eye, Ban, UserCheck, UserX, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import adminApi from '../api/adminApi';
 
 const AdminUsers = ({ roleProp }) => {
@@ -55,17 +56,17 @@ const AdminUsers = ({ roleProp }) => {
       await adminApi.put(`/users/${userId}/${action}`);
       fetchUsers(pagination.page);
       if (selectedUser?._id === userId) viewUser(userId);
-    } catch (err) { alert(err.response?.data?.message || 'Action failed'); }
+    } catch (err) { toast.error(err.response?.data?.message || 'Action failed'); }
   };
 
   const handleKycReview = async (userId, step, decision, reason = '') => {
     try {
       await adminApi.patch(`/kyc/${userId}/review`, { step, decision, reason });
-      alert(`KYC ${step} ${decision}d successfully!`);
+      toast.success(`KYC ${step} ${decision}d successfully!`);
       viewUser(userId);
       fetchUsers(pagination.page);
     } catch (err) {
-      alert(err.response?.data?.message || 'KYC review failed');
+      toast.error(err.response?.data?.message || 'KYC review failed');
     }
   };
 
@@ -87,12 +88,12 @@ const AdminUsers = ({ roleProp }) => {
     setEditSaving(true);
     try {
       await adminApi.put(`/users/${selectedUser._id}`, editForm);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
       setIsEditing(false);
       viewUser(selectedUser._id);
       fetchUsers(pagination.page);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update profile');
+      toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setEditSaving(false);
     }

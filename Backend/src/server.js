@@ -65,3 +65,14 @@ server.listen(PORT, () => {
   const cronService = require('./services/cronService');
   cronService.startScheduledJobs();
 });
+
+// Global crash guards to prevent unhandled rejection/exceptions from silently killing the server
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+  // Uncaught exceptions might leave the process in an corrupted state, safe to exit and let PM2/Render restart it.
+  process.exit(1);
+});

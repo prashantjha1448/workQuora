@@ -3,42 +3,74 @@ const socketHandler = (io) => {
     console.log(`🟢 Live Connection Started: ${socket.id} (User: ${socket.userId || 'Guest'})`);
 
     // 1. PERSONAL ROOM (For Private Notifications)
-    // Jab user login karega, wo apne ID ke naam ka ek room join kar lega
+    // Only allow joining your OWN personal room
     socket.on('join_user_room', (userId) => {
-      socket.join(userId);
-      console.log(`🔔 User ${userId} is now online and ready for notifications.`);
+      try {
+        if (!userId || userId !== socket.userId) {
+          socket.emit('error', { message: 'Unauthorized' });
+          return;
+        }
+        socket.join(userId);
+        console.log(`🔔 User ${userId} is now online and ready for notifications.`);
+      } catch (err) {
+        console.error('join_user_room error:', err);
+      }
     });
 
     // 2. JOB / TASK ROOM (For Live Map Tracking)
-    // Client aur Freelancer ek common "Job Room" join karenge
-    socket.on('join_job_room', (jobId) => {
-      socket.join(jobId);
-      console.log(`🗺️ Users connected to Job Room: ${jobId} for Live Tracking.`);
+    // Only allow joining a job room if the user is client or assigned freelancer
+    socket.on('join_job_room', async (jobId) => {
+      try {
+        if (!jobId) return;
+        const mongoose = require('mongoose');
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+          socket.emit('error', { message: 'Invalid Job ID' });
+          return;
+        }
+        const Job = require('../models/Job');
+        const job = await Job.findOne({
+          _id: jobId,
+          $or: [
+            { client: socket.userId },
+            { assignedTo: socket.userId }
+          ]
+        });
+        if (!job) {
+          socket.emit('error', { message: 'Unauthorized room join' });
+          return;
+        }
+        socket.join(jobId);
+        console.log(`🗺️ Users connected to Job Room: ${jobId} for Live Tracking.`);
+      } catch (err) {
+        console.error('join_job_room error:', err);
+      }
     });
 
     // 3. LIVE LOCATION TRACKING ENGINE
-    // Freelancer ka phone har 3-5 second mein ye event fire karega
-    socket.on('send_location', (data) => {
-      // data format: { jobId, latitude, longitude }
-      // Hum ye location seedha Client ko bhej denge jo us jobId room mein baitha hai
-      socket.to(data.jobId).emit('receive_location', {
-        latitude: data.latitude,
-        longitude: data.longitude,
-        timestamp: new Date()
-      });
+    // Only allow sending location if the sender is the assigned freelancer
+    socket.on('send_location', async (data) => {
+      try {
+        const { jobId, latitude, longitude } = data || {};
+        if (!jobId) return;
+        
+        const Job = require('../models/Job');
+        const job = await Job.findOne({ _id: jobId, assignedTo: socket.userId });
+        if (!job) {
+          socket.emit('error', { message: 'Unauthorized location broadcasting' });
+          return;
+        }
+
+        socket.to(jobId).emit('receive_location', {
+          latitude,
+          longitude,
+          timestamp: new Date()
+        });
+      } catch (err) {
+        console.error('send_location error:', err);
+      }
     });
 
-    // 4. INSTANT NOTIFICATIONS (Task Assigned, Completed, etc.)
-    socket.on('send_notification', (data) => {
-      // data format: { receiverId, message, type }
-      socket.to(data.receiverId).emit('receive_notification', {
-        message: data.message,
-        type: data.type, // e.g., 'task_assigned', 'payment_released'
-        timestamp: new Date()
-      });
-    });
-
-    // 5. User went offline
+    // 4. User went offline
     socket.on('disconnect', () => {
       console.log(`🔴 Connection Closed: ${socket.id}`);
     });

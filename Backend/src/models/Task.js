@@ -9,10 +9,12 @@ const taskSchema = new mongoose.Schema(
     },
     client: {
       type: String,
+      ref: 'User',
       required: true
     },
     freelancer: {
       type: String,
+      ref: 'User',
       required: true
     },
     status: {

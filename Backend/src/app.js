@@ -62,7 +62,16 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://*.tile.openstreetmap.org"],
-      connectSrc: ["'self'", "http://localhost:3000", "ws://localhost:3000", "wss://localhost:3000", "https://api.razorpay.com"],
+      connectSrc: [
+        "'self'",
+        // Flutter web dev server runs on a random port; allow all localhost ports.
+        "http://localhost:*",
+        "ws://localhost:*",
+        "wss://localhost:*",
+        // Also allow the Render backend itself to be reachable from the browser.
+        "https://workquora.onrender.com",
+        "https://api.razorpay.com"
+      ],
       frameSrc: ["'self'", "https://api.razorpay.com"],
     }
   },

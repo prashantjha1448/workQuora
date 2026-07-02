@@ -416,9 +416,14 @@ exports.getLandingStats = async (req, res, next) => {
 // @route   PUT /api/v1/jobs/:id/complete
 // @access  Private
 exports.completeJob = async (req, res, next) => {
+  const session = await mongoose.startSession();
   try {
-    const job = await Job.findById(req.params.id);
+    session.startTransaction();
+
+    const job = await Job.findById(req.params.id).session(session);
     if (!job) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ success: false, message: 'Job not found' });
     }
 
@@ -427,10 +432,14 @@ exports.completeJob = async (req, res, next) => {
     const isFreelancer = job.assignedTo && job.assignedTo.toString() === userId;
 
     if (!isClient && !isFreelancer) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({ success: false, message: 'Not authorized to perform this action' });
     }
 
     if (job.status !== 'in-progress') {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: 'Job is not in-progress' });
     }
 
@@ -441,12 +450,16 @@ exports.completeJob = async (req, res, next) => {
       job.completionRequestedByFreelancer = true;
     }
 
+    let releasedAmount = 0;
+    let netPayout = 0;
+
     // If both client and freelancer approve completion
     if (job.completionRequestedByClient && job.completionRequestedByFreelancer) {
       job.status = 'completed';
 
       // ── Uber-style settlement: platform fee + GST on the fee ──────────────
       const gross = job.budget || 0;
+      releasedAmount = gross;
       const freelancerId = job.assignedTo;
 
       const commissionService = require('../services/commissionService');
@@ -457,12 +470,13 @@ exports.completeJob = async (req, res, next) => {
       const platformFee = Math.round(commissionAmount * 100) / 100;
       const gstOnFee = Math.round((platformFee * GST_PERCENT / 100) * 100) / 100;
       const totalDeduction = Math.round((platformFee + gstOnFee) * 100) / 100;
-      const netPayout = Math.round((gross - totalDeduction) * 100) / 100;
+      netPayout = Math.round((gross - totalDeduction) * 100) / 100;
 
       // Deduct FULL gross from Client's Escrow (client funded the whole job)
       await Earnings.findOneAndUpdate(
         { userId: job.client },
-        { $inc: { escrowBalance: -gross } }
+        { $inc: { escrowBalance: -gross } },
+        { session }
       );
 
       // Credit NET to the worker
@@ -476,7 +490,7 @@ exports.completeJob = async (req, res, next) => {
             completedJobs: 1
           }
         },
-        { upsert: true }
+        { upsert: true, session }
       );
 
       // Soft-clear the chat for this job: retained in DB for audit, but
@@ -484,83 +498,96 @@ exports.completeJob = async (req, res, next) => {
       const Message = require('../models/Message');
       await Message.updateMany(
         { job: job._id },
-        { $set: { clearedFromChat: true } }
+        { $set: { clearedFromChat: true } },
+        { session }
       );
 
       // Set associated Task status to completed if it exists
       const Task = require('../models/Task');
       await Task.findOneAndUpdate(
         { job: job._id },
-        { status: 'completed', completedAt: Date.now() }
+        { status: 'completed', completedAt: Date.now() },
+        { session }
       ).catch(() => {});
 
       // Create escrow release transaction record
       const Transaction = require('../models/Transaction');
-      await Transaction.create({
-        sender: job.client,
-        receiver: String(freelancerId),
-        job: job._id,
-        amount: netPayout,
-        type: 'escrow_release',
-        status: 'completed',
-        breakdown: {
-          gross,
-          platformFee,
-          platformFeePercent: ratePercent,
-          gstPercent: GST_PERCENT,
-          gstOnFee,
-          totalDeduction,
-          netPayout,
+      await Transaction.create([
+        {
+          sender: job.client,
+          receiver: String(freelancerId),
+          job: job._id,
+          amount: netPayout,
+          type: 'escrow_release',
+          status: 'completed',
+          breakdown: {
+            gross,
+            platformFee,
+            platformFeePercent: ratePercent,
+            gstPercent: GST_PERCENT,
+            gstOnFee,
+            totalDeduction,
+            netPayout,
+          }
         }
-      });
-
-      // Notify both parties
-      const { createNotification } = require('../utils/notification');
-      const io = req.app.get('io');
-      
-      // Notify client
-      await createNotification({
-        recipient: String(job.client),
-        sender: userId,
-        type: 'payment_alert',
-        message: `Job "${job.title}" has been successfully completed. ₹${payoutAmount} released from escrow.`,
-        relatedId: job._id,
-        onModel: 'Job',
-        io,
-      });
-
-      // Notify freelancer
-      await createNotification({
-        recipient: String(freelancerId),
-        sender: userId,
-        type: 'payment_alert',
-        message: `Job "${job.title}" has been completed. ₹${payoutAmount} transferred to your wallet!`,
-        relatedId: job._id,
-        onModel: 'Job',
-        io,
-      });
-    } else {
-      // Notify the other party about the completion request
-      const { createNotification } = require('../utils/notification');
-      const io = req.app.get('io');
-      const senderName = req.user.name;
-      const recipientId = isClient ? String(job.assignedTo) : String(job.client);
-      
-      await createNotification({
-        recipient: recipientId,
-        sender: userId,
-        type: 'task_update',
-        message: `${senderName} has marked "${job.title}" as completed. Please approve to release payment.`,
-        relatedId: job._id,
-        onModel: 'Job',
-        io,
-      });
+      ], { session });
     }
 
-    await job.save();
+    await job.save({ session });
 
-    if (redisClient.isOpen) {
-      await redisClient.del('jobs:active').catch(() => {});
+    await session.commitTransaction();
+    session.endSession();
+
+    // Send notifications in background after transaction commits successfully
+    try {
+      const { createNotification } = require('../utils/notification');
+      const io = req.app.get('io');
+
+      if (job.completionRequestedByClient && job.completionRequestedByFreelancer) {
+        const freelancerId = job.assignedTo;
+
+        // Notify client
+        await createNotification({
+          recipient: String(job.client),
+          sender: userId,
+          type: 'payment_alert',
+          message: `Job "${job.title}" has been successfully completed. ₹${releasedAmount} released from escrow.`,
+          relatedId: job._id,
+          onModel: 'Job',
+          io,
+        }).catch(() => {});
+
+        // Notify freelancer
+        await createNotification({
+          recipient: String(freelancerId),
+          sender: userId,
+          type: 'payment_alert',
+          message: `Job "${job.title}" has been completed. ₹${netPayout} transferred to your wallet!`,
+          relatedId: job._id,
+          onModel: 'Job',
+          io,
+        }).catch(() => {});
+      } else {
+        // Notify the other party about the completion request
+        const senderName = req.user.name;
+        const recipientId = isClient ? String(job.assignedTo) : String(job.client);
+        
+        await createNotification({
+          recipient: recipientId,
+          sender: userId,
+          type: 'task_update',
+          message: `${senderName} has marked "${job.title}" as completed. Please approve to release payment.`,
+          relatedId: job._id,
+          onModel: 'Job',
+          io,
+        }).catch(() => {});
+      }
+
+      if (redisClient.isOpen) {
+        await redisClient.del('jobs:active').catch(() => {});
+      }
+    } catch (notifyErr) {
+      console.error('completeJob background notification failure:', notifyErr);
     }
 
     res.status(200).json({
@@ -569,6 +596,10 @@ exports.completeJob = async (req, res, next) => {
       data: job
     });
   } catch (error) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    session.endSession();
     next(error);
   }
 };

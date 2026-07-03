@@ -92,6 +92,7 @@ export const kycApi = {
 };
 
 export const reviewsApi = {
-  add:     (d)      => api.post('/reviews', d),
-  getUser: (userId) => api.get(`/reviews/${userId}`),
+  add:      (d)      => api.post('/reviews', d),
+  getUser:  (userId) => api.get(`/reviews/${userId}`),
+  getGiven: (userId) => api.get(`/reviews/given/${userId}`),
 };

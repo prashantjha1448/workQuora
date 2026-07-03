@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { scaleIn } from '../../utils/animations';
 
-export function AnimatedCard({ children, className = '', delay = 0, hover = true }) {
+export function AnimatedCard({ children, className = '', delay = 0, hover = true, ...rest }) {
   return (
     <motion.div
       variants={scaleIn}
@@ -20,6 +20,7 @@ export function AnimatedCard({ children, className = '', delay = 0, hover = true
       }
       className={`bg-[hsl(var(--surface))] rounded-[var(--radius)] border border-[hsl(var(--border))]
                   shadow-[var(--card-shadow)] ${className}`}
+      {...rest}
     >
       {children}
     </motion.div>

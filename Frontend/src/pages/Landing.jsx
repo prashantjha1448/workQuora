@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Shield, Zap, Users, Briefcase, ArrowRight, ArrowUpRight, ChevronDown, X } from 'lucide-react';
@@ -7,38 +7,8 @@ import api from '../services/api';
 import AdBanner from '../components/shared/AdBanner';
 import { GradientBlob } from '../components/ui/GradientBlob';
 import { AnimatedCard } from '../components/ui/AnimatedCard';
+import { StatCounter } from '../components/ui/StatCounter';
 import { fadeInUp, staggerContainer } from '../utils/animations';
-
-function StatCounter({ target, suffix = '', prefix = '' }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isInView || !target) return;
-    let start = 0;
-    const duration = 1500;
-    const step = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return (
-    <span ref={ref} className="text-3xl font-bold text-foreground">
-      {prefix}
-      {count.toLocaleString('en-IN')}
-      {suffix}
-    </span>
-  );
-}
 
 const CATEGORIES = [
   { label: 'Design', emoji: '🎨' },
@@ -166,22 +136,30 @@ const Landing = () => {
           {/* Real platform stats from /jobs/stats — not placeholder numbers */}
           <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground">
             <div className="flex flex-col items-center">
-              <StatCounter target={statsData?.activeJobs ?? 0} />
+              <span className="text-3xl font-bold text-foreground">
+                <StatCounter target={statsData?.activeJobs ?? 0} duration={1500} />
+              </span>
               <span className="text-sm mt-1">Live Jobs</span>
             </div>
             <div className="w-px h-8 bg-border hidden sm:block" />
             <div className="flex flex-col items-center">
-              <StatCounter target={statsData?.freelancers ?? 0} />
+              <span className="text-3xl font-bold text-foreground">
+                <StatCounter target={statsData?.freelancers ?? 0} duration={1500} />
+              </span>
               <span className="text-sm mt-1">Freelancers</span>
             </div>
             <div className="w-px h-8 bg-border hidden sm:block" />
             <div className="flex flex-col items-center">
-              <StatCounter target={statsData?.clients ?? 0} />
+              <span className="text-3xl font-bold text-foreground">
+                <StatCounter target={statsData?.clients ?? 0} duration={1500} />
+              </span>
               <span className="text-sm mt-1">Active Clients</span>
             </div>
             <div className="w-px h-8 bg-border hidden sm:block" />
             <div className="flex flex-col items-center">
-              <StatCounter target={statsData?.totalPaidOut ?? 0} prefix="₹" />
+              <span className="text-3xl font-bold text-foreground">
+                <StatCounter target={statsData?.totalPaidOut ?? 0} prefix="₹" duration={1500} />
+              </span>
               <span className="text-sm mt-1">Total Paid Out</span>
             </div>
           </motion.div>

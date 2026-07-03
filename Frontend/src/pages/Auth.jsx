@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Toaster } from 'react-hot-toast';
-import { Briefcase, User, MapPin, Loader2, ShieldCheck, Zap, Globe } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
+import { Briefcase, User, MapPin, Loader2, ShieldCheck, Zap, Globe, Check } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
 import api from '../services/api';
+import { slideInRight } from '../utils/animations';
 
 /* ---- Schemas ---- */
 const loginSchema = z.object({
@@ -68,8 +71,21 @@ const Auth = () => {
   
   const [regOtp, setRegOtp] = useState('');
   const [mobileOtp, setMobileOtp] = useState('');
+  const [shake, setShake] = useState(false);
 
-  const { login, isLoggingIn, register, isRegistering, verifyRegistration, isVerifyingRegistration, verifyMobile, isVerifyingMobile, socialLogin, isSocialLoading } = useAuth();
+  const {
+    login, isLoggingIn, isLoginSuccess,
+    register, isRegistering,
+    verifyRegistration, isVerifyingRegistration,
+    verifyMobile, isVerifyingMobile, isVerifyMobileSuccess,
+    socialLogin, isSocialLoading,
+  } = useAuth();
+
+  // Full registration completes here (mobile OTP verified) — celebrate once.
+  useEffect(() => {
+    if (!isVerifyMobileSuccess) return;
+    confetti({ particleCount: 60, spread: 70, colors: ['#1E00A9', '#6366F1', '#10B981'], origin: { y: 0.6 } });
+  }, [isVerifyMobileSuccess]);
 
   const { register: formReg, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(isLogin ? loginSchema : registerSchema),
@@ -115,6 +131,8 @@ const Auth = () => {
   }, [isLogin, setValue]);
 
   useEffect(() => { loadGoogleSDK(); loadFacebookSDK(); }, []);
+
+  const onValidationError = () => setShake(true);
 
   const onSubmit = (data) => {
     if (isLogin) {
@@ -257,8 +275,13 @@ const Auth = () => {
 
       {/* RIGHT SIDE: Auth Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative">
-        <div className="max-w-md w-full bg-card p-8 sm:p-10 rounded-3xl border border-border shadow-xl relative z-10">
-          
+        <motion.div
+          variants={slideInRight}
+          initial="hidden"
+          animate="visible"
+          className="max-w-md w-full bg-card p-8 sm:p-10 rounded-3xl border border-border shadow-xl relative z-10"
+        >
+
           {/* Mobile Logo */}
           <div className="flex justify-center mb-8 lg:hidden">
             <Link to="/" className="flex items-center gap-2 font-extrabold text-2xl text-foreground">
@@ -353,14 +376,29 @@ const Auth = () => {
                 <input type="text" value={mobileOtp} onChange={e => setMobileOtp(e.target.value)} placeholder="6-digit Mobile OTP"
                   className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground text-sm focus:outline-none focus:border-primary transition-colors tracking-widest font-mono" required />
               </div>
-              <button type="submit" disabled={isVerifyingMobile}
-                className="w-full bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
-                {isVerifyingMobile ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify Mobile & Login'}
+              <button type="submit" disabled={isVerifyingMobile || isVerifyMobileSuccess}
+                className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
+                  isVerifyMobileSuccess ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground shadow-primary/20'
+                }`}>
+                {isVerifyMobileSuccess ? (
+                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 15 }} className="flex items-center gap-2">
+                    <Check className="w-5 h-5" /> Welcome to WorkQuora!
+                  </motion.span>
+                ) : isVerifyingMobile ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  'Verify Mobile & Login'
+                )}
               </button>
             </form>
           ) : (
             <>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <motion.form
+                onSubmit={handleSubmit(onSubmit, onValidationError)}
+                animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : { x: 0 }}
+                transition={{ duration: 0.4 }}
+                onAnimationComplete={() => setShake(false)}
+                className="space-y-5">
               {/* Role Selector (register only) */}
             {!isLogin && (
               <div className="space-y-2">
@@ -466,11 +504,23 @@ const Auth = () => {
               {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" disabled={isLoggingIn || isRegistering}
-              className="w-full bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
-              {isLoggingIn || isRegistering ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? 'Sign In' : 'Create Account')}
+            <button type="submit" disabled={isLoggingIn || isRegistering || isLoginSuccess}
+              className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
+                isLoginSuccess ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground shadow-primary/20'
+              }`}>
+              {isLoginSuccess ? (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 15 }} className="flex items-center gap-2">
+                  <Check className="w-5 h-5" /> Welcome back!
+                </motion.span>
+              ) : isLoggingIn || isRegistering ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : isLogin ? (
+                'Sign In'
+              ) : (
+                'Create Account →'
+              )}
             </button>
-          </form>
+          </motion.form>
 
           {/* Social Auth */}
           <div className="mt-8 relative">
@@ -501,7 +551,7 @@ const Auth = () => {
           </div>
           </>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

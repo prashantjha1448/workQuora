@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Briefcase, UserCheck, ArrowRight } from 'lucide-react';
@@ -39,27 +40,35 @@ const SelectRole = () => {
         {error && <p className="mt-4 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">{error}</p>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
-          <div
+          <motion.div
             onClick={() => setSelectedRole('client')}
-            className={`p-6 rounded-2xl border cursor-pointer text-left transition-all duration-300 ${
-              selectedRole === 'client' ? 'bg-primary/10 border-primary shadow-[0_0_30px_rgba(99,102,241,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/10'
+            whileHover={{ scale: 1.02, y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            className={`p-6 rounded-2xl border cursor-pointer text-left transition-colors duration-300 ${
+              selectedRole === 'client'
+                ? 'border-primary shadow-lg shadow-primary/20 bg-primary/10'
+                : 'bg-white/5 border-white/5 hover:border-white/10 opacity-70'
             }`}
           >
             <div className="p-3 bg-primary/10 text-primary rounded-xl w-max mb-4"><Briefcase size={24} /></div>
             <h3 className="text-xl font-bold text-white mb-1">I want to Hire</h3>
             <p className="text-sm text-zinc-400">Post local jobs, track nearby freelancers, and manage tasks.</p>
-          </div>
+          </motion.div>
 
-          <div
+          <motion.div
             onClick={() => setSelectedRole('freelancer')}
-            className={`p-6 rounded-2xl border cursor-pointer text-left transition-all duration-300 ${
-              selectedRole === 'freelancer' ? 'bg-emerald-600/10 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/10'
+            whileHover={{ scale: 1.02, y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            className={`p-6 rounded-2xl border cursor-pointer text-left transition-colors duration-300 ${
+              selectedRole === 'freelancer'
+                ? 'border-emerald-500 shadow-lg shadow-emerald-500/20 bg-emerald-600/10'
+                : 'bg-white/5 border-white/5 hover:border-white/10 opacity-70'
             }`}
           >
             <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl w-max mb-4"><UserCheck size={24} /></div>
             <h3 className="text-xl font-bold text-white mb-1">I'm looking for Work</h3>
             <p className="text-sm text-zinc-400">Find nearby jobs, set your work radius, and track earnings.</p>
-          </div>
+          </motion.div>
         </div>
 
         <button

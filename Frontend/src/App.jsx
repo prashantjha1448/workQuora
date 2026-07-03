@@ -31,6 +31,7 @@ const Reviews               = lazy(() => import('./pages/shared/Reviews'));
 const PostJob               = lazy(() => import('./pages/client/PostJob'));
 const ClientJobs            = lazy(() => import('./pages/client/ClientJobs'));
 const ClientDashboard       = lazy(() => import('./pages/client/Dashboard'));
+const ClientHistory         = lazy(() => import('./pages/client/ClientHistory'));
 
 // ── Lazy-loaded freelancer pages ──────────────────────────────────────────────
 const FreelancerDashboard   = lazy(() => import('./pages/freelancer/Dashboard'));
@@ -139,6 +140,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <ClientDashboard /> },
       { path: 'jobs',      element: <ClientJobs /> },
+      { path: 'history',   element: <ClientHistory /> },
     ],
   },
 

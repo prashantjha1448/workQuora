@@ -24,9 +24,12 @@ export const useAuth = () => {
     onSuccess: (res) => {
       const u = afterAuth(res);
       if (!u) return;
-      toast.success(`Welcome back, ${u.name?.split(' ')[0]}!`);
-      if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-      else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      toast.success(`Welcome back, ${u.name?.split(' ')[0]}! 👋`);
+      // Delayed so the caller can show a brief success state before navigating away.
+      setTimeout(() => {
+        if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
+        else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      }, 600);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Login failed.'),
   });
@@ -56,8 +59,10 @@ export const useAuth = () => {
       const u = afterAuth(res);
       if (!u) return;
       toast.success('Account verified and created successfully!');
-      if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-      else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      setTimeout(() => {
+        if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
+        else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      }, 600);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Mobile verification failed.'),
   });
@@ -90,12 +95,14 @@ export const useAuth = () => {
     user, token, isAuthenticated, role,
     login:        loginMutation.mutate,
     isLoggingIn:  loginMutation.isPending,
+    isLoginSuccess: loginMutation.isSuccess,
     register:     registerMutation.mutate,
     isRegistering: registerMutation.isPending,
     verifyRegistration: verifyRegistrationMutation.mutate,
     isVerifyingRegistration: verifyRegistrationMutation.isPending,
     verifyMobile: verifyMobileMutation.mutate,
     isVerifyingMobile: verifyMobileMutation.isPending,
+    isVerifyMobileSuccess: verifyMobileMutation.isSuccess,
     socialLogin:  socialMutation.mutate,
     isSocialLoading: socialMutation.isPending,
     assignRole:   assignRoleMutation.mutate,

@@ -41,6 +41,7 @@ const Earnings              = lazy(() => import('./pages/freelancer/Earnings'));
 const AdminLogin            = lazy(() => import('./admin/pages/AdminLogin'));
 const AdminDashboard        = lazy(() => import('./admin/pages/AdminDashboard'));
 const AdminUsers            = lazy(() => import('./admin/pages/AdminUsers'));
+const AdminKyc              = lazy(() => import('./admin/pages/AdminKyc'));
 const AdminTasks            = lazy(() => import('./admin/pages/AdminTasks'));
 const AdminPayments         = lazy(() => import('./admin/pages/AdminPayments'));
 const AdminAnalytics        = lazy(() => import('./admin/pages/AdminAnalytics'));
@@ -161,6 +162,7 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'clients', element: <AdminUsers roleProp="CLIENT" /> },
       { path: 'freelancers', element: <AdminUsers roleProp="FREELANCER" /> },
+      { path: 'kyc', element: <AdminKyc /> },
       { path: 'tasks', element: <AdminTasks /> },
       { path: 'payments', element: <AdminPayments /> },
       { path: 'analytics', element: <AdminAnalytics /> },

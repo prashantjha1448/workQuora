@@ -3,3 +3,13 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Logs
+logs/
+*.log
+
+# Test artifacts
+backups/
+public/uploads/kyc/
+public/uploads/chat/
+public/uploads/profile/

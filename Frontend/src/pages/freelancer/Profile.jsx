@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { MapPin, Star, Edit3, Moon, Sun, Camera, Loader2, X, Save, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -183,10 +184,13 @@ const FreelancerProfile = () => {
                     </span>
                   )}
                   {displayProfile?.averageRating != null && (
-                    <span className="flex items-center gap-1 text-amber-500">
+                    <Link
+                      to={`/reviews/${displayProfile.id || displayProfile._id || user?._id || user?.id}`}
+                      className="flex items-center gap-1 text-amber-500 hover:underline"
+                    >
                       <Star size={16} className="fill-current" />
                       {displayProfile.averageRating} / 5
-                    </span>
+                    </Link>
                   )}
                   {displayProfile?.role !== 'CLIENT' && displayProfile?.hourlyRate > 0 && (
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">

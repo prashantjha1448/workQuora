@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ChevronLeft, MapPin, Star, ShieldCheck, ShieldX, Briefcase, Clock, Mail, Phone, Calendar,
@@ -136,10 +136,11 @@ const FreelancerPublicProfile = () => {
 
                 <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
                   {profile.averageRating > 0 && (
-                    <span className="flex items-center gap-1 text-amber-500 font-semibold">
+                    <Link to={`/reviews/${profile.id || profile._id}`} className="flex items-center gap-1 text-amber-500 font-semibold hover:underline">
                       <Star className="w-4 h-4 fill-current" />
                       {profile.averageRating.toFixed(1)} / 5
-                    </span>
+                      <span className="text-muted-foreground font-normal">· See all reviews</span>
+                    </Link>
                   )}
                   {profile.hourlyRate > 0 && (
                     <span className="font-bold text-emerald-600 dark:text-emerald-400">

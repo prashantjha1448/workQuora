@@ -25,6 +25,7 @@ const InfoPage              = lazy(() => import('./pages/shared/InfoPage'));
 const Messages              = lazy(() => import('./pages/shared/Messages'));
 const Settings              = lazy(() => import('./pages/shared/Settings'));
 const Wallet                = lazy(() => import('./pages/shared/Wallet'));
+const Reviews               = lazy(() => import('./pages/shared/Reviews'));
 
 // ── Lazy-loaded client pages ──────────────────────────────────────────────────
 const PostJob               = lazy(() => import('./pages/client/PostJob'));
@@ -116,6 +117,7 @@ const router = createBrowserRouter([
       { path: 'shared/messages', loader: authLoader, element: <Messages /> },
       { path: 'shared/settings', loader: authLoader, element: <Settings /> },
       { path: 'shared/wallet',   loader: authLoader, element: <Wallet /> },
+      { path: 'reviews/:userId', loader: authLoader, element: <Reviews /> },
       { path: 'freelancer/earnings', loader: freelancerLoader, element: <Earnings /> },
       { path: 'client/post-job', loader: clientLoader, element: <PostJob /> },
       { path: 'info/:slug', element: <InfoPage /> },

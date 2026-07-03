@@ -75,7 +75,7 @@ class DisputeService {
   /**
    * Execute dispute resolutions
    */
-  async resolveDispute(disputeId, clientRefund, freelancerPayout, adminUserId) {
+  async resolveDispute(disputeId, clientRefund, freelancerPayout, adminUserId, note) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
@@ -142,7 +142,7 @@ class DisputeService {
       dispute.timeline.push({
         user: 'ADMIN',
         action: 'DisputeResolved',
-        description: `Dispute resolved by Admin ${adminUserId}. Split: Client ${clientRefund}, Freelancer ${freelancerPayout}`,
+        description: note || `Dispute resolved by Admin ${adminUserId}. Split: Client ${clientRefund}, Freelancer ${freelancerPayout}`,
       });
       await dispute.save({ session });
 

@@ -35,6 +35,7 @@ const adminAuditRoutes     = require('./modules/admin/routes/adminAuditRoutes');
 const adminKycRoutes       = require('./modules/admin/routes/adminKycRoutes');
 const superAdminRoutes     = require('./modules/admin/routes/superAdminRoutes');
 const adminAdRoutes        = require('./modules/admin/routes/adminAdRoutes');
+const adminDisputeRoutes   = require('./modules/admin/routes/adminDisputeRoutes');
 
 const { mongoSanitize } = require('./middlewares/securityMiddleware');
 
@@ -176,6 +177,7 @@ app.use('/api/admin/audit',      adminLimiter, adminAuditRoutes);
 app.use('/api/admin/kyc',        adminLimiter, adminKycRoutes);
 app.use('/api/admin/super',      adminLimiter, superAdminRoutes);
 app.use('/api/admin/ads',        adminLimiter, adminAdRoutes);
+app.use('/api/admin/disputes',   adminLimiter, adminDisputeRoutes);
 
 app.use(errorHandler);
 module.exports = app;

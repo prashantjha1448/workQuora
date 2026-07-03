@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const { registerUser, verifyRegistration, verifyMobile, sendMobileOtp, loginUser, logoutUser, getMe, socialLogin, assignRole, forgotPassword, resetPassword, checkUsername, refreshSession, logoutAllDevices } = require('../controllers/authController');
+const { registerUser, verifyRegistration, verifyMobile, sendMobileOtp, loginUser, logoutUser, getMe, socialLogin, assignRole, forgotPassword, resetPassword, checkUsername, refreshSession, logoutAllDevices, deleteAccount } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const { enforceStringParams } = require('../middlewares/securityMiddleware');
@@ -19,5 +19,6 @@ router.post('/reset-password',    resetPassword);
 router.get('/check-username',     checkUsername);
 router.get('/me',       protect,  getMe);
 router.put('/user/assign-role', protect, assignRole);   // SelectRole.jsx calls this
+router.delete('/account',       protect, deleteAccount);
 
 module.exports = router;

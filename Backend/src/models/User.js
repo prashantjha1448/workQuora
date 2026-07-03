@@ -84,7 +84,19 @@ const userSchema = new mongoose.Schema(
     
     // Social Logins
     googleId: { type: String, default: null },
-    facebookId: { type: String, default: null }
+    facebookId: { type: String, default: null },
+
+    // Account lifecycle
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
+
+    // Privacy preferences
+    privacySettings: {
+      showEmail: { type: Boolean, default: false },
+      showPhone: { type: Boolean, default: false },
+      showEarnings: { type: Boolean, default: false },
+      profileVisibility: { type: String, enum: ['public', 'registered', 'private'], default: 'public' },
+    },
   },
   { 
     timestamps: true,

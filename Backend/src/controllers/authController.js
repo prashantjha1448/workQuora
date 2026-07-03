@@ -3,6 +3,7 @@ const Earnings = require('../models/Earnings');
 const Kyc = require('../models/Kyc');
 const BankDetails = require('../models/BankDetails');
 const Session = require('../models/Session');
+const Job = require('../models/Job');
 const { parseUserAgent } = require('../utils/uaParser');
 const { createAuditLog } = require('../utils/auditLogger');
 const bcrypt = require('bcryptjs');
@@ -757,6 +758,53 @@ exports.checkUsername = async (req, res, next) => {
       return res.status(200).json({ success: true, available: false, message: 'Username is already taken' });
     }
     res.status(200).json({ success: true, available: true, message: 'Username is available' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /auth/account
+exports.deleteAccount = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Prevent deletion if user has active jobs/escrow
+    const activeJobs = await Job.countDocuments({
+      $or: [{ client: userId }, { assignedTo: userId }],
+      status: { $in: ['open', 'in-progress'] }
+    });
+
+    if (activeJobs > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete account with ${activeJobs} active job(s). Complete or cancel them first.`
+      });
+    }
+
+    // Soft delete — mark as deleted, anonymize PII. Do NOT hard delete —
+    // preserves review/transaction history integrity for the other party.
+    await User.findByIdAndUpdate(userId, {
+      isDeleted: true,
+      deletedAt: new Date(),
+      email: `deleted_${userId}@workquora.com`,
+      name: 'Deleted User',
+      mobileNumber: null,
+      profilePic: null,
+      bio: null,
+      skills: []
+    });
+
+    await createAuditLog(req, {
+      userId,
+      action: 'ACCOUNT_DELETED',
+      entity: 'User',
+      entityId: userId
+    });
+
+    res.cookie('jwt', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+    res.cookie('refreshToken', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+
+    res.status(200).json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {
     next(error);
   }

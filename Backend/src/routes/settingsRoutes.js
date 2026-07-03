@@ -8,4 +8,7 @@ router.use(protect);
 router.post('/', authorize('ADMIN'), settingsController.updateSettings);
 router.get('/', authorize('ADMIN'), settingsController.getSettings);
 
+router.get('/privacy', settingsController.getPrivacySettings);
+router.put('/privacy', settingsController.updatePrivacySettings);
+
 module.exports = router;

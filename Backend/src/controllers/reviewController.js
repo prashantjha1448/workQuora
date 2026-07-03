@@ -57,3 +57,19 @@ exports.getUserReviews = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all reviews a user has given to others
+// @route   GET /api/v1/reviews/given/:userId
+// @access  Private
+exports.getReviewsGiven = async (req, res, next) => {
+  try {
+    const reviews = await Review.find({ reviewer: req.params.userId })
+      .populate('reviewee', 'name avatar role')
+      .populate('job', 'title')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: reviews.length, data: reviews });
+  } catch (error) {
+    next(error);
+  }
+};

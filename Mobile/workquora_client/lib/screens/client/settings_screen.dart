@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/utils/error_helper.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -120,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.go('/login');
     } catch (e) {
       if (!mounted) return;
-      final msg = (e as dynamic).response?.data?['message'] ?? 'Failed to delete account';
+      final msg = ErrorHelper.extractError(e);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: AppColors.error));
     }
   }

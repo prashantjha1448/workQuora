@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../network/dio_client.dart';
 import '../constants/api_constants.dart';
+import '../utils/error_helper.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -155,8 +156,5 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _parseError(dynamic e) {
-    try { return e.response?.data?['message'] ?? 'Something went wrong'; }
-    catch (_) { return 'Network error. Check your connection.'; }
-  }
+  String _parseError(dynamic e) => ErrorHelper.extractError(e);
 }

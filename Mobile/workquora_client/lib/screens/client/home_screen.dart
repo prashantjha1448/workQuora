@@ -47,12 +47,17 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(Icons.location_on, color: AppColors.primary, size: 16),
-                    const SizedBox(width: 4),
-                    const Text('New Delhi', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                    const Icon(Icons.arrow_drop_down, color: AppColors.textMuted, size: 18),
-                  ]),
+                  GestureDetector(
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Location-based discovery uses your device region. Precise location coming soon.'),
+                    )),
+                    child: Row(children: [
+                      const Icon(Icons.location_on, color: AppColors.primary, size: 16),
+                      const SizedBox(width: 4),
+                      const Text('Near You', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                      const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 18),
+                    ]),
+                  ),
                   const SizedBox(height: 2),
                   Text('Hi $name 👋', style: const TextStyle(color: AppColors.text, fontSize: 22, fontWeight: FontWeight.w900)),
                 ])),

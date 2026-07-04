@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:dio/dio.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/providers/wallet_provider.dart';
+import '../../core/utils/error_helper.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -130,7 +130,7 @@ class _AddMoneyDialogState extends State<AddMoneyDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      final msg = e is DioException ? (e.response?.data?['message'] ?? 'Failed to create order') : 'Failed to create order';
+      final msg = ErrorHelper.extractError(e);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: AppColors.error));
     }
   }
@@ -185,7 +185,7 @@ class _WithdrawDialogState extends State<WithdrawDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      final msg = e is DioException ? (e.response?.data?['message'] ?? 'Withdrawal failed') : 'Withdrawal failed';
+      final msg = ErrorHelper.extractError(e);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: AppColors.error));
     }
   }

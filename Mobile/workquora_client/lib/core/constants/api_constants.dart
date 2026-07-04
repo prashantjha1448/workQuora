@@ -6,8 +6,6 @@ class ApiConstants {
   static const String verifyRegistration = '/auth/verify-registration';
   static const String verifyMobile     = '/auth/verify-mobile';
   static const String sendMobileOtp    = '/auth/send-mobile-otp';
-  static const String sendOtp          = '/auth/send-otp';
-  static const String verifyOtp        = '/auth/verify-otp';
   static const String me               = '/auth/me';
   static const String logout           = '/auth/logout';
 
@@ -21,7 +19,7 @@ class ApiConstants {
 
   static const String jobs             = '/jobs';
   static const String myJobs           = '/jobs/my-jobs';
-  static const String nearbyJobs       = '/jobs/nearby';
+  static const String nearbyJobs       = '/geo/nearby-jobs';
   static const String nearbyFreelancers= '/geo/nearby-freelancers';
   static const String workerProfile    = '/profile/user';
 

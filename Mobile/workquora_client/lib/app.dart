@@ -18,6 +18,12 @@ import 'screens/client/notifications_screen.dart';
 import 'screens/client/settings_screen.dart';
 import 'screens/chat/conversations_screen.dart';
 import 'screens/chat/chat_screen.dart';
+import 'screens/kyc/kyc_screen.dart';
+import 'screens/kyc/kyc_mobile_otp_screen.dart';
+import 'screens/kyc/kyc_pan_screen.dart';
+import 'screens/kyc/kyc_aadhaar_screen.dart';
+import 'screens/kyc/kyc_bank_screen.dart';
+import 'screens/kyc/kyc_selfie_screen.dart';
 
 class WorkQuoraClientApp extends StatelessWidget {
   const WorkQuoraClientApp({super.key});
@@ -83,6 +89,12 @@ class WorkQuoraClientApp extends StatelessWidget {
                 );
               },
             ),
+            GoRoute(path: '/kyc', builder: (_, __) => const KycScreen()),
+            GoRoute(path: '/kyc/mobile-otp', builder: (_, __) => const KycMobileOtpScreen()),
+            GoRoute(path: '/kyc/pan', builder: (_, __) => const KycPanScreen()),
+            GoRoute(path: '/kyc/aadhaar', builder: (_, __) => const KycAadhaarScreen()),
+            GoRoute(path: '/kyc/bank', builder: (_, __) => const KycBankScreen()),
+            GoRoute(path: '/kyc/selfie', builder: (_, __) => const KycSelfieScreen()),
           ],
         );
 

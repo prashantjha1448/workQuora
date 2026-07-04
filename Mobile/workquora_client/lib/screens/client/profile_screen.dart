@@ -3,37 +3,34 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/providers/auth_provider.dart';
+import '../../core/providers/kyc_provider.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_text_field.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+  @override State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-  void _showKycDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Complete KYC Verification', style: TextStyle(color: AppColors.text)),
-        content: const Text(
-          'KYC verification requires document upload (Aadhaar + PAN). '
-          'Please complete KYC on the WorkQuora web app for now — mobile KYC is coming soon.',
-          style: TextStyle(color: AppColors.textMuted),
-        ),
-        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK', style: TextStyle(color: AppColors.primary)))],
-      ),
-    );
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<KycProvider>().fetchStatus());
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final kyc = context.watch<KycProvider>();
     final user = auth.user ?? {};
     final name = user['name'] ?? 'User';
     final email = user['email'] ?? '';
-    final isKyc = user['isKycVerified'] == true;
     final isEmail = user['isEmailVerified'] == true;
+    // The Kyc-model-level status (5-of-5 steps) is the live source of truth
+    // during the flow; fall back to the cached User.isKycVerified flag
+    // (core PAN+Aadhaar-driven) if KYC status hasn't loaded yet.
+    final isKyc = kyc.isFullyVerified || (kyc.status == null && user['isKycVerified'] == true);
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -83,8 +80,31 @@ class ProfileScreen extends StatelessWidget {
           _tile(Icons.badge_outlined, 'Username', '@${user['username'] ?? ''}'),
           _tile(Icons.shield_outlined, 'KYC Status', isKyc ? 'Verified ✓' : 'Pending — Complete KYC'),
           const SizedBox(height: 28),
-          if (!isKyc)
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: AppButton(label: '🔐 Complete KYC Verification', onPressed: () => _showKycDialog(context))),
+          if (isKyc)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.emerald.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.emerald),
+                ),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.verified, color: AppColors.emerald, size: 16),
+                  SizedBox(width: 6),
+                  Text('KYC Verified', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                ]),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: AppButton(
+                label: '🔐 Complete KYC Verification',
+                onPressed: () { kyc.fetchStatus(); context.push('/kyc'); },
+              ),
+            ),
           AppButton(label: 'Logout', onPressed: () async { await auth.logout(); if (context.mounted) context.go('/login'); }, color: AppColors.error),
           const SizedBox(height: 20),
         ]))),

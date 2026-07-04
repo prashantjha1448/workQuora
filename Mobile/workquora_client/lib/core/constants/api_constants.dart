@@ -11,10 +11,10 @@ class ApiConstants {
 
   static const String kycSendOtp       = '/kyc/otp/send';
   static const String kycVerifyOtp     = '/kyc/otp/verify';
-  static const String kycAadhaar       = '/kyc/aadhaar/submit';
-  static const String kycPan           = '/kyc/pan/submit';
-  static const String kycBank          = '/kyc/bank/add';
-  static const String kycPin           = '/kyc/pin/set';
+  static const String kycSubmitPan     = '/kyc/pan/submit';
+  static const String kycSubmitAadhaar = '/kyc/aadhaar/submit';
+  static const String kycSubmitBank    = '/kyc/bank/submit';
+  static const String kycSubmitSelfie  = '/kyc/selfie/submit';
   static const String kycStatus        = '/kyc/status';
 
   static const String jobs             = '/jobs';

@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../network/dio_client.dart';
 import '../constants/api_constants.dart';
 import '../utils/error_helper.dart';
+import '../services/socket_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -38,6 +39,7 @@ class AuthProvider extends ChangeNotifier {
       await DioClient.instance.saveToken(data['token']);
       _user = data['user'];
       await _prefs.setString('user', jsonEncode(_user));
+      SocketService().connect(data['token']);
       _isLoading = false; notifyListeners();
       return true;
     } catch (e) {
@@ -108,6 +110,7 @@ class AuthProvider extends ChangeNotifier {
       await DioClient.instance.saveToken(d['token']);
       _user = d['user'];
       await _prefs.setString('user', jsonEncode(_user));
+      SocketService().connect(d['token']);
       _pendingEmail = null;
       _pendingRegistrationData = null;
       _isLoading = false; notifyListeners();
@@ -141,6 +144,7 @@ class AuthProvider extends ChangeNotifier {
       final res = await DioClient.instance.dio.get(ApiConstants.me);
       _user = res.data['data'];
       await _prefs.setString('user', jsonEncode(_user));
+      SocketService().connect(token);
       notifyListeners();
       return true;
     } catch (_) {
@@ -153,6 +157,7 @@ class AuthProvider extends ChangeNotifier {
     await DioClient.instance.clearToken();
     await _prefs.remove('user');
     _user = null;
+    SocketService().disconnect();
     notifyListeners();
   }
 

@@ -30,8 +30,7 @@ class ApiConstants {
   static const String transactions     = '/wallet/transactions';
 
   static const String conversations    = '/messages/conversations';
-  static const String messages         = '/messages';
-  static const String sendMessage      = '/messages/send';
+  static const String sendMessage      = '/messages';
 
   static const String notifications    = '/notifications';
   static const String markAllRead      = '/notifications/read-all';

@@ -91,7 +91,29 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
           ],
           AppButton(label: 'Post a Job for ${name.split(' ').first} →', onPressed: () => context.push('/post-job')),
           const SizedBox(height: 12),
-          AppButton(label: '💬 Send Message', onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Chat coming soon!'))), outlined: true),
+          AppButton(
+            label: '💬 Send Message',
+            outlined: true,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                backgroundColor: AppColors.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                title: const Text('Post a Job First', style: TextStyle(color: AppColors.text)),
+                content: Text(
+                  'Messaging opens once you post a job — that\'s the conversation ${name.split(' ').first} will reply in.',
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+                actions: [
+                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+                  TextButton(
+                    onPressed: () { Navigator.of(context).pop(); context.push('/post-job'); },
+                    child: const Text('Post a Job', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 30),
         ]))),
       ]),

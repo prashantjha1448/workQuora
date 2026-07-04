@@ -16,6 +16,8 @@ import 'screens/client/profile_screen.dart';
 import 'screens/client/worker_detail_screen.dart';
 import 'screens/client/notifications_screen.dart';
 import 'screens/client/settings_screen.dart';
+import 'screens/chat/conversations_screen.dart';
+import 'screens/chat/chat_screen.dart';
 
 class WorkQuoraClientApp extends StatelessWidget {
   const WorkQuoraClientApp({super.key});
@@ -68,6 +70,19 @@ class WorkQuoraClientApp extends StatelessWidget {
             ),
             GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
             GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+            GoRoute(path: '/conversations', builder: (_, __) => const ConversationsScreen()),
+            GoRoute(
+              path: '/chat',
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>;
+                return ChatScreen(
+                  jobId: extra['jobId'] as String,
+                  otherUserId: extra['otherUserId'] as String,
+                  otherUserName: extra['otherUserName'] as String,
+                  otherUserAvatar: extra['otherUserAvatar'] as String?,
+                );
+              },
+            ),
           ],
         );
 

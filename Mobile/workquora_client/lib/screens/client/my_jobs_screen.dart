@@ -62,13 +62,13 @@ class _MyJobsScreenState extends State<MyJobsScreen> {
         backgroundColor: AppColors.surface,
         onRefresh: () => context.read<JobsProvider>().fetchMyJobs(),
         child: jobsProvider.isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? Center(child: CircularProgressIndicator(color: AppColors.primary))
             : jobs.isEmpty
                 ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
                     const SizedBox(height: 100),
-                    const Icon(Icons.work_outline, size: 64, color: AppColors.textMuted),
+                    Icon(Icons.work_outline, size: 64, color: AppColors.textMuted),
                     const SizedBox(height: 16),
-                    const Center(child: Text('No jobs posted yet', style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600))),
+                    Center(child: Text('No jobs posted yet', style: TextStyle(color: AppColors.text, fontSize: 15, fontWeight: FontWeight.w600))),
                     const SizedBox(height: 20),
                     Center(child: ElevatedButton(
                       onPressed: () => context.push('/post-job'),
@@ -92,7 +92,7 @@ class _MyJobsScreenState extends State<MyJobsScreen> {
                           decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Row(children: [
-                              Expanded(child: Text(job['title'] ?? 'Untitled Job', style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14))),
+                              Expanded(child: Text(job['title'] ?? 'Untitled Job', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14))),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
@@ -101,12 +101,12 @@ class _MyJobsScreenState extends State<MyJobsScreen> {
                             ]),
                             const SizedBox(height: 8),
                             Row(children: [
-                              const Icon(Icons.currency_rupee, size: 13, color: AppColors.primary),
-                              Text(_formatBudget(job), style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+                              Icon(Icons.currency_rupee, size: 13, color: AppColors.primary),
+                              Text(_formatBudget(job), style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
                               const SizedBox(width: 12),
-                              const Icon(Icons.calendar_today, size: 12, color: AppColors.textMuted),
+                              Icon(Icons.calendar_today, size: 12, color: AppColors.textMuted),
                               const SizedBox(width: 4),
-                              Text(_timeAgo(job['createdAt']?.toString()), style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                              Text(_timeAgo(job['createdAt']?.toString()), style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                             ]),
                           ]),
                         ),

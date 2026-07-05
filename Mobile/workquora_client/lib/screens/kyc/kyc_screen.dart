@@ -34,7 +34,7 @@ class _KycScreenState extends State<KycScreen> {
       body: Consumer<KycProvider>(
         builder: (ctx, kyc, _) {
           if (kyc.isLoading && kyc.status == null) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           final progress = _calculateProgress(kyc);
@@ -50,19 +50,19 @@ class _KycScreenState extends State<KycScreen> {
                 _StatusBanner(status: kyc.kycStatus),
                 const SizedBox(height: 24),
 
-                const Text('Verification Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.text)),
+                Text('Verification Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.text)),
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(3),
                   child: LinearProgressIndicator(
                     value: progress,
                     backgroundColor: AppColors.surfaceAlt,
-                    valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
                     minHeight: 6,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text('${(progress * 100).round()}% complete', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                Text('${(progress * 100).round()}% complete', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                 const SizedBox(height: 24),
 
                 _KycStepTile(
@@ -115,7 +115,7 @@ class _KycScreenState extends State<KycScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.primary.withOpacity(0.3)),
                   ),
-                  child: const Row(children: [
+                  child: Row(children: [
                     Icon(Icons.info_outline, color: AppColors.primary, size: 20),
                     SizedBox(width: 12),
                     Expanded(
@@ -226,15 +226,15 @@ class _KycStepTile extends StatelessWidget {
               ),
               child: Center(
                 child: isCompleted
-                    ? const Icon(Icons.check, color: AppColors.emerald, size: 18)
-                    : Text('$step', style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold)),
+                    ? Icon(Icons.check, color: AppColors.emerald, size: 18)
+                    : Text('$step', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(width: 14),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(title, style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14)),
               const SizedBox(height: 2),
-              Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+              Text(subtitle, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             ])),
             Icon(
               isLocked ? Icons.lock_outline : (isCompleted ? Icons.check_circle : Icons.chevron_right),

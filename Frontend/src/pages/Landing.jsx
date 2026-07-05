@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Shield, Zap, Users, Briefcase, ArrowRight, ArrowUpRight, ChevronDown, X } from 'lucide-react';
 import api from '../services/api';
@@ -21,6 +22,7 @@ const CATEGORIES = [
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, role } = useSelector((s) => s.auth);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: jobsData, isLoading: jobsLoading } = useQuery({
@@ -41,6 +43,12 @@ const Landing = () => {
     e.preventDefault();
     navigate(`/discover${searchQuery.trim() ? `?keyword=${encodeURIComponent(searchQuery.trim())}` : ''}`);
   };
+
+  if (isAuthenticated) {
+    const r = role?.toLowerCase();
+    if (r === 'client') return <Navigate to="/client/dashboard" replace />;
+    if (r === 'freelancer') return <Navigate to="/freelancer/dashboard" replace />;
+  }
 
   return (
     <div className="bg-[hsl(var(--background))] text-foreground w-full min-h-screen">

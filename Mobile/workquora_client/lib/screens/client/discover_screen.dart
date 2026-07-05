@@ -36,12 +36,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
             child: Row(children: [
-              const Icon(Icons.search, color: AppColors.textMuted, size: 18),
+              Icon(Icons.search, color: AppColors.textMuted, size: 18),
               const SizedBox(width: 8),
               Expanded(child: TextField(
                 controller: _searchCtrl,
-                style: const TextStyle(color: AppColors.text, fontSize: 14),
-                decoration: const InputDecoration.collapsed(hintText: 'Search workers...', hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14)),
+                style: TextStyle(color: AppColors.text, fontSize: 14),
+                decoration: InputDecoration.collapsed(hintText: 'Search workers...', hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14)),
                 onChanged: (_) => setState(() {}),
               )),
             ]),
@@ -64,15 +64,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           },
         )),
         Padding(padding: const EdgeInsets.fromLTRB(20, 4, 20, 12), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('${workers.length} workers found', style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
-          const Icon(Icons.tune, color: AppColors.textMuted, size: 20),
+          Text('${workers.length} workers found', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+          Icon(Icons.tune, color: AppColors.textMuted, size: 20),
         ])),
         Expanded(child: jobs.isLoading
           ? ListView.builder(padding: const EdgeInsets.symmetric(horizontal: 20), itemCount: 6,
               itemBuilder: (_, __) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Shimmer.fromColors(baseColor: AppColors.surface, highlightColor: AppColors.surfaceAlt,
                 child: Container(height: 90, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18))))))
           : workers.isEmpty
-            ? const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Icon(Icons.search_off, color: AppColors.textMuted, size: 56),
                 SizedBox(height: 12),
                 Text('No workers found', style: TextStyle(color: AppColors.textMuted, fontSize: 15)),

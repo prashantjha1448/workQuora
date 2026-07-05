@@ -55,11 +55,11 @@ class _KycBankScreenState extends State<KycBankScreen> {
 
   InputDecoration _decoration(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: AppColors.textMuted),
+    hintStyle: TextStyle(color: AppColors.textMuted),
     filled: true,
     fillColor: AppColors.surface,
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
-    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
+    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
   );
 
   @override
@@ -72,24 +72,24 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Form(
           key: _formKey,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Account Holder Name', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Account Holder Name', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _nameCtrl,
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: _decoration('As per bank records'),
               validator: (v) => (v == null || v.trim().length < 2) ? 'Enter the account holder\'s full name' : null,
             ),
             const SizedBox(height: 16),
 
-            const Text('Account Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Account Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _accountCtrl,
               obscureText: _obscureAccount,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: _decoration('9-18 digit account number').copyWith(
                 suffixIcon: IconButton(
                   icon: Icon(_obscureAccount ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textMuted, size: 20),
@@ -104,26 +104,26 @@ class _KycBankScreenState extends State<KycBankScreen> {
             ),
             const SizedBox(height: 16),
 
-            const Text('Confirm Account Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Confirm Account Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _confirmAccountCtrl,
               obscureText: _obscureAccount,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: _decoration('Re-enter account number'),
               validator: (v) => v != _accountCtrl.text ? 'Account numbers do not match' : null,
             ),
             const SizedBox(height: 16),
 
-            const Text('IFSC Code', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('IFSC Code', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _ifscCtrl,
               textCapitalization: TextCapitalization.characters,
               inputFormatters: [LengthLimitingTextInputFormatter(11)],
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: _decoration('e.g. SBIN0001234'),
               validator: (v) {
                 final val = (v ?? '').toUpperCase();
@@ -133,14 +133,14 @@ class _KycBankScreenState extends State<KycBankScreen> {
             ),
             const SizedBox(height: 20),
 
-            const Text('Bank Passbook / Cheque (Optional)', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            Text('Bank Passbook / Cheque (Optional)', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             const SizedBox(height: 8),
             _filePath == null
                 ? OutlinedButton.icon(
                     onPressed: _pickFile,
-                    icon: const Icon(Icons.upload_file, color: AppColors.primary),
-                    label: const Text('Upload Document', style: TextStyle(color: AppColors.primary)),
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                    icon: Icon(Icons.upload_file, color: AppColors.primary),
+                    label: Text('Upload Document', style: TextStyle(color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   )
                 : Container(
                     padding: const EdgeInsets.all(12),
@@ -148,10 +148,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
                     child: Row(children: [
                       ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(File(_filePath!), width: 44, height: 44, fit: BoxFit.cover)),
                       const SizedBox(width: 10),
-                      const Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
+                      Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
                       const SizedBox(width: 6),
-                      const Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
-                      TextButton(onPressed: _pickFile, child: const Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
+                      TextButton(onPressed: _pickFile, child: Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
                     ]),
                   ),
             const SizedBox(height: 32),

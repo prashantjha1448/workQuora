@@ -86,7 +86,7 @@ class _OtpScreenState extends State<OtpScreen> {
     if (ok) {
       _startCountdown();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP resent'), backgroundColor: AppColors.success),
+        SnackBar(content: Text('OTP resent'), backgroundColor: AppColors.success),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +100,7 @@ class _OtpScreenState extends State<OtpScreen> {
     final defaultPinTheme = PinTheme(
       width: 48,
       height: 48,
-      textStyle: const TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold),
+      textStyle: TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -119,7 +119,7 @@ class _OtpScreenState extends State<OtpScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: AppColors.text, size: 20), onPressed: () => context.pop()),
+        leading: IconButton(icon: Icon(Icons.arrow_back_ios, color: AppColors.text, size: 20), onPressed: () => context.pop()),
       ),
       body: SafeArea(
         child: Padding(
@@ -135,9 +135,9 @@ class _OtpScreenState extends State<OtpScreen> {
               child: ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset('assets/logo.png', fit: BoxFit.cover)),
             ),
             const SizedBox(height: 28),
-            Text(widget.title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.text)),
+            Text(widget.title, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.text)),
             const SizedBox(height: 6),
-            Text(widget.subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 14)),
+            Text(widget.subtitle, style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
             const SizedBox(height: 36),
             Center(
               child: Pinput(

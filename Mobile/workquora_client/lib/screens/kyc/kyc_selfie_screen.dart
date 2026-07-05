@@ -56,18 +56,18 @@ class _KycSelfieScreenState extends State<KycSelfieScreen> {
                       color: AppColors.surface,
                       border: Border.all(color: AppColors.primary, width: 2),
                     ),
-                    child: const Icon(Icons.person, size: 80, color: AppColors.textMuted),
+                    child: Icon(Icons.person, size: 80, color: AppColors.textMuted),
                   )
                 : CircleAvatar(radius: 100, backgroundImage: FileImage(File(_selfiePath!))),
             const SizedBox(height: 24),
             OutlinedButton.icon(
               onPressed: _takeSelfie,
-              icon: const Icon(Icons.camera_alt, color: AppColors.primary),
-              label: Text(_selfiePath == null ? 'Take Selfie' : 'Retake Selfie', style: const TextStyle(color: AppColors.primary)),
-              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14), side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              icon: Icon(Icons.camera_alt, color: AppColors.primary),
+              label: Text(_selfiePath == null ? 'Take Selfie' : 'Retake Selfie', style: TextStyle(color: AppColors.primary)),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14), side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Use front camera. Make sure your face is clearly visible.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textMuted, fontSize: 12),
@@ -78,7 +78,7 @@ class _KycSelfieScreenState extends State<KycSelfieScreen> {
                     width: double.infinity, height: 54,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
-                    child: const Text('Submit Selfie', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+                    child: Text('Submit Selfie', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
                   )
                 : AppButton(label: 'Submit Selfie', loading: _submitting, onPressed: _submit),
           ]),

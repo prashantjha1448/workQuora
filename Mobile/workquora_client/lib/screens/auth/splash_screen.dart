@@ -64,9 +64,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
               ),
               const SizedBox(height: 20),
-              const Text('WorkQuora', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.text, letterSpacing: -1)),
+              Text('WorkQuora', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.text, letterSpacing: -1)),
               const SizedBox(height: 6),
-              const Text('Find Trusted Workers Near You', style: TextStyle(fontSize: 14, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+              Text('Find Trusted Workers Near You', style: TextStyle(fontSize: 14, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
               const SizedBox(height: 60),
               SizedBox(
                 width: 28, height: 28,

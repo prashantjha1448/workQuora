@@ -22,7 +22,7 @@ class JobsProvider extends ChangeNotifier {
   double get currentLng => _currentLng;
   String get locationLabel => _locationLabel;
 
-  Future<void> fetchNearbyWorkers({double? lat, double? lng, int radius = 25}) async {
+  Future<void> fetchNearbyWorkers({double? lat, double? lng, int radius = 40}) async {
     final useLat = lat ?? _currentLat;
     final useLng = lng ?? _currentLng;
     _isLoading = true; notifyListeners();

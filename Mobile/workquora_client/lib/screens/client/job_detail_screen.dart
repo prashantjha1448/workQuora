@@ -54,21 +54,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Accept Proposal', style: TextStyle(color: AppColors.text)),
+        title: Text('Accept Proposal', style: TextStyle(color: AppColors.text)),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Accept proposal from ${freelancerInfo['name'] ?? 'this freelancer'}?', style: const TextStyle(color: AppColors.text)),
+          Text('Accept proposal from ${freelancerInfo['name'] ?? 'this freelancer'}?', style: TextStyle(color: AppColors.text)),
           const SizedBox(height: 8),
-          Text('Bid: ₹${proposal['bidAmount']}', style: const TextStyle(color: AppColors.textMuted)),
-          Text('Timeline: ${proposal['estimatedDays']} days', style: const TextStyle(color: AppColors.textMuted)),
+          Text('Bid: ₹${proposal['bidAmount']}', style: TextStyle(color: AppColors.textMuted)),
+          Text('Timeline: ${proposal['estimatedDays']} days', style: TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: 8),
           Text(
             '⚠️ This will move ₹${proposal['bidAmount']} from your wallet to escrow. Make sure you have sufficient balance.',
-            style: const TextStyle(color: AppColors.warning, fontSize: 12),
+            style: TextStyle(color: AppColors.warning, fontSize: 12),
           ),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: const Text('Accept', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: Text('Accept', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -77,7 +77,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final ok = await provider.acceptProposal(proposal['_id'].toString());
     if (!context.mounted) return;
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Proposal accepted! Chat initialized.'), backgroundColor: AppColors.success));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Proposal accepted! Chat initialized.'), backgroundColor: AppColors.success));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to accept proposal'), backgroundColor: AppColors.error));
     }
@@ -89,11 +89,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Reject Proposal', style: TextStyle(color: AppColors.text)),
-        content: const Text('Are you sure you want to reject this proposal?', style: TextStyle(color: AppColors.textMuted)),
+        title: Text('Reject Proposal', style: TextStyle(color: AppColors.text)),
+        content: Text('Are you sure you want to reject this proposal?', style: TextStyle(color: AppColors.textMuted)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: const Text('Reject', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: Text('Reject', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -112,14 +112,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Job', style: TextStyle(color: AppColors.text)),
+        title: Text('Delete Job', style: TextStyle(color: AppColors.text)),
         content: Text(
           'Delete "${job['title']}"? This cannot be undone.\n\nOnly delete jobs with no accepted proposals.',
-          style: const TextStyle(color: AppColors.textMuted),
+          style: TextStyle(color: AppColors.textMuted),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: const Text('Delete', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: Text('Delete', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -140,14 +140,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Request Cancellation', style: TextStyle(color: AppColors.text)),
+        title: Text('Request Cancellation', style: TextStyle(color: AppColors.text)),
         content: Text(
           'Request cancellation for "${job['title']}"?\n\nBoth you and the freelancer must agree to cancel. If agreed, your escrow will be refunded.',
-          style: const TextStyle(color: AppColors.textMuted),
+          style: TextStyle(color: AppColors.textMuted),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: const Text('Request', style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: Text('Request', style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -167,14 +167,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Agree to Cancel', style: TextStyle(color: AppColors.text)),
-        content: const Text(
+        title: Text('Agree to Cancel', style: TextStyle(color: AppColors.text)),
+        content: Text(
           'The freelancer has requested cancellation. Agreeing will cancel the job and refund your escrow.',
           style: TextStyle(color: AppColors.textMuted),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Not yet', style: TextStyle(color: AppColors.textMuted))),
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: const Text('Agree to Cancel', style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: Text('Not yet', style: TextStyle(color: AppColors.textMuted))),
+          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(true), child: Text('Agree to Cancel', style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -183,7 +183,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final ok = await provider.requestCancellation(job['_id'].toString());
     if (!context.mounted) return;
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Job cancelled. Escrow refunded.'), backgroundColor: AppColors.success));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Job cancelled. Escrow refunded.'), backgroundColor: AppColors.success));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Failed to cancel'), backgroundColor: AppColors.error));
     }
@@ -196,7 +196,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       body: Consumer<JobDetailProvider>(
         builder: (ctx, provider, _) {
           if (provider.isLoading && provider.job == null) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           if (provider.error != null && provider.job == null) {
@@ -204,11 +204,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
+                  Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
                   const SizedBox(height: 12),
-                  Text(provider.error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted)),
+                  Text(provider.error!, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 16),
-                  TextButton(onPressed: () => provider.fetchJob(widget.jobId), child: const Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+                  TextButton(onPressed: () => provider.fetchJob(widget.jobId), child: Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
                 ]),
               ),
             );
@@ -226,7 +226,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               actions: [
                 if (provider.isOpen)
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                    icon: Icon(Icons.delete_outline, color: AppColors.error),
                     onPressed: () => _showDeleteConfirm(context, provider, job),
                   ),
               ],
@@ -245,9 +245,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                     child: Row(children: [
-                      Text('Proposals (${provider.proposals.length})', style: const TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text('Proposals (${provider.proposals.length})', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
                       const Spacer(),
-                      if (acceptedCount > 0) Text('$acceptedCount accepted', style: const TextStyle(color: AppColors.emerald, fontSize: 12, fontWeight: FontWeight.w600)),
+                      if (acceptedCount > 0) Text('$acceptedCount accepted', style: TextStyle(color: AppColors.emerald, fontSize: 12, fontWeight: FontWeight.w600)),
                     ]),
                   ),
                   ...provider.proposals.map((p) => _ProposalCard(
@@ -266,7 +266,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
-  Widget _divider() => const Divider(color: AppColors.border, height: 1);
+  Widget _divider() => Divider(color: AppColors.border, height: 1);
 
   Widget _buildHeader(Map job) {
     return Padding(
@@ -274,26 +274,26 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(job['title'] ?? 'Untitled Job', style: const TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(job['title'] ?? 'Untitled Job', style: TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             _StatusBadge(status: job['status'] ?? ''),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('₹${_formatBudget(job)}', style: const TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold)),
-            const Text('Budget', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            Text('₹${_formatBudget(job)}', style: TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Budget', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
           ]),
         ]),
         const SizedBox(height: 12),
         Row(children: [
-          const Icon(Icons.calendar_today, size: 14, color: AppColors.textMuted),
+          Icon(Icons.calendar_today, size: 14, color: AppColors.textMuted),
           const SizedBox(width: 4),
-          Text('Posted ${_timeAgo(job['createdAt']?.toString())}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          Text('Posted ${_timeAgo(job['createdAt']?.toString())}', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
           const Spacer(),
           if (job['isUrgent'] == true)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.15), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.warning)),
-              child: const Text('URGENT', style: TextStyle(color: AppColors.warning, fontSize: 11, fontWeight: FontWeight.bold)),
+              child: Text('URGENT', style: TextStyle(color: AppColors.warning, fontSize: 11, fontWeight: FontWeight.bold)),
             ),
         ]),
       ]),
@@ -307,25 +307,25 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Description', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.bold)),
+        Text('Description', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text(job['description'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.6)),
+        Text(job['description'] ?? '', style: TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.6)),
         if (skills.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const Text('Skills Required', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('Skills Required', style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: skills.map((s) => Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.primary.withOpacity(0.3))),
-            child: Text(s, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+            child: Text(s, style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600)),
           )).toList()),
         ],
         if (address.isNotEmpty) ...[
           const SizedBox(height: 16),
           Row(children: [
-            const Icon(Icons.location_on, size: 16, color: AppColors.primary),
+            Icon(Icons.location_on, size: 16, color: AppColors.primary),
             const SizedBox(width: 4),
-            Expanded(child: Text(address, style: const TextStyle(color: AppColors.textMuted, fontSize: 13))),
+            Expanded(child: Text(address, style: TextStyle(color: AppColors.textMuted, fontSize: 13))),
           ]),
         ],
       ]),
@@ -343,15 +343,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           radius: 20,
           backgroundColor: AppColors.primary.withOpacity(0.15),
           backgroundImage: pic.isNotEmpty ? NetworkImage(pic) : null,
-          child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'C', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
+          child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'C', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(name, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14)),
-          const Text('Posted this job', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          Text(name, style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Posted this job', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
         ])),
         if (clientInfo['isVerified'] == true)
-          const Icon(Icons.verified, color: AppColors.emerald, size: 18),
+          Icon(Icons.verified, color: AppColors.emerald, size: 18),
       ]),
     );
   }
@@ -362,7 +362,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         margin: const EdgeInsets.all(20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
-        child: const Row(children: [
+        child: Row(children: [
           Icon(Icons.hourglass_empty, color: AppColors.textMuted),
           SizedBox(width: 12),
           Expanded(child: Text('Waiting for proposals...', style: TextStyle(color: AppColors.textMuted))),
@@ -375,10 +375,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     if (provider.isInProgress) {
       Widget content;
       if (provider.clientRequestedCancel && !provider.freelancerRequestedCancel) {
-        content = const _InfoBanner(message: 'You requested cancellation. Waiting for freelancer to agree.', color: AppColors.warning);
+        content = _InfoBanner(message: 'You requested cancellation. Waiting for freelancer to agree.', color: AppColors.warning);
       } else if (provider.freelancerRequestedCancel && !provider.clientRequestedCancel) {
         content = Column(children: [
-          const _InfoBanner(message: 'Freelancer has requested cancellation.', color: AppColors.warning),
+          _InfoBanner(message: 'Freelancer has requested cancellation.', color: AppColors.warning),
           const SizedBox(height: 8),
           AppButton(label: 'Agree to Cancel', onPressed: () => _confirmCancellation(context, provider, job)),
         ]);
@@ -387,7 +387,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           alignment: Alignment.centerLeft,
           child: TextButton(
             onPressed: () => _showCancelDialog(context, provider, job),
-            child: const Text('Request Cancellation', style: TextStyle(color: AppColors.error)),
+            child: Text('Request Cancellation', style: TextStyle(color: AppColors.error)),
           ),
         );
       } else {
@@ -498,17 +498,17 @@ class _ProposalCard extends StatelessWidget {
             radius: 24,
             backgroundColor: AppColors.primary.withOpacity(0.15),
             backgroundImage: pic.isNotEmpty ? NetworkImage(pic) : null,
-            child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'F', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
+            child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'F', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Expanded(child: Text(name, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14))),
+              Expanded(child: Text(name, style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 14))),
               _ProposalStatusBadge(status: status),
             ]),
-            Text(freelancerInfo['title']?.toString() ?? 'Freelancer', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            Text(freelancerInfo['title']?.toString() ?? 'Freelancer', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             if (freelancerInfo['isKycVerified'] == true)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 2),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.verified, size: 12, color: AppColors.emerald),
@@ -528,7 +528,7 @@ class _ProposalCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             proposal['coverLetter'].toString(),
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -538,8 +538,8 @@ class _ProposalCard extends StatelessWidget {
           Row(children: [
             Expanded(child: OutlinedButton(
               onPressed: provider.isActing ? null : onReject,
-              style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.error), padding: const EdgeInsets.symmetric(vertical: 10)),
-              child: const Text('Reject', style: TextStyle(color: AppColors.error)),
+              style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.error), padding: const EdgeInsets.symmetric(vertical: 10)),
+              child: Text('Reject', style: TextStyle(color: AppColors.error)),
             )),
             const SizedBox(width: 8),
             Expanded(child: ElevatedButton(
@@ -556,9 +556,9 @@ class _ProposalCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.chat_outlined, size: 16, color: AppColors.primary),
-              label: Text('Message $name', style: const TextStyle(color: AppColors.primary)),
-              style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.primary), padding: const EdgeInsets.symmetric(vertical: 10)),
+              icon: Icon(Icons.chat_outlined, size: 16, color: AppColors.primary),
+              label: Text('Message $name', style: TextStyle(color: AppColors.primary)),
+              style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.primary), padding: const EdgeInsets.symmetric(vertical: 10)),
               onPressed: () => context.push('/chat', extra: {
                 'jobId': provider.job?['_id']?.toString(),
                 'otherUserId': (freelancerInfo['id'] ?? freelancerInfo['_id'])?.toString(),
@@ -574,8 +574,8 @@ class _ProposalCard extends StatelessWidget {
 
   Widget _bidDetail(String label, String value) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
-      Text(value, style: const TextStyle(color: AppColors.text, fontSize: 13, fontWeight: FontWeight.w600)),
+      Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+      Text(value, style: TextStyle(color: AppColors.text, fontSize: 13, fontWeight: FontWeight.w600)),
     ]);
   }
 }

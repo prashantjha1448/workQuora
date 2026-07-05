@@ -73,14 +73,14 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             : _error != null
                 ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
                     const SizedBox(height: 100),
-                    const Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
+                    Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
                     const SizedBox(height: 12),
-                    Center(child: Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted))),
+                    Center(child: Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted))),
                     const SizedBox(height: 16),
-                    Center(child: TextButton(onPressed: _load, child: const Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))),
+                    Center(child: TextButton(onPressed: _load, child: Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))),
                   ])
                 : _conversations.isEmpty
-                    ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
+                    ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
                         SizedBox(height: 120),
                         Icon(Icons.chat_bubble_outline, size: 64, color: AppColors.textMuted),
                         SizedBox(height: 16),
@@ -101,17 +101,17 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                               radius: 24,
                               backgroundColor: AppColors.primary.withOpacity(0.15),
                               backgroundImage: pic.isNotEmpty ? CachedNetworkImageProvider(pic) : null,
-                              child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'U', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
+                              child: pic.isEmpty ? Text(name.isNotEmpty ? name[0].toUpperCase() : 'U', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)) : null,
                             ),
-                            title: Text(name, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 15)),
-                            subtitle: Text(convo['lastMessage']?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                            title: Text(name, style: TextStyle(color: AppColors.text, fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text(convo['lastMessage']?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                             trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                              Text(_timeAgo(convo['lastMessageTime']?.toString()), style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                              Text(_timeAgo(convo['lastMessageTime']?.toString()), style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
                               if (unread > 0) ...[
                                 const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.all(5),
-                                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                  decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                                   constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                                   child: Text('$unread', textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                 ),

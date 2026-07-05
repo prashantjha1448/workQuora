@@ -121,6 +121,15 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Merges a partial update into the cached user locally, without a network
+  // call — for endpoints (e.g. photo upload) that return just the changed
+  // field(s) rather than the full user object.
+  void patchUser(Map<String, dynamic> patch) {
+    _user = {...?_user, ...patch};
+    _prefs.setString('user', jsonEncode(_user));
+    notifyListeners();
+  }
+
   // PUT /profile/update — only returns {success, message}, no updated user
   // object, so the submitted fields are merged into local state directly.
   Future<bool> updateProfile(Map<String, dynamic> data) async {

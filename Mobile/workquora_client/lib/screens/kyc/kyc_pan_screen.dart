@@ -30,7 +30,7 @@ class _KycPanScreenState extends State<KycPanScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_filePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please upload your PAN card image'), backgroundColor: AppColors.error));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please upload your PAN card image'), backgroundColor: AppColors.error));
       return;
     }
     setState(() => _submitting = true);
@@ -55,20 +55,20 @@ class _KycPanScreenState extends State<KycPanScreen> {
         child: Form(
           key: _formKey,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('PAN Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('PAN Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _panCtrl,
               textCapitalization: TextCapitalization.characters,
               inputFormatters: [UpperCaseTextFormatter(), LengthLimitingTextInputFormatter(10)],
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: InputDecoration(
                 hintText: 'e.g. ABCDE1234F',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.surface,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
               ),
               validator: (v) {
                 final val = (v ?? '').toUpperCase();
@@ -79,14 +79,14 @@ class _KycPanScreenState extends State<KycPanScreen> {
               },
             ),
             const SizedBox(height: 20),
-            const Text('PAN Card Image', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('PAN Card Image', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             _filePath == null
                 ? OutlinedButton.icon(
                     onPressed: _pickFile,
-                    icon: const Icon(Icons.upload_file, color: AppColors.primary),
-                    label: const Text('Upload PAN Card Image', style: TextStyle(color: AppColors.primary)),
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                    icon: Icon(Icons.upload_file, color: AppColors.primary),
+                    label: Text('Upload PAN Card Image', style: TextStyle(color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   )
                 : Container(
                     padding: const EdgeInsets.all(12),
@@ -94,10 +94,10 @@ class _KycPanScreenState extends State<KycPanScreen> {
                     child: Row(children: [
                       ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(File(_filePath!), width: 44, height: 44, fit: BoxFit.cover)),
                       const SizedBox(width: 10),
-                      const Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
+                      Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
                       const SizedBox(width: 6),
-                      const Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
-                      TextButton(onPressed: _pickFile, child: const Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
+                      TextButton(onPressed: _pickFile, child: Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
                     ]),
                   ),
             const SizedBox(height: 32),

@@ -44,7 +44,7 @@ class _KycMobileOtpScreenState extends State<KycMobileOtpScreen> {
   Future<void> _sendOtp({bool showToast = true}) async {
     if (_mobileNumber.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No mobile number on file — add one in Edit Profile first'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No mobile number on file — add one in Edit Profile first'), backgroundColor: AppColors.error));
       }
       return;
     }
@@ -52,7 +52,7 @@ class _KycMobileOtpScreenState extends State<KycMobileOtpScreen> {
     if (!mounted) return;
     if (ok) {
       _startCountdown();
-      if (showToast) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('OTP resent'), backgroundColor: AppColors.success));
+      if (showToast) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('OTP resent'), backgroundColor: AppColors.success));
     } else {
       final err = context.read<KycProvider>().error ?? 'Failed to send OTP';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err), backgroundColor: AppColors.error));
@@ -81,7 +81,7 @@ class _KycMobileOtpScreenState extends State<KycMobileOtpScreen> {
   Widget build(BuildContext context) {
     final defaultPinTheme = PinTheme(
       width: 48, height: 48,
-      textStyle: const TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold),
+      textStyle: TextStyle(color: AppColors.text, fontSize: 20, fontWeight: FontWeight.bold),
       decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
     );
     final focusedPinTheme = defaultPinTheme.copyWith(
@@ -96,14 +96,14 @@ class _KycMobileOtpScreenState extends State<KycMobileOtpScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
             const SizedBox(height: 32),
-            const Icon(Icons.phone_android, size: 64, color: AppColors.primary),
+            Icon(Icons.phone_android, size: 64, color: AppColors.primary),
             const SizedBox(height: 20),
-            const Text('Verify Mobile Number', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.text)),
+            Text('Verify Mobile Number', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.text)),
             const SizedBox(height: 8),
             Text(
               _mobileNumber.isNotEmpty ? 'Enter the OTP sent to $_mobileNumber' : 'Enter the OTP sent to your registered mobile number',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
             const SizedBox(height: 36),
             Pinput(

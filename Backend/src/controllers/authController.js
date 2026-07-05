@@ -4,6 +4,7 @@ const Kyc = require('../models/Kyc');
 const BankDetails = require('../models/BankDetails');
 const Session = require('../models/Session');
 const Job = require('../models/Job');
+const Review = require('../models/Review');
 const { parseUserAgent } = require('../utils/uaParser');
 const { createAuditLog } = require('../utils/auditLogger');
 const bcrypt = require('bcryptjs');
@@ -450,6 +451,7 @@ exports.getMe = async (req, res, next) => {
     user.earnings = await Earnings.findOne({ userId: req.user.id }).lean();
     user.kyc = await Kyc.findOne({ userId: req.user.id }).lean();
     user.bankDetails = await BankDetails.findOne({ userId: req.user.id }).lean();
+    user.totalReviews = await Review.countDocuments({ reviewee: user._id });
     user.password = undefined;
     res.status(200).json({ success: true, data: user });
   } catch (error) {

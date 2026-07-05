@@ -18,9 +18,9 @@ class AppTextField extends StatelessWidget {
       decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
       child: TextField(
         controller: controller, obscureText: obscure, keyboardType: keyboardType, maxLines: maxLines,
-        style: const TextStyle(color: AppColors.text, fontSize: 15),
+        style: TextStyle(color: AppColors.text, fontSize: 15),
         decoration: InputDecoration(
-          hintText: hint, hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+          hintText: hint, hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 15),
           prefixIcon: Icon(icon, color: AppColors.textMuted, size: 20),
           suffixIcon: suffix, border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),

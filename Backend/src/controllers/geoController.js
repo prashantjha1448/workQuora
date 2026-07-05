@@ -12,7 +12,7 @@ const haversine = (lat1, lng1, lat2, lng2) => {
 // GET /geo/nearby-jobs
 exports.getNearbyJobs = async (req, res, next) => {
   try {
-    const { lat, lng, radius = 25, category, keyword } = req.query;
+    const { lat, lng, radius = 40, category, keyword } = req.query;
     if (!lat || !lng) return res.status(400).json({ success: false, message: 'lat and lng required' });
 
     const query = {
@@ -62,7 +62,7 @@ exports.getNearbyJobs = async (req, res, next) => {
 // GET /geo/nearby-freelancers
 exports.getNearbyFreelancers = async (req, res, next) => {
   try {
-    const { lat, lng, radius = 25, category, keyword } = req.query;
+    const { lat, lng, radius = 40, category, keyword } = req.query;
     if (!lat || !lng) return res.status(400).json({ success: false, message: 'lat and lng required' });
 
     const query = {

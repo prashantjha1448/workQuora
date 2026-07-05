@@ -30,7 +30,7 @@ class _KycAadhaarScreenState extends State<KycAadhaarScreen> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_filePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please upload your Aadhaar document'), backgroundColor: AppColors.error));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please upload your Aadhaar document'), backgroundColor: AppColors.error));
       return;
     }
     setState(() => _submitting = true);
@@ -55,20 +55,20 @@ class _KycAadhaarScreenState extends State<KycAadhaarScreen> {
         child: Form(
           key: _formKey,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Aadhaar Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Aadhaar Number', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _aadhaarCtrl,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(12)],
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: AppColors.text),
               decoration: InputDecoration(
                 hintText: 'Enter 12-digit Aadhaar number',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.surface,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.border)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.border)),
               ),
               validator: (v) {
                 if (!RegExp(r'^[0-9]{12}$').hasMatch(v ?? '')) {
@@ -78,14 +78,14 @@ class _KycAadhaarScreenState extends State<KycAadhaarScreen> {
               },
             ),
             const SizedBox(height: 20),
-            const Text('Aadhaar Document', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('Aadhaar Document', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             _filePath == null
                 ? OutlinedButton.icon(
                     onPressed: _pickFile,
-                    icon: const Icon(Icons.upload_file, color: AppColors.primary),
-                    label: const Text('Upload Aadhaar Document', style: TextStyle(color: AppColors.primary)),
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: const BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                    icon: Icon(Icons.upload_file, color: AppColors.primary),
+                    label: Text('Upload Aadhaar Document', style: TextStyle(color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   )
                 : Container(
                     padding: const EdgeInsets.all(12),
@@ -93,10 +93,10 @@ class _KycAadhaarScreenState extends State<KycAadhaarScreen> {
                     child: Row(children: [
                       ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(File(_filePath!), width: 44, height: 44, fit: BoxFit.cover)),
                       const SizedBox(width: 10),
-                      const Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
+                      Icon(Icons.check_circle, color: AppColors.emerald, size: 18),
                       const SizedBox(width: 6),
-                      const Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
-                      TextButton(onPressed: _pickFile, child: const Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text('Document selected', style: TextStyle(color: AppColors.text, fontSize: 13))),
+                      TextButton(onPressed: _pickFile, child: Text('Change', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
                     ]),
                   ),
             const SizedBox(height: 32),

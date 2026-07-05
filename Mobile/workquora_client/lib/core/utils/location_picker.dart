@@ -7,26 +7,38 @@ import '../network/dio_client.dart';
 import '../providers/jobs_provider.dart';
 import 'mobile_location.dart' if (dart.library.html) 'web_location.dart';
 
+typedef LocationSelected = void Function(double lat, double lng, String label);
+
 /// Gets the current position (via geolocator on mobile, the browser's
-/// Geolocation API on web — see mobile_location.dart / web_location.dart),
-/// stores it via [JobsProvider.setLocation], and returns whether it
-/// succeeded. Shared between the picker's GPS button and home_screen's
-/// auto-resume check, so the permission flow only lives in one place.
-Future<bool> requestAndUseCurrentLocation(BuildContext context) async {
+/// Geolocation API on web — see mobile_location.dart / web_location.dart).
+/// When [onSelected] is given, hands the result to it instead of writing to
+/// [JobsProvider] — used by callers (e.g. Post Job) that need a one-off
+/// location rather than changing the user's global "nearby search" center.
+Future<bool> requestAndUseCurrentLocation(BuildContext context, {LocationSelected? onSelected}) async {
   final pos = await getPlatformLocation();
   if (pos == null) return false;
   if (!context.mounted) return false;
-  await context.read<JobsProvider>().setLocation(pos['lat']!, pos['lng']!, 'Current Location');
+  if (onSelected != null) {
+    onSelected(pos['lat']!, pos['lng']!, 'Current Location');
+  } else {
+    await context.read<JobsProvider>().setLocation(pos['lat']!, pos['lng']!, 'Current Location');
+  }
   return true;
 }
 
-Future<void> showLocationPicker(BuildContext context) async {
+/// Shows the location picker sheet (GPS button + city/area search).
+///
+/// With no [onSelected], the picked location becomes the user's global
+/// "nearby search" center via [JobsProvider] (home_screen's usage). Pass
+/// [onSelected] to instead receive the pick as a one-off value without
+/// touching that global state (e.g. setting a specific job's location).
+Future<void> showLocationPicker(BuildContext context, {LocationSelected? onSelected}) async {
   final wantsGps = await showModalBottomSheet<bool>(
     context: context,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
     isScrollControlled: true,
-    builder: (_) => const _LocationPickerSheet(),
+    builder: (_) => _LocationPickerSheet(onSelected: onSelected),
   );
 
   if (wantsGps == true && context.mounted) {
@@ -39,13 +51,17 @@ Future<void> showLocationPicker(BuildContext context) async {
       duration: Duration(seconds: 10),
     ));
 
-    final ok = await requestAndUseCurrentLocation(context);
+    final ok = await requestAndUseCurrentLocation(context, onSelected: onSelected);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     if (ok) {
-      context.read<JobsProvider>().startLocationTracking();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      // Background tracking only makes sense for the "nearby search center"
+      // use case — skip it when the caller just wanted a one-off pick.
+      if (onSelected == null) {
+        context.read<JobsProvider>().startLocationTracking();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('✓ Location updated'),
         backgroundColor: AppColors.success,
         duration: Duration(seconds: 2),
@@ -60,7 +76,8 @@ Future<void> showLocationPicker(BuildContext context) async {
 }
 
 class _LocationPickerSheet extends StatefulWidget {
-  const _LocationPickerSheet();
+  final LocationSelected? onSelected;
+  const _LocationPickerSheet({this.onSelected});
   @override State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
 }
 
@@ -117,9 +134,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)))),
           const SizedBox(height: 16),
 
-          const Text('Set Your Location', style: TextStyle(color: AppColors.text, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Set Your Location', style: TextStyle(color: AppColors.text, fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          const Text('Used to find workers near you', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          Text('Used to find workers near you', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
           const SizedBox(height: 20),
 
           SizedBox(
@@ -137,20 +154,20 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           ),
 
           const SizedBox(height: 20),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
           const SizedBox(height: 12),
 
           TextField(
             controller: _searchController,
             onChanged: _onSearchChanged,
-            style: const TextStyle(color: AppColors.text),
+            style: TextStyle(color: AppColors.text),
             decoration: InputDecoration(
               hintText: 'Search city, area or pincode...',
-              hintStyle: const TextStyle(color: AppColors.textMuted),
-              prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+              hintStyle: TextStyle(color: AppColors.textMuted),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: AppColors.textMuted, size: 18),
+                      icon: Icon(Icons.clear, color: AppColors.textMuted, size: 18),
                       onPressed: () {
                         _searchController.clear();
                         setState(() => _suggestions = []);
@@ -166,9 +183,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           const SizedBox(height: 12),
 
           if (_isSearching)
-            const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppColors.primary)))
+            Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppColors.primary)))
           else if (_searchController.text.trim().length >= 3 && _suggestions.isEmpty)
-            const Center(child: Padding(
+            Center(child: Padding(
               padding: EdgeInsets.all(20),
               child: Text('No results found. Try different keywords.', style: TextStyle(color: AppColors.textMuted), textAlign: TextAlign.center),
             ))
@@ -181,21 +198,28 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 final city = _suggestions[i];
                 return ListTile(
                   dense: true,
-                  leading: const Icon(Icons.location_on, color: AppColors.primary, size: 20),
-                  title: Text(city['name'].toString(), style: const TextStyle(color: AppColors.text, fontSize: 14)),
+                  leading: Icon(Icons.location_on, color: AppColors.primary, size: 20),
+                  title: Text(city['name'].toString(), style: TextStyle(color: AppColors.text, fontSize: 14)),
                   subtitle: Text(
                     '${(city['lat'] as double).toStringAsFixed(4)}, ${(city['lng'] as double).toStringAsFixed(4)}',
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                   onTap: () async {
-                    await context.read<JobsProvider>().setLocation(city['lat'] as double, city['lng'] as double, city['name'].toString());
+                    final lat = city['lat'] as double;
+                    final lng = city['lng'] as double;
+                    final name = city['name'].toString();
+                    if (widget.onSelected != null) {
+                      widget.onSelected!(lat, lng, name);
+                    } else {
+                      await context.read<JobsProvider>().setLocation(lat, lng, name);
+                    }
                     if (context.mounted) Navigator.of(context).pop();
                   },
                 );
               },
             )
           else
-            const Center(child: Padding(
+            Center(child: Padding(
               padding: EdgeInsets.all(16),
               child: Text('Type at least 3 characters to search', style: TextStyle(color: AppColors.textMuted, fontSize: 12), textAlign: TextAlign.center),
             )),

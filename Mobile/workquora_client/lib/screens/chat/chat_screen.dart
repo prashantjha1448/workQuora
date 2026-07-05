@@ -209,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildInputBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 8, 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -237,7 +237,7 @@ class _ChatScreenState extends State<ChatScreen> {
           onTap: _sendMessage,
           child: Container(
             width: 44, height: 44,
-            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
             child: _isSending
                 ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : const Icon(Icons.send, color: Colors.white, size: 20),
@@ -261,7 +261,7 @@ class _ChatScreenState extends State<ChatScreen> {
             backgroundColor: AppColors.primary.withOpacity(0.15),
             backgroundImage: avatar.isNotEmpty ? CachedNetworkImageProvider(avatar) : null,
             child: avatar.isEmpty
-                ? Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : 'U', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14))
+                ? Text(widget.otherUserName.isNotEmpty ? widget.otherUserName[0].toUpperCase() : 'U', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14))
                 : null,
           ),
           const SizedBox(width: 10),
@@ -277,7 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(children: [
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+              ? Center(child: CircularProgressIndicator(color: AppColors.primary))
               : ListView.builder(
                   controller: _scrollController,
                   reverse: true,

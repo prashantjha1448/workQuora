@@ -36,7 +36,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       });
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to mark all as read'), backgroundColor: AppColors.error));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to mark all as read'), backgroundColor: AppColors.error));
     }
   }
 
@@ -98,22 +98,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (hasUnread)
             TextButton(
               onPressed: _markAllRead,
-              child: const Text('Mark all read', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+              child: Text('Mark all read', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
             ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _error
               ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
+                  Icon(Icons.error_outline, color: AppColors.textMuted, size: 48),
                   const SizedBox(height: 12),
-                  const Text('Failed to load notifications', style: TextStyle(color: AppColors.textMuted)),
+                  Text('Failed to load notifications', style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 16),
-                  TextButton(onPressed: _load, child: const Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+                  TextButton(onPressed: _load, child: Text('Retry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
                 ]))
               : _notifications.isEmpty
-                  ? const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Icon(Icons.notifications_none, color: AppColors.textMuted, size: 56),
                       SizedBox(height: 12),
                       Text('No notifications yet', style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
@@ -149,10 +149,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                   Text(_titleFor(type), style: TextStyle(color: AppColors.text, fontSize: 14, fontWeight: isRead ? FontWeight.w600 : FontWeight.bold)),
                                   const SizedBox(height: 3),
-                                  Text(n['message'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                                  Text(n['message'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                                 ])),
                                 const SizedBox(width: 8),
-                                Text(_timeAgo(n['createdAt']?.toString()), style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                                Text(_timeAgo(n['createdAt']?.toString()), style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
                               ]),
                             ),
                           );

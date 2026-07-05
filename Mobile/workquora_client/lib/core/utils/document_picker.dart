@@ -14,13 +14,13 @@ Future<String?> pickDocumentImage(BuildContext context) async {
         const SizedBox(height: 12),
         Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
         ListTile(
-          leading: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-          title: const Text('Take Photo', style: TextStyle(color: AppColors.text)),
+          leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+          title: Text('Take Photo', style: TextStyle(color: AppColors.text)),
           onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
         ),
         ListTile(
-          leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
-          title: const Text('Choose from Gallery', style: TextStyle(color: AppColors.text)),
+          leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+          title: Text('Choose from Gallery', style: TextStyle(color: AppColors.text)),
           onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
         ),
         const SizedBox(height: 12),

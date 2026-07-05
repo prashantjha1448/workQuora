@@ -50,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth  = context.watch<AuthProvider>();
     final jobs  = context.watch<JobsProvider>();
-    final name  = auth.user?['name']?.toString().split(' ').first ?? 'there';
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -66,28 +65,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   GestureDetector(
                     onTap: () => showLocationPicker(context),
                     child: Row(children: [
-                      const Icon(Icons.location_on, color: AppColors.primary, size: 16),
+                      Icon(Icons.location_on, color: AppColors.primary, size: 16),
                       const SizedBox(width: 4),
-                      Text(jobs.locationLabel, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                      const Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 18),
+                      Text(jobs.locationLabel, style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                      Icon(Icons.keyboard_arrow_down, color: AppColors.textMuted, size: 18),
                     ]),
                   ),
-                  const SizedBox(height: 2),
-                  Text('Hi $name 👋', style: const TextStyle(color: AppColors.text, fontSize: 22, fontWeight: FontWeight.w900)),
                 ])),
                 IconButton(
-                  icon: const Icon(Icons.work_outline, color: AppColors.text),
+                  icon: Icon(Icons.work_outline, color: AppColors.text),
                   onPressed: () => context.push('/my-jobs'),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_outlined, color: AppColors.text),
+                  icon: Icon(Icons.notifications_outlined, color: AppColors.text),
                   onPressed: () => context.push('/notifications'),
                 ),
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: () => context.go('/profile'),
                   child: Container(width: 44, height: 44,
-                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppColors.primary, Color(0xFF8B5CF6)]), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.primary, Color(0xFF8B5CF6)]), borderRadius: BorderRadius.circular(12)),
                     child: Center(child: Text((auth.user?['name'] ?? 'U')[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18))),
                   ),
                 ),
@@ -100,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
-                  child: const Row(children: [
+                  child: Row(children: [
                     Icon(Icons.search, color: AppColors.textMuted, size: 20),
                     SizedBox(width: 10),
                     Text('Search workers, skills...', style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
@@ -131,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
             )),
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-              child: const Text('Categories', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text('Categories', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
             )),
             SliverToBoxAdapter(child: SizedBox(
               height: 96,
@@ -154,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           cat['label']!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: AppColors.text, fontSize: 11, fontWeight: FontWeight.w600),
+                          style: TextStyle(color: AppColors.text, fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                       ]),
                     ),
@@ -165,8 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 12),
               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                const Text('Nearby Workers', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
-                GestureDetector(onTap: () => context.go('/discover'), child: const Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600))),
+                Text('Nearby Workers', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+                GestureDetector(onTap: () => context.go('/discover'), child: Text('See all', style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600))),
               ]),
             )),
             jobs.isLoading
@@ -180,9 +177,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? SliverToBoxAdapter(child: Padding(
                     padding: const EdgeInsets.all(40),
                     child: Column(children: [
-                      const Icon(Icons.people_outline, color: AppColors.textMuted, size: 56),
+                      Icon(Icons.people_outline, color: AppColors.textMuted, size: 56),
                       const SizedBox(height: 12),
-                      const Text('No workers nearby', style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
+                      Text('No workers nearby', style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
                       const SizedBox(height: 6),
                       Text('Try increasing search radius', style: TextStyle(color: AppColors.textMuted.withOpacity(0.6), fontSize: 12)),
                     ]),

@@ -54,8 +54,8 @@ class _PostJobScreenState extends State<PostJobScreen> {
       builder: (_) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
-            leading: const Icon(Icons.camera_alt, color: AppColors.primary),
-            title: const Text('Take Photo', style: TextStyle(color: AppColors.text)),
+            leading: Icon(Icons.camera_alt, color: AppColors.primary),
+            title: Text('Take Photo', style: TextStyle(color: AppColors.text)),
             onTap: () async {
               Navigator.pop(context);
               final image = await picker.pickImage(source: ImageSource.camera, imageQuality: 70, maxWidth: 1024);
@@ -66,8 +66,8 @@ class _PostJobScreenState extends State<PostJobScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.photo_library, color: AppColors.primary),
-            title: const Text('Choose from Gallery', style: TextStyle(color: AppColors.text)),
+            leading: Icon(Icons.photo_library, color: AppColors.primary),
+            title: Text('Choose from Gallery', style: TextStyle(color: AppColors.text)),
             onTap: () async {
               Navigator.pop(context);
               final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 1024);
@@ -100,7 +100,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
 
   Future<void> _submit() async {
     if (_titleCtrl.text.isEmpty || _budgetCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields'), backgroundColor: AppColors.error)); return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill all required fields'), backgroundColor: AppColors.error)); return;
     }
     setState(() => _loading = true);
 
@@ -111,7 +111,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
       } catch (e) {
         if (!mounted) return;
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to upload photos. Try again.'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload photos. Try again.'), backgroundColor: AppColors.error));
         return;
       }
     }
@@ -145,22 +145,22 @@ class _PostJobScreenState extends State<PostJobScreen> {
         builder: (dialogContext) => AlertDialog(
           backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(children: [
+          title: Row(children: [
             Icon(Icons.check_circle, color: AppColors.success, size: 28),
             SizedBox(width: 10),
             Text('Job Posted!', style: TextStyle(color: AppColors.text, fontSize: 18)),
           ]),
-          content: const Text(
+          content: Text(
             'Your job has been posted successfully.\nFreelancers will start sending proposals soon.',
             style: TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
-          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('View Job', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))],
+          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text('View Job', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))],
         ),
       );
       if (!mounted) return;
       context.push('/job/$newJobId');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to post job'), backgroundColor: AppColors.error));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to post job'), backgroundColor: AppColors.error));
     }
   }
 
@@ -173,25 +173,25 @@ class _PostJobScreenState extends State<PostJobScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.primary.withOpacity(0.2))),
-            child: const Row(children: [Icon(Icons.bolt, color: AppColors.primary, size: 20), SizedBox(width: 10), Expanded(child: Text('Get bids from verified nearby workers within minutes!', style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600)))])),
+            child: Row(children: [Icon(Icons.bolt, color: AppColors.primary, size: 20), SizedBox(width: 10), Expanded(child: Text('Get bids from verified nearby workers within minutes!', style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600)))])),
           const SizedBox(height: 24),
-          const Text('Job Title *', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Job Title *', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           AppTextField(controller: _titleCtrl, hint: 'e.g. Fix leaking pipe in bathroom', icon: Icons.work_outline),
           const SizedBox(height: 16),
-          const Text('Category', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Category', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Container(padding: const EdgeInsets.symmetric(horizontal: 14), decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
             child: DropdownButton<String>(value: _category, isExpanded: true, dropdownColor: AppColors.surface, underline: const SizedBox(),
-              style: const TextStyle(color: AppColors.text, fontSize: 14),
+              style: TextStyle(color: AppColors.text, fontSize: 14),
               onChanged: (v) => setState(() => _category = v!),
               items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList())),
           const SizedBox(height: 16),
-          const Text('Description', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Description', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           AppTextField(controller: _descCtrl, hint: 'Describe the job in detail...', icon: Icons.description_outlined, maxLines: 4),
           const SizedBox(height: 16),
-          const Text('Job Location', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Job Location', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () => showLocationPicker(context, onSelected: (lat, lng, label) {
@@ -216,17 +216,17 @@ class _PostJobScreenState extends State<PostJobScreen> {
                 if (_jobLocationLabel.isNotEmpty)
                   GestureDetector(
                     onTap: () => setState(() { _jobLat = null; _jobLng = null; _jobLocationLabel = ''; }),
-                    child: const Icon(Icons.close, color: AppColors.textMuted, size: 16),
+                    child: Icon(Icons.close, color: AppColors.textMuted, size: 16),
                   )
                 else
-                  const Icon(Icons.arrow_forward_ios, color: AppColors.textMuted, size: 14),
+                  Icon(Icons.arrow_forward_ios, color: AppColors.textMuted, size: 14),
               ]),
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Photos (Optional)', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Photos (Optional)', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          const Text('Add up to 3 photos of the job', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          Text('Add up to 3 photos of the job', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
           const SizedBox(height: 8),
           SizedBox(
             height: 80,
@@ -238,7 +238,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
                     width: 80, height: 80,
                     margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-                    child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary, size: 28),
                       SizedBox(height: 4),
                       Text('Add', style: TextStyle(color: AppColors.primary, fontSize: 11)),
@@ -272,7 +272,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
             ]),
           ),
           const SizedBox(height: 16),
-          const Text('Budget Type', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Budget Type', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(children: [
             Expanded(child: GestureDetector(onTap: () => setState(() => _budgetType = 'fixed'),
@@ -286,7 +286,7 @@ class _PostJobScreenState extends State<PostJobScreen> {
             ),
           ]),
           const SizedBox(height: 16),
-          Text('${_budgetType == 'fixed' ? 'Budget' : 'Hourly Rate'} (₹) *', style: const TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('${_budgetType == 'fixed' ? 'Budget' : 'Hourly Rate'} (₹) *', style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           AppTextField(controller: _budgetCtrl, hint: 'e.g. 500', icon: Icons.currency_rupee, keyboardType: TextInputType.number),
           const SizedBox(height: 32),

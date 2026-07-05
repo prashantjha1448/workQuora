@@ -29,8 +29,8 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Scaffold(backgroundColor: AppColors.bg, body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
-    if (_worker == null) return const Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Worker not found', style: TextStyle(color: AppColors.textMuted))));
+    if (_loading) return Scaffold(backgroundColor: AppColors.bg, body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+    if (_worker == null) return Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Worker not found', style: TextStyle(color: AppColors.textMuted))));
 
     final name    = _worker!['name'] ?? 'Worker';
     final title   = _worker!['title'] ?? 'Freelancer';
@@ -49,8 +49,8 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
           backgroundColor: AppColors.bg, expandedHeight: 280, pinned: true,
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(children: [
-              Container(decoration: const BoxDecoration(gradient: LinearGradient(colors: [AppColors.primary, Color(0xFF7C3AED)], begin: Alignment.topLeft, end: Alignment.bottomRight))),
-              Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 40, decoration: const BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.vertical(top: Radius.circular(28))))),
+              Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.primary, Color(0xFF7C3AED)], begin: Alignment.topLeft, end: Alignment.bottomRight))),
+              Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 40, decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.vertical(top: Radius.circular(28))))),
               Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const SizedBox(height: 30),
                 Container(width: 90, height: 90, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)),
@@ -60,7 +60,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: AppColors.surfaceAlt,
-                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+                          child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.primaryDark,
@@ -73,11 +73,11 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                 Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13)),
                 const SizedBox(height: 6),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.star_rounded, color: AppColors.amber, size: 16),
+                  Icon(Icons.star_rounded, color: AppColors.amber, size: 16),
                   Text(' ${rating.toStringAsFixed(1)}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                   const SizedBox(width: 12),
                   Text('₹$rate/hr', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                  if (kyc) ...[const SizedBox(width: 12), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: AppColors.emerald.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Text('✓ KYC', style: TextStyle(color: AppColors.emerald, fontSize: 10, fontWeight: FontWeight.bold)))],
+                  if (kyc) ...[const SizedBox(width: 12), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: AppColors.emerald.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: Text('✓ KYC', style: TextStyle(color: AppColors.emerald, fontSize: 10, fontWeight: FontWeight.bold)))],
                 ]),
               ])),
             ]),
@@ -90,16 +90,16 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
             Text(avail ? 'Available now' : 'Currently busy', style: TextStyle(color: avail ? AppColors.success : AppColors.textMuted, fontSize: 13)),
           ]),
           const SizedBox(height: 20),
-          const Text('About', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('About', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(bio, style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.6)),
+          Text(bio, style: TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.6)),
           const SizedBox(height: 20),
           if (skills.isNotEmpty) ...[
-            const Text('Skills', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Skills', style: TextStyle(color: AppColors.text, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             Wrap(spacing: 8, runSpacing: 8, children: skills.map((s) => Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.primary.withOpacity(0.3))),
-              child: Text(s, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600)))).toList()),
+              child: Text(s, style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w600)))).toList()),
             const SizedBox(height: 24),
           ],
           AppButton(label: 'Post a Job for ${name.split(' ').first} →', onPressed: () => context.push('/post-job')),
@@ -112,16 +112,16 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
               builder: (_) => AlertDialog(
                 backgroundColor: AppColors.surface,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                title: const Text('Post a Job First', style: TextStyle(color: AppColors.text)),
+                title: Text('Post a Job First', style: TextStyle(color: AppColors.text)),
                 content: Text(
                   'Messaging opens once you post a job — that\'s the conversation ${name.split(' ').first} will reply in.',
-                  style: const TextStyle(color: AppColors.textMuted),
+                  style: TextStyle(color: AppColors.textMuted),
                 ),
                 actions: [
-                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
+                  TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
                   TextButton(
                     onPressed: () { Navigator.of(context).pop(); context.push('/post-job'); },
-                    child: const Text('Post a Job', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                    child: Text('Post a Job', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),

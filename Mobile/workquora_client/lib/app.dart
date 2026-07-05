@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'core/providers/auth_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/network/dio_client.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -145,27 +147,48 @@ class _WorkQuoraClientAppState extends State<WorkQuoraClientApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'WorkQuora Client',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.bg,
-        colorScheme: const ColorScheme.dark(
-          primary: AppColors.primary,
-          surface: AppColors.surface,
-          error: AppColors.error,
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark
+          ? const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark,
+            )
+          : const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.dark,
+              statusBarBrightness: Brightness.light,
+            ),
+      child: MaterialApp.router(
+        title: 'WorkQuora Client',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: isDark ? Brightness.dark : Brightness.light,
+          scaffoldBackgroundColor: AppColors.bg,
+          colorScheme: isDark
+              ? ColorScheme.dark(
+                  primary: AppColors.primary,
+                  surface: AppColors.surface,
+                  error: AppColors.error,
+                )
+              : ColorScheme.light(
+                  primary: AppColors.primary,
+                  surface: AppColors.surface,
+                  error: AppColors.error,
+                ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: AppColors.bg,
+            elevation: 0,
+            iconTheme: IconThemeData(color: AppColors.text),
+            titleTextStyle: TextStyle(
+                color: AppColors.text, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.bg,
-          elevation: 0,
-          iconTheme: IconThemeData(color: AppColors.text),
-          titleTextStyle: TextStyle(
-              color: AppColors.text, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        routerConfig: _router,
       ),
-      routerConfig: _router,
     );
   }
 }

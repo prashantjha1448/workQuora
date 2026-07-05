@@ -48,15 +48,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(backgroundColor: AppColors.bg, elevation: 0, leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: AppColors.text, size: 20), onPressed: () => context.go('/login'))),
+      appBar: AppBar(backgroundColor: AppColors.bg, elevation: 0, leading: IconButton(icon: Icon(Icons.arrow_back_ios, color: AppColors.text, size: 20), onPressed: () => context.go('/login'))),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const SizedBox(height: 8),
-            const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.text)),
+            Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.text)),
             const SizedBox(height: 6),
-            const Text('Post jobs & hire nearby workers', style: TextStyle(color: AppColors.textMuted)),
+            Text('Post jobs & hire nearby workers', style: TextStyle(color: AppColors.textMuted)),
             const SizedBox(height: 28),
             AppTextField(controller: _nameCtrl, hint: 'Full Name', icon: Icons.person_outline),
             const SizedBox(height: 12),
@@ -76,8 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             AppButton(label: 'Create Account', onPressed: _register, loading: auth.isLoading),
             const SizedBox(height: 20),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text('Already have an account? ', style: TextStyle(color: AppColors.textMuted)),
-              GestureDetector(onTap: () => context.go('/login'), child: const Text('Sign In', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
+              Text('Already have an account? ', style: TextStyle(color: AppColors.textMuted)),
+              GestureDetector(onTap: () => context.go('/login'), child: Text('Sign In', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold))),
             ]),
             const SizedBox(height: 32),
           ]),

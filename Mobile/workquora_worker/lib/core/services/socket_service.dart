@@ -12,6 +12,10 @@ class SocketService {
   IO.Socket? _socket;
   bool get isConnected => _socket?.connected ?? false;
 
+  // Exposed so feature screens (notifications, chat) can attach their own
+  // event listeners without this service needing to know about them.
+  IO.Socket? get socket => _socket;
+
   void connect(String token) {
     if (_socket?.connected == true) return;
 

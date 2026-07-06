@@ -6,6 +6,9 @@ import 'core/constants/app_colors.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/tasks_provider.dart';
 import 'core/providers/wallet_provider.dart';
+import 'core/providers/jobs_provider.dart';
+import 'core/providers/kyc_provider.dart';
+import 'core/providers/dashboard_provider.dart';
 import 'core/network/dio_client.dart';
 
 void main() async {
@@ -23,6 +26,9 @@ void main() async {
       ChangeNotifierProvider.value(value: auth),
       ChangeNotifierProvider(create: (_) => TasksProvider()),
       ChangeNotifierProvider(create: (_) => WalletProvider()),
+      ChangeNotifierProvider(create: (_) => JobsProvider()),
+      ChangeNotifierProvider(create: (_) => KycProvider()),
+      ChangeNotifierProvider(create: (_) => DashboardProvider()),
     ],
     child: const WorkQuoraWorkerApp(),
   ));

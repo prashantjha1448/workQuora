@@ -213,6 +213,17 @@ class AuthProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
+  // Merges locally-known-good fields into the cached user map. Used after
+  // PUT /profile/update, which returns only {success, message} with no user
+  // object (verified against profileController.js's updateProfile) — so the
+  // screen tells us what it just saved and we reflect it here instead of
+  // waiting on a re-fetch.
+  Future<void> patchLocalUser(Map<String, dynamic> fields) async {
+    _user = {...?_user, ...fields};
+    await _persistUser();
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');

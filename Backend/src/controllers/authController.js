@@ -187,6 +187,11 @@ exports.registerUser = async (req, res, next) => {
       });
     } catch (err) {
       console.error('❌ Registration Email sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.',
+        debug: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
     }
 
     res.status(200).json({ success: true, message: 'OTP sent to your email. Please verify.' });
@@ -266,7 +271,12 @@ exports.verifyRegistration = async (req, res, next) => {
     try {
       await smsService.sendOtp(user.mobileNumber, mobileOtp);
     } catch (err) {
-      console.error('Failed to send Mobile OTP:', err);
+      console.error('❌ Mobile OTP SMS sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP SMS. Please try again.',
+        debug: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
     }
 
     res.status(200).json({ success: true, message: 'Email verified. Mobile OTP sent via SMS.' });
@@ -677,6 +687,11 @@ exports.forgotPassword = async (req, res, next) => {
       });
     } catch (err) {
       console.error('❌ Forgot Password Email sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.',
+        debug: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
     }
 
     res.status(200).json({ success: true, message: 'OTP sent to email. Please verify.' });

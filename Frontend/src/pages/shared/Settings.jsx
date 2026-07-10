@@ -424,7 +424,18 @@ const Settings = () => {
                           </div>
                           <div>
                             <h4 className="font-extrabold text-xl text-foreground">{activeUser?.name || 'Your Name'}</h4>
-                            <p className="text-primary font-semibold text-sm mt-0.5">{activeUser?.title || 'Expert Developer'}</p>
+                            {activeUser?.role && (
+                              <div className="mt-1 flex items-center">
+                                <span className={`text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-md border ${
+                                  activeUser.role.toUpperCase() === 'CLIENT'
+                                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                }`}>
+                                  {activeUser.role.toUpperCase() === 'CLIENT' ? 'Client' : 'Freelancer'}
+                                </span>
+                              </div>
+                            )}
+                            <p className="text-primary font-semibold text-sm mt-1.5">{activeUser?.title || 'Expert Developer'}</p>
                             <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1.5 font-medium">
                               <MapPin className="w-3.5 h-3.5" />
                               <span>{navbarCity || activeUser?.location?.city || activeUser?.location?.address || 'Bhopal, MP'}</span>

@@ -23,7 +23,7 @@ const SelectRole = () => {
     try {
       await authApi.assignRole(selectedRole.toUpperCase());
       dispatch(updateRole(selectedRole.toUpperCase()));
-      navigate(selectedRole === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      navigate('/home');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save role. Try again.');
     } finally {

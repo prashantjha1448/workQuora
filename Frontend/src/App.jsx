@@ -12,6 +12,7 @@ import AdminLayout from './admin/components/AdminLayout';
 import Auth from './pages/Auth';
 import Login from './features/auth/ui/Login';
 import SelectRole from './features/auth/ui/SelectRole';
+import OnboardingOverlay from './components/OnboardingOverlay';
 
 // ── Lazy-loaded public pages ──────────────────────────────────────────────────
 const Landing               = lazy(() => import('./pages/Landing'));
@@ -20,6 +21,7 @@ const JobDetails            = lazy(() => import('./pages/JobDetails'));
 const SearchPage            = lazy(() => import('./pages/SearchPage'));
 const FreelancerPublicProfile = lazy(() => import('./pages/FreelancerPublicProfile'));
 const InfoPage              = lazy(() => import('./pages/shared/InfoPage'));
+const NotFound = lazy(() => import('./pages/shared/NotFound'));
 
 // ── Lazy-loaded shared/protected pages ───────────────────────────────────────
 const Messages              = lazy(() => import('./pages/shared/Messages'));
@@ -61,11 +63,9 @@ const PageLoader = () => (
 
 /* ── Route Guards ─────────────────────────────────── */
 const guestLoader = () => {
-  const { isAuthenticated, role } = store.getState().auth;
+  const { isAuthenticated } = store.getState().auth;
   if (isAuthenticated) {
-    const r = role?.toLowerCase();
-    if (r === 'client') return redirect('/client/dashboard');
-    if (r === 'freelancer') return redirect('/freelancer/dashboard');
+    return redirect('/home');
   }
   return null;
 };
@@ -73,6 +73,7 @@ const guestLoader = () => {
 const clientLoader = () => {
   const { isAuthenticated, role } = store.getState().auth;
   if (!isAuthenticated) return redirect('/auth');
+  if (!role) return redirect('/auth/select-role');
   if (role?.toLowerCase() !== 'client') return redirect('/freelancer/dashboard');
   return null;
 };
@@ -80,6 +81,7 @@ const clientLoader = () => {
 const freelancerLoader = () => {
   const { isAuthenticated, role } = store.getState().auth;
   if (!isAuthenticated) return redirect('/auth');
+  if (!role) return redirect('/auth/select-role');
   if (role?.toLowerCase() !== 'freelancer') return redirect('/client/dashboard');
   return null;
 };
@@ -110,6 +112,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { index: true, element: <Landing /> },
+      { path: 'home', element: <Landing /> },
       { path: 'discover', element: <Discover /> },
       { path: 'job/:id', element: <JobDetails /> },
       { path: 'search', element: <SearchPage /> },
@@ -184,13 +187,7 @@ const router = createBrowserRouter([
   // 404
   {
     path: '*',
-    element: (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-4xl font-extrabold text-primary mb-2">404</h1>
-        <p className="text-sm text-muted-foreground mb-4">This route does not exist.</p>
-        <a href="/" className="text-xs font-bold px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity">Go Home</a>
-      </div>
-    ),
+    element: <NotFound />,
   },
 ]);
 
@@ -219,6 +216,7 @@ function App() {
   return (
     <Suspense fallback={<PageLoader />}>
       <RouterProvider router={router} />
+      <OnboardingOverlay />
     </Suspense>
   );
 }

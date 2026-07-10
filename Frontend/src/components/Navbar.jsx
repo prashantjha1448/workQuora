@@ -201,14 +201,16 @@ const Navbar = () => {
                 <Home size={14} /><span>Home</span>
               </NavLink>
             )}
-            <NavLink 
-              to="/discover" 
-              className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
-              }`}
-            >
-              <Compass size={14} /><span>Discover</span>
-            </NavLink>
+            {user && (
+              <NavLink 
+                to="/discover" 
+                className={({ isActive }) => `flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  isActive ? 'bg-white dark:bg-white/5 text-primary dark:text-white shadow-sm border border-slate-200 dark:border-white/10' : 'text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
+                }`}
+              >
+                <Compass size={14} /><span>Discover</span>
+              </NavLink>
+            )}
             {user && (
               <NavLink 
                 to="/shared/messages" 
@@ -371,9 +373,11 @@ const Navbar = () => {
                     <Home className="w-4 h-4" /> Home
                   </Link>
                 )}
-                <Link to="/discover" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-foreground transition-colors">
-                  <Compass className="w-4 h-4" /> Discover Talent/Jobs
-                </Link>
+                {user && (
+                  <Link to="/discover" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-foreground transition-colors">
+                    <Compass className="w-4 h-4" /> Discover Talent/Jobs
+                  </Link>
+                )}
                 {user && (
                   <Link to="/shared/messages" onClick={() => setMobileOpen(false)} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-foreground transition-colors">
                     <div className="flex items-center gap-3">

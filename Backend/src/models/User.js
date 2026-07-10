@@ -85,7 +85,9 @@ const userSchema = new mongoose.Schema(
     // Social Logins
     googleId: { type: String, default: null },
     facebookId: { type: String, default: null },
-
+    // Terms Acceptance Onboarding
+    termsAcceptedVersion: { type: String, default: null },
+    termsAcceptedAt: { type: Date, default: null },
     // Account lifecycle
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },

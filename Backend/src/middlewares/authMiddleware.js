@@ -25,6 +25,59 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = currentUser;
+
+    const whitelist = [
+      '/api/v1/auth/me',
+      '/api/v1/auth/logout',
+      '/api/v1/auth/logout-all',
+      '/api/v1/auth/refresh',
+      '/api/v1/auth/user/assign-role',
+      '/api/v1/terms/current',
+      '/api/v1/terms/accept'
+    ];
+
+    const isWhitelisted = whitelist.some(route => req.originalUrl.split('?')[0] === route);
+    if (!isWhitelisted) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const termsPath = path.join(__dirname, '../config/terms.json');
+        
+        if (!fs.existsSync(termsPath)) {
+          throw new Error('Terms configuration file is missing');
+        }
+        const terms = JSON.parse(fs.readFileSync(termsPath, 'utf8'));
+        if (!terms || typeof terms.name !== 'string' || !terms.name.trim() ||
+            typeof terms.version !== 'string' || !terms.version.trim() ||
+            !Array.isArray(terms.content)) {
+          throw new Error('Invalid terms configuration format');
+        }
+
+        const roleSelected = !!(currentUser.role && ['CLIENT', 'FREELANCER'].includes(currentUser.role.toUpperCase()));
+        const currentTermsAccepted = currentUser.termsAcceptedVersion === terms.version && !!currentUser.termsAcceptedAt;
+
+        if (!roleSelected || !currentTermsAccepted) {
+          return res.status(403).json({
+            success: false,
+            message: 'Onboarding incomplete. Please assign a role and accept the current Terms & Conditions.',
+            onboarding: {
+              roleSelected,
+              termsAccepted: currentTermsAccepted,
+              currentTermsVersion: terms.version,
+              acceptedTermsVersion: currentUser.termsAcceptedVersion || null,
+              onboardingComplete: false
+            }
+          });
+        }
+      } catch (err) {
+        console.error('❌ Onboarding middleware terms load error:', err.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Unable to validate current platform terms. Please try again later.'
+        });
+      }
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Not authorized, token failed' });

@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const getEmailTemplate = (subject, bodyHtml) => `
 <!DOCTYPE html>
@@ -122,6 +124,43 @@ const getWelcomeTemplate = (name) => getEmailTemplate(
 );
 
 const sendEmail = async (options) => {
+  // Auto-detect template type from subject
+  let htmlContent = options.html;
+  
+  if (!htmlContent) {
+    if (options.otp) {
+      const purpose = options.subject?.toLowerCase().includes('reset') ? 'reset' : 'verification';
+      htmlContent = getOtpTemplate(options.otp, purpose);
+    } else if (options.subject?.toLowerCase().includes('welcome')) {
+      htmlContent = getWelcomeTemplate(options.name || 'there');
+    } else {
+      // Generic branded template
+      htmlContent = getEmailTemplate(options.subject, `
+        <h2 style="margin:0 0 16px 0;font-size:22px;font-weight:800;color:#0f0069;">${options.subject}</h2>
+        <p style="margin:0;font-size:15px;color:#444455;line-height:1.7;">${options.message}</p>
+      `);
+    }
+  }
+
+  // Use Resend if API key is provided
+  if (resend && process.env.RESEND_API_KEY) {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || `WorkQuora <otp@send.workquora.com>`;
+    
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: options.email,
+      subject: options.subject,
+      text: options.message || options.subject,
+      html: htmlContent,
+    });
+
+    if (response.error) {
+      throw new Error(`Resend Email API failed: ${response.error.message || JSON.stringify(response.error)}`);
+    }
+    return response;
+  }
+
+  // Fallback to original Nodemailer SMTP transport
   const isGmail = process.env.SMTP_HOST === 'smtp.gmail.com';
   const smtpPort = isGmail ? 465 : (Number(process.env.SMTP_PORT) || 587);
   const isSecure = smtpPort === 465;
@@ -143,24 +182,6 @@ const sendEmail = async (options) => {
       require('dns').lookup(hostname, { ...options, family: 4 }, callback);
     }
   });
-
-  // Auto-detect template type from subject
-  let htmlContent = options.html;
-  
-  if (!htmlContent) {
-    if (options.otp) {
-      const purpose = options.subject?.toLowerCase().includes('reset') ? 'reset' : 'verification';
-      htmlContent = getOtpTemplate(options.otp, purpose);
-    } else if (options.subject?.toLowerCase().includes('welcome')) {
-      htmlContent = getWelcomeTemplate(options.name || 'there');
-    } else {
-      // Generic branded template
-      htmlContent = getEmailTemplate(options.subject, `
-        <h2 style="margin:0 0 16px 0;font-size:22px;font-weight:800;color:#0f0069;">${options.subject}</h2>
-        <p style="margin:0;font-size:15px;color:#444455;line-height:1.7;">${options.message}</p>
-      `);
-    }
-  }
 
   const mailOptions = {
     from: `"WorkQuora" <${process.env.FROM_EMAIL}>`,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -78,6 +78,7 @@ const loadFacebookSDK = () =>
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const googleBtnRef = useRef(null);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -177,7 +178,36 @@ const Auth = () => {
     }
   }, [isLogin, setValue]);
 
-  useEffect(() => { loadGoogleSDK(); loadFacebookSDK(); }, []);
+  useEffect(() => {
+    loadGoogleSDK().then(() => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: (response) => {
+            socialLogin({ provider: 'google', token: response.credential });
+          },
+        });
+        window.google.accounts.id.prompt();
+      }
+    });
+    loadFacebookSDK();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (window.google && googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '';
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'filled_black',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'rectangular',
+          width: Math.floor(googleBtnRef.current.getBoundingClientRect().width) || 190
+        });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [googleBtnRef.current, isLogin]);
 
   const onValidationError = () => setShake(true);
 
@@ -239,22 +269,7 @@ const Auth = () => {
     }
   };
 
-  /* Google One-Tap */
-  const handleGoogleLogin = () => {
-    if (!window.google) return;
-    const client = window.google.accounts.oauth2.initTokenClient({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      scope: 'email profile',
-      callback: async (tokenResponse) => {
-        const infoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const info = await infoRes.json();
-        socialLogin({ provider: 'google', email: info.email, name: info.name, avatar: info.picture });
-      },
-    });
-    client.requestAccessToken();
-  };
+
 
   /* Facebook Login */
   const handleFacebookLogin = () => {
@@ -703,19 +718,10 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button type="button" onClick={handleGoogleLogin} disabled={isSocialLoading}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-background border border-border rounded-xl hover:bg-muted transition-colors font-semibold text-sm cursor-pointer disabled:opacity-50 text-foreground">
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z" />
-                <path fill="#34A853" d="M16.04 18.013c-1.09.703-2.474 1.078-4.04 1.078a7.077 7.077 0 01-6.723-4.823l-4.04 3.067A11.965 11.965 0 0012 24c2.933 0 5.735-1.043 7.834-3l-3.793-2.987z" />
-                <path fill="#4A90E2" d="M19.834 21c2.195-2.048 3.62-5.096 3.62-9 0-.71-.109-1.473-.272-2.182H12v4.637h6.436c-.317 1.559-1.17 2.766-2.395 3.558l3.793 2.987z" />
-                <path fill="#FBBC05" d="M5.277 14.268A7.12 7.12 0 014.909 12c0-.782.125-1.533.357-2.235L1.24 6.65A11.934 11.934 0 000 12c0 1.92.445 3.73 1.237 5.335l4.04-3.067z" />
-              </svg>
-              Google
-            </button>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 items-center">
+            <div ref={googleBtnRef} className="flex-1 flex justify-center h-[40px] overflow-hidden rounded-xl w-full"></div>
             <button type="button" onClick={handleFacebookLogin} disabled={isSocialLoading}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#1877F2]/10 border border-[#1877F2]/20 text-[#1877F2] rounded-xl hover:bg-[#1877F2]/20 transition-colors font-semibold text-sm cursor-pointer disabled:opacity-50">
+              className="flex-1 flex items-center justify-center gap-2 h-[40px] px-4 w-full bg-[#1877F2]/10 border border-[#1877F2]/20 text-[#1877F2] rounded-xl hover:bg-[#1877F2]/20 transition-colors font-semibold text-sm cursor-pointer disabled:opacity-50">
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>

@@ -17,12 +17,13 @@ const MainLayout = () => {
     api.get('/auth/me')
       .then((res) => {
         const freshUser = res.data?.data ?? res.data?.user;
+        const onboarding = res.data?.onboarding;
         if (freshUser) {
-          dispatch(loginSuccess({ user: freshUser, token }));
+          dispatch(loginSuccess({ user: freshUser, token, onboarding }));
         }
       })
       .catch(() => {
-        // Silently fail — don't logout user on network error
+        // Silently fail
       });
   }, [isAuthenticated]); // eslint-disable-line
 

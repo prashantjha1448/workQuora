@@ -48,7 +48,7 @@ const Login = () => {
         if (!user.role) {
           navigate('/auth/select-role', { state: { userId: user.id || user._id } });
         } else {
-          navigate(user.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+          navigate('/home');
         }
       }
     } catch (err) {

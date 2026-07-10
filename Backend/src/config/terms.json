@@ -1,0 +1,19 @@
+{
+  "name": "WorkQuora Terms and Conditions",
+  "version": "1.0",
+  "effectiveDate": "2026-07-10",
+  "content": [
+    {
+      "title": "1. Account and Login",
+      "text": "Your account details and credentials must be kept confidential. You are solely responsible for all activities conducted under your user credentials."
+    },
+    {
+      "title": "2. User Data and Platform Conduct",
+      "text": "WorkQuora collects and stores your profile information, job postings, proposals, transactions, and location data to offer marketplace services according to our platform privacy policies."
+    },
+    {
+      "title": "3. Marketplace Escrow and Wallet Rules",
+      "text": "Payments, escrow administration, wallet balances, dispute resolutions, and platform commissions follow direct operational rules outlined on the platform. All users agree to abide by these guidelines."
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const User = require('../models/User');
 const Earnings = require('../models/Earnings');
 const Kyc = require('../models/Kyc');
@@ -16,6 +18,33 @@ const smsService = require('../services/smsService');
 const crypto = require('crypto');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const getOnboardingStatus = (user) => {
+  try {
+    const filePath = path.join(__dirname, '../config/terms.json');
+    const terms = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    
+    const roleSelected = !!(user.role && ['CLIENT', 'FREELANCER'].includes(user.role.toUpperCase()));
+    const currentTermsAccepted = user.termsAcceptedVersion === terms.version && !!user.termsAcceptedAt;
+    const onboardingComplete = roleSelected && currentTermsAccepted;
+
+    return {
+      roleSelected,
+      termsAccepted: currentTermsAccepted,
+      currentTermsVersion: terms.version,
+      acceptedTermsVersion: user.termsAcceptedVersion || null,
+      onboardingComplete
+    };
+  } catch (error) {
+    return {
+      roleSelected: !!user.role,
+      termsAccepted: false,
+      currentTermsVersion: null,
+      acceptedTermsVersion: null,
+      onboardingComplete: false
+    };
+  }
+};
 
 // Session based token response generation (Module 1)
 const sendTokenResponse = async (user, statusCode, req, res) => {
@@ -104,6 +133,7 @@ const sendTokenResponse = async (user, statusCode, req, res) => {
     refreshToken,
     user: userObj,
     data: userObj,
+    onboarding: getOnboardingStatus(user)
   });
 };
 
@@ -178,22 +208,25 @@ exports.registerUser = async (req, res, next) => {
       console.log(`🔑 [DEVELOPER ONLY] Registration OTP for ${user.email} is: ${otp}`);
     }
 
-    // Trigger email in background so slow or blocked SMTP ports do not delay/timeout the API response
-    sendEmail({
-      email: user.email,
-      subject: 'Verify your WorkQuora Account 🚀',
-      message: `Hi ${user.name},\n\nYour registration OTP is: ${otp}\n\nIt expires in 10 minutes.\n\nWorkQuora Team`,
-      otp,
-    }).catch((err) => {
-      console.error('❌ Registration Email sending failed in background:', err.message);
-    });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Verify your WorkQuora account — Your OTP Code',
+        message: `Hi ${user.name},\n\nYour registration OTP is: ${otp}\n\nIt expires in 10 minutes.\n\nWorkQuora Team`,
+        otp,
+      });
+    } catch (err) {
+      console.error('❌ Registration Email sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send verification email. Please try again later.'
+      });
+    }
 
-    // Always return success — user can request resend if email didn't arrive.
     return res.status(200).json({
       success: true,
       message: 'Account created. Verification OTP has been dispatched to your email.',
       emailSent: true,
-      // Include the OTP directly if dev bypass is enabled or in development mode so user can verify easily
       ...((process.env.NODE_ENV === 'development' || process.env.ENABLE_DEV_BYPASS === 'true') && { otp })
     });
   } catch (error) {
@@ -220,15 +253,20 @@ exports.resendOtp = async (req, res, next) => {
     user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    // Send email in background
-    sendEmail({
-      email: user.email,
-      subject: 'WorkQuora — Resend OTP',
-      message: `Your new OTP is: ${otp}. Valid for 10 minutes.`,
-      otp,
-    }).catch((err) => {
-      console.error('Resend email failed in background:', err.message);
-    });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Verify your WorkQuora account — Your OTP Code',
+        message: `Your new OTP is: ${otp}. Valid for 10 minutes.`,
+        otp,
+      });
+    } catch (err) {
+      console.error('❌ Resend OTP Email sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to resend verification email. Please try again later.'
+      });
+    }
 
     return res.json({ 
       success: true, 
@@ -475,7 +513,7 @@ exports.getMe = async (req, res, next) => {
     user.bankDetails = await BankDetails.findOne({ userId: req.user.id }).lean();
     user.totalReviews = await Review.countDocuments({ reviewee: user._id });
     user.password = undefined;
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({ success: true, data: user, onboarding: getOnboardingStatus(user) });
   } catch (error) {
     next(error);
   }
@@ -584,6 +622,7 @@ exports.refreshSession = async (req, res, next) => {
       success: true,
       token: newAccessToken,
       refreshToken: newRefreshToken,
+      onboarding: getOnboardingStatus(user)
     });
   } catch (error) {
     next(error);
@@ -593,21 +632,33 @@ exports.refreshSession = async (req, res, next) => {
 // POST /auth/social
 exports.socialLogin = async (req, res, next) => {
   try {
-    const { provider, token: providerToken, email, name, avatar } = req.body;
-    let verifiedEmail = email;
-    let verifiedName = name;
+    const { provider, token: providerToken } = req.body;
+    let verifiedEmail = null;
+    let verifiedName = null;
+    let verifiedAvatar = null;
+    let googleSubId = null;
 
-    if (provider === 'google' && providerToken) {
+    if (provider === 'google') {
+      if (!providerToken) {
+        return res.status(401).json({ success: false, message: 'Google ID token is required' });
+      }
       try {
         const ticket = await googleClient.verifyIdToken({
           idToken: providerToken,
           audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
-        verifiedEmail = payload.email;
+        
+        if (!payload.sub || !payload.email || payload.email_verified !== true) {
+          return res.status(401).json({ success: false, message: 'Invalid or unverified Google account identity' });
+        }
+        
+        verifiedEmail = payload.email.toLowerCase().trim();
         verifiedName = payload.name;
+        verifiedAvatar = payload.picture;
+        googleSubId = payload.sub;
       } catch (err) {
-        return res.status(401).json({ success: false, message: 'Invalid Google token' });
+        return res.status(401).json({ success: false, message: 'Invalid Google ID token verification failed' });
       }
     } else if (provider === 'facebook' && providerToken) {
       try {
@@ -615,11 +666,14 @@ exports.socialLogin = async (req, res, next) => {
         if (!data.email) {
           return res.status(400).json({ success: false, message: 'Facebook account must have an email attached' });
         }
-        verifiedEmail = data.email;
+        verifiedEmail = data.email.toLowerCase().trim();
         verifiedName = data.name;
+        verifiedAvatar = data.picture?.data?.url;
       } catch (err) {
         return res.status(401).json({ success: false, message: 'Invalid Facebook token' });
       }
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid social provider or token' });
     }
 
     if (!verifiedEmail) return res.status(400).json({ success: false, message: 'Email required' });
@@ -631,11 +685,25 @@ exports.socialLogin = async (req, res, next) => {
         name: verifiedName || verifiedEmail.split('@')[0],
         email: verifiedEmail,
         password: randomPwd,
-        isEmailVerified: true
+        isEmailVerified: true,
+        googleId: provider === 'google' ? googleSubId : null,
+        avatar: verifiedAvatar
       });
       await Earnings.create({ userId: user._id }).catch(() => {});
       const Wallet = require('../models/Wallet');
       await Wallet.create({ user: user._id, userId: user._id }).catch(() => {});
+    } else {
+      if (provider === 'google') {
+        if (!user.googleId) {
+          user.googleId = googleSubId;
+          await user.save();
+        } else if (user.googleId !== googleSubId) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'This email is already associated with a different Google account.' 
+          });
+        }
+      }
     }
 
     await sendTokenResponse(user, 200, req, res);
@@ -664,7 +732,7 @@ exports.assignRole = async (req, res, next) => {
 
     const userObj = user.toObject ? user.toObject() : user;
     userObj.password = undefined;
-    res.status(200).json({ success: true, message: 'Role assigned', data: userObj });
+    res.status(200).json({ success: true, message: 'Role assigned', data: userObj, onboarding: getOnboardingStatus(user) });
   } catch (error) {
     next(error);
   }
@@ -692,15 +760,20 @@ exports.forgotPassword = async (req, res, next) => {
       entityId: user.id
     });
 
-    // Send email in background
-    sendEmail({
-      email: user.email,
-      subject: 'Reset your WorkQuora Password 🔑',
-      message: `Hi ${user.name},\n\nYour password reset OTP is: ${otp}\n\nIt expires in 5 minutes.\n\nWorkQuora Team`,
-      otp,
-    }).catch((err) => {
-      console.error('❌ Forgot Password Email sending failed in background:', err.message);
-    });
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Reset your WorkQuora Password 🔑',
+        message: `Hi ${user.name},\n\nYour password reset OTP is: ${otp}\n\nIt expires in 5 minutes.\n\nWorkQuora Team`,
+        otp,
+      });
+    } catch (err) {
+      console.error('❌ Forgot Password Email sending failed:', err.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send reset password email. Please try again later.'
+      });
+    }
 
     res.status(200).json({ 
       success: true, 

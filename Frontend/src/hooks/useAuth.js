@@ -28,7 +28,7 @@ export const useAuth = () => {
       // Delayed so the caller can show a brief success state before navigating away.
       setTimeout(() => {
         if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-        else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+        else navigate('/home');
       }, 600);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Login failed.'),
@@ -52,7 +52,7 @@ export const useAuth = () => {
       toast.success('Account verified and created successfully!');
       setTimeout(() => {
         if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-        else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+        else navigate('/home');
       }, 600);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Verification failed.'),
@@ -67,7 +67,7 @@ export const useAuth = () => {
       toast.success('Account verified and created successfully!');
       setTimeout(() => {
         if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-        else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+        else navigate('/home');
       }, 600);
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Mobile verification failed.'),
@@ -80,7 +80,7 @@ export const useAuth = () => {
       if (!u) return;
       toast.success(`Welcome, ${u.name?.split(' ')[0]}!`);
       if (!u.role) navigate('/auth/select-role', { state: { userId: u.id } });
-      else navigate(u.role.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      else navigate('/home');
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Social login failed.'),
   });
@@ -90,7 +90,7 @@ export const useAuth = () => {
     onSuccess: (_, roleArg) => {
       dispatch(updateRole(roleArg.toUpperCase()));
       toast.success('Role set!');
-      navigate(roleArg.toLowerCase() === 'client' ? '/client/dashboard' : '/freelancer/dashboard');
+      navigate('/home');
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Failed to set role.'),
   });

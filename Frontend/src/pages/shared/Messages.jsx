@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Send, Phone, Video, MoreVertical, Image as ImageIcon, Paperclip, Loader2, Wifi, WifiOff, ArrowLeft, Home, MapPin, PhoneOff } from 'lucide-react';
+import { Search, Send, Phone, Video, MoreVertical, Image as ImageIcon, Paperclip, Loader2, Wifi, WifiOff, ArrowLeft, Home, MapPin, PhoneOff, Mic, MicOff, VideoOff } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
 import { socketService } from '../../services/socket';
+import { Lightbox } from '../../components/ui/Lightbox';
 
 const LocalVideo = ({ stream }) => {
   const ref = useRef();
@@ -36,6 +37,22 @@ const RemoteAudio = ({ stream }) => {
   return <audio ref={ref} autoPlay className="hidden" />;
 };
 
+// STUN-only by default — this works for many NAT combinations but fails for
+// symmetric NAT / most mobile carrier networks. To make calls reliable across
+// real-world networks, set VITE_TURN_URL (+ VITE_TURN_USERNAME/VITE_TURN_CREDENTIAL)
+// from a real TURN provider (e.g. Twilio, Xirsys, or a self-hosted coturn) in
+// the Frontend .env — never hardcode TURN credentials in source.
+const TURN_URL = import.meta.env.VITE_TURN_URL;
+const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME;
+const TURN_CREDENTIAL = import.meta.env.VITE_TURN_CREDENTIAL;
+
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    ...(TURN_URL ? [{ urls: TURN_URL, username: TURN_USERNAME, credential: TURN_CREDENTIAL }] : []),
+  ],
+};
+
 const Messages = () => {
   const { user, token, onboarding } = useSelector((s) => s.auth);
   const navigate = useNavigate();
@@ -56,7 +73,7 @@ const Messages = () => {
   const activeRoomRef = useRef(activeRoom);
 
   // WebRTC & File Upload State & Refs
-  const [callState, setCallState] = useState('idle'); // 'idle' | 'calling' | 'ringing' | 'connected'
+  const [callState, setCallState] = useState('idle'); // 'idle' | 'calling' | 'ringing' | 'connecting' | 'connected'
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [callerName, setCallerName] = useState('');
   const [callParticipant, setCallParticipant] = useState(null);
@@ -65,6 +82,9 @@ const Messages = () => {
   const [uploading, setUploading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [blockedUsersList, setBlockedUsersList] = useState([]);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -106,10 +126,6 @@ const Messages = () => {
   const remoteStreamRef = useRef(null);
   const fileInputRef = useRef(null);
   const mediaInputRef = useRef(null);
-
-  const rtcConfig = {
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-  };
 
   useEffect(() => {
     activeRoomRef.current = activeRoom;
@@ -244,7 +260,7 @@ const Messages = () => {
         setMessages((prev) =>
           prev.map((m) => {
             const myId = user?._id || user?.id;
-            if (myId && (m.sender === myId || msg.senderId === myId) && m.status !== 'read') {
+            if (myId && (m.sender === myId || m.senderId === myId) && m.status !== 'read') {
               return { ...m, status: 'delivered' };
             }
             return m;
@@ -359,6 +375,14 @@ const Messages = () => {
         setCallState('connected');
       };
 
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+          console.error('WebRTC connection failed — likely no viable path without a TURN server for this network.');
+          alert('Call connection failed. This can happen on restrictive networks without a TURN server.');
+          endCall(true);
+        }
+      };
+
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
@@ -379,7 +403,9 @@ const Messages = () => {
   const answerCall = async () => {
     if (!currentCallOfferRef.current) return;
     const { from, offer, isVideo } = currentCallOfferRef.current;
-    
+    // Leave 'ringing' immediately so Accept/Decline can't be pressed again mid-negotiation.
+    setCallState('connecting');
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -387,7 +413,6 @@ const Messages = () => {
       });
       localStreamRef.current = stream;
       setLocalStreamObj(stream);
-      setCallState('connected');
 
       const pc = new RTCPeerConnection(rtcConfig);
       peerConnectionRef.current = pc;
@@ -400,9 +425,19 @@ const Messages = () => {
         }
       };
 
+      // Only flip to 'connected' once remote media actually arrives, matching startCall.
       pc.ontrack = (e) => {
         remoteStreamRef.current = e.streams[0];
         setRemoteStreamObj(e.streams[0]);
+        setCallState('connected');
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+          console.error('WebRTC connection failed — likely no viable path without a TURN server for this network.');
+          alert('Call connection failed. This can happen on restrictive networks without a TURN server.');
+          endCall(true);
+        }
       };
 
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -441,6 +476,8 @@ const Messages = () => {
     setRemoteStreamObj(null);
     setCallState('idle');
     setCallParticipant(null);
+    setIsMuted(false);
+    setIsCameraOff(false);
 
     if (emit) {
       const targetId = activeRoomRef.current?.otherUserId || currentCallOfferRef.current?.from;
@@ -449,6 +486,22 @@ const Messages = () => {
       }
     }
     currentCallOfferRef.current = null;
+  };
+
+  const toggleMute = () => {
+    const stream = localStreamRef.current;
+    if (!stream) return;
+    const nextMuted = !isMuted;
+    stream.getAudioTracks().forEach((track) => { track.enabled = !nextMuted; });
+    setIsMuted(nextMuted);
+  };
+
+  const toggleCamera = () => {
+    const stream = localStreamRef.current;
+    if (!stream) return;
+    const nextOff = !isCameraOff;
+    stream.getVideoTracks().forEach((track) => { track.enabled = !nextOff; });
+    setIsCameraOff(nextOff);
   };
 
   // --- Chat File Upload & Location Methods ---
@@ -504,6 +557,19 @@ const Messages = () => {
     }
   };
 
+  // Reverse-geocode via the same free bigdatacloud API used by useGeolocation.js
+  const reverseGeocodeAddress = async (latitude, longitude) => {
+    try {
+      const res = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+      );
+      const data = await res.json();
+      return data.locality || data.city || data.principalSubdivision || data.countryName || 'Shared Location';
+    } catch {
+      return 'Shared Location';
+    }
+  };
+
   const sendLocation = () => {
     if (!navigator.geolocation) {
       return alert('Geolocation is not supported by your browser.');
@@ -512,6 +578,7 @@ const Messages = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        const address = await reverseGeocodeAddress(latitude, longitude);
         const socket = socketService.getSocket();
         const roomId = `${activeRoom.jobId}_${activeRoom.otherUserId}`;
         const myId = user?._id || user?.id;
@@ -522,7 +589,7 @@ const Messages = () => {
           roomId,
           text: '',
           fileType: 'location',
-          location: { latitude, longitude, address: 'Shared Location' },
+          location: { latitude, longitude, address },
           senderId: myId,
           senderName: user?.name,
           timestamp: new Date().toISOString(),
@@ -535,7 +602,7 @@ const Messages = () => {
           receiverId: activeRoom.otherUserId,
           text: '',
           fileType: 'location',
-          location: { latitude, longitude, address: 'Shared Location' },
+          location: { latitude, longitude, address },
         });
 
         qc.invalidateQueries({ queryKey: ['conversations'] });
@@ -611,10 +678,11 @@ const Messages = () => {
                   className={`p-4 border-b border-border/50 cursor-pointer hover:bg-accent/50 transition-colors border-l-4 ${activeKey === roomKey ? 'bg-accent/30 border-l-primary' : 'border-l-transparent'}`}>
                   <div className="flex justify-between items-start mb-1">
                     <div className="flex items-center gap-2">
-                      <img 
-                        src={c.profilePic} 
+                      <img
+                        src={c.profilePic}
                         alt={c.name}
-                        className="w-9 h-9 rounded-full object-cover border border-border flex-shrink-0"
+                        className="w-9 h-9 rounded-full object-cover border border-border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={(e) => { e.stopPropagation(); setLightboxSrc(c.profilePic); }}
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.name}`;
@@ -652,10 +720,11 @@ const Messages = () => {
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <img 
-                src={activeRoom.profilePic} 
+              <img
+                src={activeRoom.profilePic}
                 alt={activeRoom.name}
                 className="w-10 h-10 rounded-full object-cover border border-border flex-shrink-0 group-hover:scale-105 transition-transform"
+                onClick={(e) => { e.stopPropagation(); setLightboxSrc(activeRoom.profilePic); }}
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${activeRoom.name}`;
@@ -719,10 +788,11 @@ const Messages = () => {
                   return (
                     <div key={msg._id} className={`flex gap-3 max-w-[78%] ${isOwn ? 'ml-auto flex-row-reverse' : ''}`}>
                       {!isOwn && (
-                        <img 
-                          src={activeRoom.profilePic} 
+                        <img
+                          src={activeRoom.profilePic}
                           alt={msg.senderName || activeRoom.name}
-                          className="w-7 h-7 rounded-full object-cover border border-border flex-shrink-0"
+                          className="w-7 h-7 rounded-full object-cover border border-border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setLightboxSrc(activeRoom.profilePic)}
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderName || activeRoom.name || 'User'}`;
@@ -740,11 +810,11 @@ const Messages = () => {
                               : 'bg-primary/10 text-foreground border border-primary/20 rounded-tl-none'
                         }`}>
                           {msg.fileType === 'image' && msg.fileUrl && (
-                            <img 
-                              src={msg.fileUrl} 
-                              alt="Attached photo" 
-                              className="max-w-xs max-h-60 rounded-lg object-cover cursor-pointer mb-2 hover:opacity-95" 
-                              onClick={() => window.open(msg.fileUrl, '_blank')} 
+                            <img
+                              src={msg.fileUrl}
+                              alt="Attached photo"
+                              className="max-w-xs max-h-60 rounded-lg object-cover cursor-pointer mb-2 hover:opacity-95"
+                              onClick={() => setLightboxSrc(msg.fileUrl)}
                             />
                           )}
                           {msg.fileType === 'video' && msg.fileUrl && (
@@ -774,7 +844,7 @@ const Messages = () => {
                                 marginWidth="0"
                               />
                               <div className="p-2 bg-black/40 text-[10px] flex justify-between items-center">
-                                <span className="truncate">Shared Location</span>
+                                <span className="truncate">{msg.location.address || 'Shared Location'}</span>
                                 <a 
                                   href={`https://www.google.com/maps/search/?api=1&query=${msg.location.latitude},${msg.location.longitude}`} 
                                   target="_blank" 
@@ -928,10 +998,11 @@ const Messages = () => {
             <div className="flex flex-col items-center gap-4 text-center mt-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary shadow-xl animate-pulse">
-                  <img 
-                    src={callParticipant?.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${callParticipant?.name || 'User'}`} 
-                    alt={callParticipant?.name || 'User'} 
-                    className="w-full h-full object-cover" 
+                  <img
+                    src={callParticipant?.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${callParticipant?.name || 'User'}`}
+                    alt={callParticipant?.name || 'User'}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setLightboxSrc(callParticipant?.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${callParticipant?.name || 'User'}`)}
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${callParticipant?.name || 'User'}`;
@@ -949,6 +1020,7 @@ const Messages = () => {
                 <p className="text-sm text-muted-foreground mt-1 capitalize animate-pulse">
                   {callState === 'calling' && 'Calling...'}
                   {callState === 'ringing' && 'Incoming Call...'}
+                  {callState === 'connecting' && 'Connecting...'}
                   {callState === 'connected' && 'Call Active'}
                 </p>
               </div>
@@ -1015,18 +1087,42 @@ const Messages = () => {
                   </button>
                 </>
               ) : (
-                <button 
-                  onClick={() => endCall(true)} 
-                  className="w-14 h-14 bg-destructive hover:bg-destructive/90 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105"
-                  title="Hang Up"
-                >
-                  <PhoneOff className="w-6 h-6 text-white" />
-                </button>
+                <>
+                  {callState === 'connected' && (
+                    <>
+                      <button
+                        onClick={toggleMute}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${isMuted ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                        title={isMuted ? 'Unmute' : 'Mute'}
+                      >
+                        {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                      </button>
+                      {isVideoCall && (
+                        <button
+                          onClick={toggleCamera}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 ${isCameraOff ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                          title={isCameraOff ? 'Turn camera on' : 'Turn camera off'}
+                        >
+                          {isCameraOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+                        </button>
+                      )}
+                    </>
+                  )}
+                  <button
+                    onClick={() => endCall(true)}
+                    className="w-14 h-14 bg-destructive hover:bg-destructive/90 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+                    title="Hang Up"
+                  >
+                    <PhoneOff className="w-6 h-6 text-white" />
+                  </button>
+                </>
               )}
             </div>
           </div>
         </div>
       )}
+
+      <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </div>
   );
 };

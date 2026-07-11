@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import { reviewsApi } from '../api/endpoints';
 
 const formatBudget = (job) => {
   const min = job?.budgetRange?.min;
@@ -37,6 +38,9 @@ const JobDetails = () => {
 
   const [showProposal, setShowProposal] = useState(false);
   const [proposal, setProposal] = useState({ coverLetter: '', bidAmount: '', estimatedDays: '7' });
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
 
   const { data: jobData, isLoading, isError } = useQuery({
     queryKey: ['job', id],
@@ -50,6 +54,32 @@ const JobDetails = () => {
   const isJobOwner = job?.client === user?.id;
   const isFreelancer = role?.toUpperCase() === 'FREELANCER';
   const isClient = role?.toUpperCase() === 'CLIENT';
+
+  // Review-after-completion: figure out who the current viewer should review.
+  const amAssignedFreelancer = !!job?.assignedTo && job.assignedTo === user?.id;
+  const acceptedProposal = proposals.find((p) => p.status === 'accepted');
+  const revieweeId = amAssignedFreelancer ? job?.client : (isJobOwner ? job?.assignedTo : null);
+  const revieweeName = amAssignedFreelancer ? job?.clientInfo?.name : acceptedProposal?.freelancerInfo?.name;
+  const canReview = job?.status === 'completed' && !!revieweeId && (amAssignedFreelancer || isJobOwner);
+
+  const { data: myGivenReviews = [] } = useQuery({
+    queryKey: ['reviews-given', user?.id],
+    queryFn: () => reviewsApi.getGiven(user.id).then((r) => r.data?.data ?? []),
+    enabled: !!user?.id && canReview,
+  });
+  const alreadyReviewed = myGivenReviews.some((r) => String(r.job?._id || r.job) === String(id));
+
+  const addReviewMutation = useMutation({
+    mutationFn: () => reviewsApi.add({ jobId: id, revieweeId, rating: reviewRating, comment: reviewComment }),
+    onSuccess: () => {
+      toast.success('Review submitted! Thank you for your feedback.');
+      setReviewModalOpen(false);
+      setReviewRating(5);
+      setReviewComment('');
+      qc.invalidateQueries({ queryKey: ['reviews-given', user?.id] });
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || 'Failed to submit review.'),
+  });
 
   // Submit proposal — use /proposals/:jobId (correct endpoint)
   const applyMutation = useMutation({
@@ -289,6 +319,21 @@ const JobDetails = () => {
                   <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-4 py-2.5 rounded-xl font-bold text-xs">
                     <CheckCircle2 className="w-4 h-4" /> Funds Released to Freelancer Wallet
                   </div>
+                )}
+
+                {canReview && (
+                  alreadyReviewed ? (
+                    <div className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-2.5 rounded-xl font-bold text-xs">
+                      <Star className="w-4 h-4 fill-current" /> You reviewed this job
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setReviewModalOpen(true)}
+                      className="flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer"
+                    >
+                      <Star className="w-4 h-4" /> Leave a Review
+                    </button>
+                  )
                 )}
 
                 {job.status === 'cancelled' && (
@@ -551,6 +596,61 @@ const JobDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {reviewModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setReviewModalOpen(false)}
+        >
+          <form
+            onSubmit={(e) => { e.preventDefault(); addReviewMutation.mutate(); }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-card border border-border rounded-3xl p-6 shadow-2xl space-y-4"
+          >
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Rate {revieweeName || 'your experience'}</h3>
+              <p className="text-sm text-muted-foreground mt-1">Share your feedback on "{job.title}"</p>
+            </div>
+
+            <div className="flex items-center justify-center gap-1.5 py-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <button type="button" key={i} onClick={() => setReviewRating(i)} className="cursor-pointer">
+                  <Star className={`w-8 h-8 transition-colors ${i <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              required
+              rows={4}
+              maxLength={500}
+              placeholder="How was your experience working together?"
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              className="w-full bg-background border border-border focus:border-primary rounded-xl p-3 text-sm outline-none resize-none text-foreground placeholder:text-muted-foreground/60 transition-colors"
+            />
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setReviewModalOpen(false)}
+                className="flex-1 bg-muted hover:bg-accent text-foreground py-3 rounded-xl font-semibold text-sm transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={addReviewMutation.isPending}
+                className="flex-1 bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-colors cursor-pointer"
+              >
+                {addReviewMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
+                Submit Review
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

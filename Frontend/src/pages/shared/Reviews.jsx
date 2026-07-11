@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Star, ChevronLeft } from 'lucide-react';
 import api, { getApiData } from '../../services/api';
+import { reviewsApi } from '../../api/endpoints';
 
 const PAGE_SIZE = 5;
 
@@ -21,6 +22,13 @@ const useReviews = (userId) =>
   useQuery({
     queryKey: ['reviews', userId],
     queryFn: () => api.get(`/reviews/${userId}`).then(getApiData),
+    enabled: !!userId,
+  });
+
+const useReviewsGiven = (userId) =>
+  useQuery({
+    queryKey: ['reviews-given', userId],
+    queryFn: () => reviewsApi.getGiven(userId).then((r) => r.data?.data ?? []),
     enabled: !!userId,
   });
 
@@ -93,6 +101,37 @@ const ReviewCard = ({ review }) => (
   </div>
 );
 
+const GivenReviewCard = ({ review }) => (
+  <div className="bg-card border border-border rounded-2xl p-5">
+    <div className="flex items-start gap-3">
+      {review.reviewee?.avatar ? (
+        <img
+          src={review.reviewee.avatar}
+          alt={review.reviewee.name}
+          className="w-10 h-10 rounded-xl object-cover shrink-0"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
+          {review.reviewee?.name?.[0]?.toUpperCase() || 'U'}
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <p className="font-semibold text-sm text-foreground truncate">{review.reviewee?.name || 'Anonymous'}</p>
+          <span className="text-[11px] text-muted-foreground shrink-0">
+            {new Date(review.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+          </span>
+        </div>
+        {review.job?.title && <p className="text-xs text-primary truncate mt-0.5">{review.job.title}</p>}
+        <StarRow rating={review.rating} />
+        {review.comment && (
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{review.comment}</p>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const SkeletonCard = () => (
   <div className="bg-card border border-border rounded-2xl p-5 animate-pulse">
     <div className="flex items-start gap-3">
@@ -119,11 +158,14 @@ const Reviews = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('received');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [givenVisibleCount, setGivenVisibleCount] = useState(PAGE_SIZE);
 
   const { data: reviews = [], isLoading } = useReviews(userId);
+  const { data: reviewsGiven = [], isLoading: givenLoading } = useReviewsGiven(userId);
   const { data: subject } = useReviewSubjectHeader(userId);
 
   const visibleReviews = reviews.slice(0, visibleCount);
+  const visibleGivenReviews = reviewsGiven.slice(0, givenVisibleCount);
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -199,11 +241,29 @@ const Reviews = () => {
                   )}
                 </>
               )
+            ) : givenLoading ? (
+              <div className="space-y-3">
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            ) : reviewsGiven.length === 0 ? (
+              <EmptyState label="No reviews given yet" />
             ) : (
-              <EmptyState
-                label="Not available yet"
-                hint="The backend only supports fetching reviews a user has received — there's no endpoint yet for reviews they've given to others."
-              />
+              <>
+                <div className="space-y-3">
+                  {visibleGivenReviews.map((r) => (
+                    <GivenReviewCard key={r._id} review={r} />
+                  ))}
+                </div>
+                {givenVisibleCount < reviewsGiven.length && (
+                  <button
+                    onClick={() => setGivenVisibleCount((c) => c + PAGE_SIZE)}
+                    className="w-full mt-4 py-2.5 text-xs font-bold text-primary border border-border rounded-xl hover:bg-accent transition-colors"
+                  >
+                    Load more
+                  </button>
+                )}
+              </>
             )}
           </>
         )}

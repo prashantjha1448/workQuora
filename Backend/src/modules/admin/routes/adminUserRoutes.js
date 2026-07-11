@@ -20,7 +20,7 @@ router.put('/:userId/activate', requirePermission('suspend_user'), activateUser)
 router.put('/:userId/block',   requirePermission('block_user'), blockUser);
 router.put('/:userId/unblock', requirePermission('block_user'), unblockUser);
 router.post('/request-otp',    requirePermission('view_users'), requestSensitiveOTP);
-router.put('/:userId/kyc',     requirePermission('view_users'), modifyUserKyc);
-router.put('/:userId/bank',    requirePermission('view_users'), modifyUserBank);
+router.put('/:userId/kyc',     requirePermission('modify_kyc'), modifyUserKyc);
+router.put('/:userId/bank',    requirePermission('modify_bank'), modifyUserBank);
 
 module.exports = router;

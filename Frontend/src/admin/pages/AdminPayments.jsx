@@ -25,6 +25,13 @@ const AdminPayments = () => {
   const [earnings, setEarnings] = useState(null);
   const [loadingEarnings, setLoadingEarnings] = useState(true);
 
+  // Withdrawals tab states
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [loadingWithdrawals, setLoadingWithdrawals] = useState(true);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
+  const [withdrawalNote, setWithdrawalNote] = useState('');
+  const [processingWithdrawal, setProcessingWithdrawal] = useState(false);
+
   // Fetch Transactions
   const fetchTransactions = useCallback(async (page = 1) => {
     setLoadingTxns(true);
@@ -70,6 +77,19 @@ const AdminPayments = () => {
     }
   }, []);
 
+  // Fetch Withdrawals
+  const fetchWithdrawals = useCallback(async () => {
+    setLoadingWithdrawals(true);
+    try {
+      const res = await adminApi.get('/payments/withdrawals');
+      setWithdrawals(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingWithdrawals(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'transactions') {
       fetchTransactions();
@@ -77,8 +97,29 @@ const AdminPayments = () => {
       fetchWallets();
     } else if (activeTab === 'earnings') {
       fetchEarnings();
+    } else if (activeTab === 'withdrawals') {
+      fetchWithdrawals();
     }
-  }, [activeTab, fetchTransactions, fetchWallets, fetchEarnings]);
+  }, [activeTab, fetchTransactions, fetchWallets, fetchEarnings, fetchWithdrawals]);
+
+  const closeWithdrawalModal = () => {
+    setSelectedWithdrawal(null);
+    setWithdrawalNote('');
+  };
+
+  const handleProcessWithdrawal = async (status) => {
+    if (!selectedWithdrawal) return;
+    setProcessingWithdrawal(true);
+    try {
+      await adminApi.patch(`/payments/withdrawals/${selectedWithdrawal._id}/process`, { status, adminNote: withdrawalNote });
+      closeWithdrawalModal();
+      fetchWithdrawals();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to process withdrawal.');
+    } finally {
+      setProcessingWithdrawal(false);
+    }
+  };
 
   const viewTransactionDetail = async (id) => {
     try {
@@ -135,6 +176,7 @@ const AdminPayments = () => {
           { id: 'transactions', label: 'Transactions History' },
           { id: 'wallets', label: 'User Wallets' },
           { id: 'earnings', label: 'Earnings Overview' },
+          { id: 'withdrawals', label: 'Withdrawals' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -369,6 +411,54 @@ const AdminPayments = () => {
         </div>
       )}
 
+      {/* WITHDRAWALS TAB */}
+      {activeTab === 'withdrawals' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
+            {loadingWithdrawals ? (
+              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+            ) : withdrawals.length === 0 ? (
+              <div className="text-center py-12 text-gray-500 text-sm">No pending withdrawals.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                      {['User', 'Amount', 'Bank Account', 'Requested', 'Actions'].map((h) => (
+                        <th key={h} className="px-5 py-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y" style={{ divideColor: 'rgba(255,255,255,0.04)' }}>
+                    {withdrawals.map((w) => (
+                      <tr key={w._id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-3">
+                          <p className="text-xs font-semibold text-gray-200">{w.userId?.name || '—'}</p>
+                          <p className="text-[10px] text-gray-500">{w.userId?.email || '—'}</p>
+                        </td>
+                        <td className="px-5 py-3 text-xs font-bold text-white">₹{(w.amountFormatted || 0).toLocaleString()}</td>
+                        <td className="px-5 py-3 text-xs text-gray-400">
+                          {w.bankAccounts?.[0] ? `${w.bankAccounts[0].bankName} •••• ${String(w.bankAccounts[0].accountNumber).slice(-4)}` : '—'}
+                        </td>
+                        <td className="px-5 py-3 text-[10px] text-gray-500">{new Date(w.createdAt).toLocaleString()}</td>
+                        <td className="px-5 py-3">
+                          <button
+                            onClick={() => setSelectedWithdrawal(w)}
+                            className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-primary transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Transaction Detail Modal */}
       {selectedTxn && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setSelectedTxn(null)}>
@@ -475,6 +565,77 @@ const AdminPayments = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Withdrawal Review Modal */}
+      {selectedWithdrawal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={closeWithdrawalModal}>
+          <div className="w-full max-w-lg rounded-2xl border p-6 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}
+            style={{ background: '#12121e', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-white">Review Withdrawal Request</h2>
+              <button onClick={closeWithdrawalModal} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                {[
+                  ['User', selectedWithdrawal.userId?.name || '—'],
+                  ['Email', selectedWithdrawal.userId?.email || '—'],
+                  ['Amount', `₹${(selectedWithdrawal.amountFormatted || 0).toLocaleString()}`],
+                  ['Requested', new Date(selectedWithdrawal.createdAt).toLocaleString()],
+                ].map(([k, v]) => (
+                  <div key={k} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{k}</p>
+                    <p className="text-xs font-semibold text-gray-200 mt-0.5 truncate select-all">{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              {selectedWithdrawal.bankAccounts?.[0] && (
+                <div className="p-4 rounded-xl space-y-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Bank Account</h3>
+                  <div className="text-xs text-gray-300 space-y-1">
+                    <p>Bank: <span className="font-semibold text-white">{selectedWithdrawal.bankAccounts[0].bankName}</span></p>
+                    <p>Account No: <span className="font-mono select-all text-white">{selectedWithdrawal.bankAccounts[0].accountNumber}</span></p>
+                    <p>IFSC: <span className="font-mono select-all text-white">{selectedWithdrawal.bankAccounts[0].ifscCode}</span></p>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Admin Note (Optional)</label>
+                <textarea
+                  value={withdrawalNote}
+                  onChange={(e) => setWithdrawalNote(e.target.value)}
+                  placeholder="e.g. Verified bank details, payout initiated via NEFT..."
+                  rows="2"
+                  className="w-full px-3 py-2 rounded-xl text-xs text-white placeholder:text-gray-600 outline-none focus:ring-2 focus:ring-primary/30"
+                  style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.08)' }}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  disabled={processingWithdrawal}
+                  onClick={() => handleProcessWithdrawal('failed')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {processingWithdrawal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Reject & Refund Wallet'}
+                </button>
+                <button
+                  type="button"
+                  disabled={processingWithdrawal}
+                  onClick={() => handleProcessWithdrawal('completed')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {processingWithdrawal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Approve & Mark Paid'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

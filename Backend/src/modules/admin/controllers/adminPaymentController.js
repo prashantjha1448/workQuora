@@ -191,6 +191,14 @@ exports.processWithdrawal = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
+    await createAuditLog({
+      admin: req.admin, actionType: 'PAYMENT_WITHDRAWAL_PROCESS', targetType: 'PAYMENT',
+      targetId: transaction._id,
+      description: `Withdrawal ${transaction._id} marked as ${status} for user ${transaction.userId}.${adminNote ? ` Note: ${adminNote}` : ''}`,
+      newData: { status, amount: transaction.amount },
+      req, severity: 'CRITICAL',
+    });
+
     // Emit live update
     const io = req.app.get('io');
     if (io) {

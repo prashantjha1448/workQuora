@@ -1,5 +1,6 @@
 const Ad = require('../models/Ad');
 const storageService = require('../services/storageService');
+const { createAuditLog } = require('../modules/admin/utils/adminAuditLogger');
 
 // @desc    Get an active ad for the client
 // @route   GET /api/v1/ads/active
@@ -100,6 +101,14 @@ exports.createAd = async (req, res, next) => {
       durationSeconds: Number(durationSeconds) || 5
     });
 
+    await createAuditLog({
+      admin: req.admin, actionType: 'AD_CREATE', targetType: 'AD',
+      targetId: ad._id, targetName: ad.brandName,
+      description: `Created ad campaign "${ad.title}" for brand ${ad.brandName}.`,
+      newData: { title: ad.title, brandName: ad.brandName, status: ad.status, platform: ad.platform },
+      req, severity: 'MEDIUM',
+    });
+
     res.status(201).json({ success: true, data: ad });
   } catch (error) {
     next(error);
@@ -133,6 +142,8 @@ exports.updateAd = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid brand name characters' });
     }
 
+    const oldData = { title: ad.title, brandName: ad.brandName, status: ad.status, platform: ad.platform, targetLink: ad.targetLink };
+
     // Handle new media upload if provided
     if (req.file) {
       // Delete old media
@@ -151,6 +162,16 @@ exports.updateAd = async (req, res, next) => {
     if (updateData.endDate) updateData.endDate = new Date(updateData.endDate);
 
     const updatedAd = await Ad.findByIdAndUpdate(adId, updateData, { new: true, runValidators: true });
+
+    await createAuditLog({
+      admin: req.admin, actionType: 'AD_UPDATE', targetType: 'AD',
+      targetId: updatedAd._id, targetName: updatedAd.brandName,
+      description: `Updated ad campaign "${updatedAd.title}" for brand ${updatedAd.brandName}.`,
+      oldData,
+      newData: { title: updatedAd.title, brandName: updatedAd.brandName, status: updatedAd.status, platform: updatedAd.platform, targetLink: updatedAd.targetLink },
+      req, severity: 'MEDIUM',
+    });
+
     res.status(200).json({ success: true, data: updatedAd });
   } catch (error) {
     next(error);
@@ -173,6 +194,15 @@ exports.deleteAd = async (req, res, next) => {
     }
 
     await ad.deleteOne();
+
+    await createAuditLog({
+      admin: req.admin, actionType: 'AD_DELETE', targetType: 'AD',
+      targetId: ad._id, targetName: ad.brandName,
+      description: `Deleted ad campaign "${ad.title}" for brand ${ad.brandName}.`,
+      oldData: { title: ad.title, brandName: ad.brandName, status: ad.status },
+      req, severity: 'HIGH',
+    });
+
     res.status(200).json({ success: true, message: 'Ad deleted successfully' });
   } catch (error) {
     next(error);

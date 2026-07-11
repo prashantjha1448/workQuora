@@ -44,13 +44,6 @@ const AdminAuditLogs = () => {
     CRITICAL: 'bg-red-500/10 text-red-400 border border-red-500/20 animate-pulse',
   };
 
-  const getLogSeverity = (actionType) => {
-    if (['ADMIN_DELETE', 'ADMIN_SUSPEND', 'PAYMENT_REFUND', 'USER_BLOCK'].includes(actionType)) return 'CRITICAL';
-    if (['ADMIN_CREATE', 'ADMIN_ACTIVATE', 'USER_SUSPEND', 'KYC_MODIFY', 'BANK_MODIFY'].includes(actionType)) return 'HIGH';
-    if (['TASK_CANCEL', 'TASK_COMPLETE'].includes(actionType)) return 'MEDIUM';
-    return 'LOW';
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -102,7 +95,7 @@ const AdminAuditLogs = () => {
                 </thead>
                 <tbody className="divide-y" style={{ divideColor: 'rgba(255,255,255,0.04)' }}>
                   {logs.map((log) => {
-                    const sev = getLogSeverity(log.actionType);
+                    const sev = log.severity || 'LOW';
                     return (
                       <tr key={log._id} className="hover:bg-white/[0.02] transition-colors">
                         <td className="px-5 py-3">

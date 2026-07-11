@@ -1,5 +1,6 @@
 const Dispute = require('../../../models/Dispute');
 const disputeService = require('../../../services/disputeService');
+const { createAuditLog } = require('../utils/adminAuditLogger');
 
 exports.getAllDisputes = async (req, res, next) => {
   try {
@@ -84,6 +85,14 @@ exports.adminResolveDispute = async (req, res, next) => {
       req.admin.id,
       note
     );
+
+    await createAuditLog({
+      admin: req.admin, actionType: 'DISPUTE_RESOLVE', targetType: 'DISPUTE',
+      targetId: dispute._id,
+      description: `Resolved dispute ${dispute._id}. Split: Client refund ₹${Number(clientRefund) || 0}, Freelancer payout ₹${Number(freelancerPayout) || 0}.${note ? ` Note: ${note}` : ''}`,
+      newData: { status: dispute.status, resolutionSplit: dispute.resolutionSplit },
+      req, severity: 'HIGH',
+    });
 
     res.status(200).json({ success: true, data: dispute });
   } catch (err) {

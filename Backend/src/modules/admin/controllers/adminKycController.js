@@ -1,5 +1,6 @@
 const Kyc = require('../../../models/Kyc');
 const User = require('../../../models/User');
+const { createAuditLog } = require('../utils/adminAuditLogger');
 
 // Helper to recalculate status
 const recalculateKycStatus = async (kycId, io) => {
@@ -99,13 +100,15 @@ exports.reviewKycStep = async (req, res, next) => {
     const io = req.app.get('io');
     await recalculateKycStatus(kyc._id, io);
 
-    const { createAuditLog } = require('../../../utils/auditLogger');
-    await createAuditLog(req, {
-      userId: req.admin.id,
-      action: isApprove ? 'KYC_APPROVAL' : 'KYC_REJECTION',
-      entity: 'Kyc',
-      entityId: kyc._id,
-      metadata: { step, decision, reason }
+    await createAuditLog({
+      admin: req.admin,
+      actionType: 'USER_KYC_MODIFY',
+      targetType: 'USER',
+      targetId: kyc.userId,
+      description: `KYC step "${step}" ${isApprove ? 'approved' : 'rejected'} for user ${kyc.userId}.${!isApprove ? ` Reason: ${kyc.rejectionReason}` : ''}`,
+      newData: { step, decision },
+      req,
+      severity: 'HIGH',
     });
 
     res.status(200).json({ success: true, message: `KYC step ${step} marked as ${decision}` });

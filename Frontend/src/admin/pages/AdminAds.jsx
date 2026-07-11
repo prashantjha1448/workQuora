@@ -7,12 +7,14 @@ const AdminAds = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  
-  const [formData, setFormData] = useState({
+  const [editingAd, setEditingAd] = useState(null);
+
+  const emptyFormData = {
     title: '', brandName: '', description: '', targetLink: '',
     mediaType: 'IMAGE', platform: 'BOTH', startDate: '', endDate: '',
     dailyFrequency: 3, durationSeconds: 5
-  });
+  };
+  const [formData, setFormData] = useState(emptyFormData);
   const [mediaFile, setMediaFile] = useState(null);
 
   const fetchAds = async () => {
@@ -40,31 +42,50 @@ const AdminAds = () => {
     setMediaFile(e.target.files[0]);
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingAd(null);
+    setFormData(emptyFormData);
+    setMediaFile(null);
+  };
+
+  const openEditModal = (ad) => {
+    setEditingAd(ad);
+    setFormData({
+      title: ad.title || '', brandName: ad.brandName || '', description: ad.description || '',
+      targetLink: ad.targetLink || '', mediaType: ad.mediaType || 'IMAGE', platform: ad.platform || 'BOTH',
+      startDate: ad.startDate ? ad.startDate.slice(0, 10) : '', endDate: ad.endDate ? ad.endDate.slice(0, 10) : '',
+      dailyFrequency: ad.dailyFrequency ?? 3, durationSeconds: ad.durationSeconds ?? 5,
+    });
+    setMediaFile(null);
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
+
     try {
       const form = new FormData();
       Object.keys(formData).forEach(key => form.append(key, formData[key]));
       if (mediaFile) {
         form.append('media', mediaFile);
       }
-      
-      await adminApi.post('/ads', form, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      setShowModal(false);
-      setFormData({
-        title: '', brandName: '', description: '', targetLink: '',
-        mediaType: 'IMAGE', platform: 'BOTH', startDate: '', endDate: '',
-        dailyFrequency: 3, durationSeconds: 5
-      });
-      setMediaFile(null);
+
+      if (editingAd) {
+        await adminApi.put(`/ads/${editingAd._id}`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        await adminApi.post('/ads', form, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
+      closeModal();
       fetchAds();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create ad');
+      alert(err.response?.data?.message || `Failed to ${editingAd ? 'update' : 'create'} ad`);
     } finally {
       setSaving(false);
     }
@@ -76,7 +97,7 @@ const AdminAds = () => {
       await adminApi.delete(`/ads/${id}`);
       fetchAds();
     } catch (err) {
-      alert('Failed to delete ad');
+      alert(err.response?.data?.message || 'Failed to delete ad');
     }
   };
 
@@ -98,7 +119,7 @@ const AdminAds = () => {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary" /></div>
       ) : (
-        <div className="bg-[#151521] border border-white/5 rounded-xl overflow-hidden">
+        <div className="bg-[#151521] border border-white/5 rounded-xl overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-300">
             <thead className="bg-[#1a1a2e] text-xs uppercase text-gray-400">
               <tr>
@@ -141,9 +162,14 @@ const AdminAds = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button onClick={() => handleDelete(ad._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex justify-end gap-1">
+                      <button onClick={() => openEditModal(ad)} className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(ad._id)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -157,13 +183,13 @@ const AdminAds = () => {
         </div>
       )}
 
-      {/* CREATE AD MODAL */}
+      {/* CREATE / EDIT AD MODAL */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#151521] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-white">Create Ad Campaign</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">✕</button>
+              <h2 className="text-lg font-bold text-white">{editingAd ? 'Edit Ad Campaign' : 'Create Ad Campaign'}</h2>
+              <button onClick={closeModal} className="text-gray-400 hover:text-white">✕</button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -197,8 +223,8 @@ const AdminAds = () => {
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Upload Media</label>
-                  <input type="file" accept={formData.mediaType === 'IMAGE' ? 'image/*' : 'video/*'} onChange={handleFileChange} required className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Upload Media{editingAd ? ' (Optional — leave blank to keep existing)' : ''}</label>
+                  <input type="file" accept={formData.mediaType === 'IMAGE' ? 'image/*' : 'video/*'} onChange={handleFileChange} required={!editingAd} className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
                 </div>
               </div>
 
@@ -233,9 +259,9 @@ const AdminAds = () => {
               </div>
 
               <div className="pt-4 border-t border-white/5 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-sm font-semibold text-gray-400 hover:text-white">Cancel</button>
-                <button type="submit" disabled={saving || !mediaFile} className="px-5 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : 'Launch Campaign'}
+                <button type="button" onClick={closeModal} className="px-5 py-2 text-sm font-semibold text-gray-400 hover:text-white">Cancel</button>
+                <button type="submit" disabled={saving || (!editingAd && !mediaFile)} className="px-5 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : editingAd ? 'Save Changes' : 'Launch Campaign'}
                 </button>
               </div>
             </form>

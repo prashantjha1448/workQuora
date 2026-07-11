@@ -5,11 +5,12 @@ import adminApi from '../api/adminApi';
 
 const permissionsList = [
   'view_users',
-  'suspend_users',
-  'block_users',
+  'suspend_user',
+  'block_user',
   'modify_kyc',
+  'modify_bank',
   'view_tasks',
-  'cancel_tasks',
+  'cancel_task',
   'view_payments',
   'process_refund',
   'view_analytics',

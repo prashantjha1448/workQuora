@@ -110,7 +110,7 @@ const OnboardingOverlay = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#09090B]/98 z-[9999] flex items-center justify-center p-6 backdrop-blur-md overflow-y-auto select-none">
+    <div className="fixed inset-0 bg-[#09090B]/98 z-[9999] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md overflow-y-auto select-none">
       <AnimatePresence mode="wait">
         {!onboarding.roleSelected ? (
           <motion.div
@@ -118,9 +118,9 @@ const OnboardingOverlay = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-8 rounded-3xl text-center shadow-2xl my-auto text-zinc-100"
+            className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-5 sm:p-8 rounded-3xl text-center shadow-2xl my-auto text-zinc-100"
           >
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">Choose Your Role</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Choose Your Role</h2>
             <p className="text-zinc-400 mt-2">Before continuing, please choose how you want to use WorkQuora.</p>
 
             {roleError && (
@@ -187,7 +187,7 @@ const OnboardingOverlay = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-8 rounded-3xl shadow-2xl my-auto text-zinc-100 flex flex-col max-h-[90vh]"
+            className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 p-5 sm:p-8 rounded-3xl shadow-2xl my-auto text-zinc-100 flex flex-col max-h-[90vh]"
           >
             <div className="text-center mb-6">
               <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-full w-max mx-auto mb-3">

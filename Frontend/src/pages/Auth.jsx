@@ -356,12 +356,12 @@ const Auth = () => {
       </div>
 
       {/* RIGHT SIDE: Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 relative">
         <motion.div
           variants={slideInRight}
           initial="hidden"
           animate="visible"
-          className="max-w-md w-full bg-card p-8 sm:p-10 rounded-3xl border border-border shadow-xl relative z-10"
+          className="max-w-md w-full bg-card p-6 sm:p-8 md:p-10 rounded-3xl border border-border shadow-xl relative z-10"
         >
 
           {/* Mobile Logo */}

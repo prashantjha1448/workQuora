@@ -189,7 +189,7 @@ const Wallet = () => {
   const isKycComplete = wallet?.kycVerified && wallet?.hasWithdrawalPin && wallet?.bankAccounts?.length > 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 lg:p-10 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
@@ -210,7 +210,7 @@ const Wallet = () => {
         {/* Lock Screen Conditions */}
         {!wallet?.hasWithdrawalPin ? (
           /* 1. KEY LOCK SETUP REQUIRED (No PIN created during KYC) */
-          <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden mt-12">
+          <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden mt-12">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
             
@@ -232,7 +232,7 @@ const Wallet = () => {
           </div>
         ) : !isUnlocked ? (
           /* 2. PIN SECURE UNLOCK CARD (Locked by default) */
-          <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden mt-12">
+          <div className="max-w-md mx-auto bg-card border border-border/80 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden mt-12">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
 
@@ -407,7 +407,7 @@ const Wallet = () => {
                   ))}
                 </div>
               ) : transactions.length === 0 ? (
-                <div className="p-16 text-center text-muted-foreground">
+                <div className="p-8 sm:p-16 text-center text-muted-foreground">
                   <WalletIcon className="w-12 h-12 mx-auto mb-4 opacity-20 text-muted-foreground" />
                   <p className="font-semibold text-base text-foreground/80">No transactions recorded</p>
                   <p className="text-xs mt-1">Start adding funds or accepting milestones to populate ledger logs.</p>

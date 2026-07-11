@@ -11,7 +11,6 @@ import AdminLayout from './admin/components/AdminLayout';
 // ── Auth pages (NOT lazy — entry points, must load instantly) ─────────────────
 import Auth from './pages/Auth';
 import Login from './features/auth/ui/Login';
-import SelectRole from './features/auth/ui/SelectRole';
 import OnboardingOverlay from './components/OnboardingOverlay';
 
 // ── Lazy-loaded public pages ──────────────────────────────────────────────────
@@ -146,7 +145,7 @@ const router = createBrowserRouter([
       // Auth routes (eager — entry points)
       { path: '/auth',             element: <Auth />,       loader: guestLoader },
       { path: '/auth/login',       element: <Login />,      loader: guestLoader },
-      { path: '/auth/select-role', element: <SelectRole />, loader: authLoader },
+      
 
       // Client dashboard (sidebar layout)
       {

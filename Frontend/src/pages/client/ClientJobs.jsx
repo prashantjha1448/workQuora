@@ -56,7 +56,7 @@ const ClientJobs = () => {
 
         {/* Empty State */}
         {!isLoading && !error && jobs.length === 0 && (
-          <div className="bg-card border border-border rounded-3xl p-16 text-center shadow-lg">
+          <div className="bg-card border border-border rounded-3xl p-8 sm:p-16 text-center shadow-lg">
             <Briefcase className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
             <h3 className="text-lg font-bold text-foreground mb-2">No jobs posted yet</h3>
             <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">

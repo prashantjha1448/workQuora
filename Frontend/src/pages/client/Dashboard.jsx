@@ -96,7 +96,7 @@ const ClientDashboard = () => {
 
         {/* Stats */}
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-card border border-border p-5 rounded-2xl shadow-sm animate-pulse">
                 <div className="h-4 bg-muted rounded w-2/3 mb-3" />
@@ -105,7 +105,7 @@ const ClientDashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             {stats.map((s, i) => (
               <AnimatedCard key={s.label} className="p-5" delay={i * 0.1}>
                 <div className="flex items-center justify-between mb-3">

@@ -388,13 +388,11 @@ exports.getMyJobs = async (req, res, next) => {
 // @access  Public
 exports.getLandingStats = async (req, res, next) => {
   try {
-    const activeJobs = await Job.countDocuments({ status: 'open' });
-    const freelancers = await User.countDocuments({ role: 'FREELANCER' });
-    const clients = await User.countDocuments({ role: 'CLIENT' });
-
-    // Calculate sum of allTimeIncome from Earnings collection
-    const earningsAgg = await Earnings.aggregate([
-      { $group: { _id: null, total: { $sum: '$allTimeIncome' } } }
+    const [activeJobs, freelancers, clients, earningsAgg] = await Promise.all([
+      Job.countDocuments({ status: 'open' }),
+      User.countDocuments({ role: 'FREELANCER' }),
+      User.countDocuments({ role: 'CLIENT' }),
+      Earnings.aggregate([{ $group: { _id: null, total: { $sum: '$allTimeIncome' } } }]),
     ]);
     const totalPaidOut = earningsAgg[0]?.total || 0;
 

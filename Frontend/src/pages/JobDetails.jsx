@@ -129,14 +129,14 @@ const JobDetails = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 lg:p-10 transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-10 transition-colors duration-300">
       <div className="max-w-5xl mx-auto space-y-6">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground text-sm transition-colors cursor-pointer">
           <ChevronLeft className="w-4 h-4" /> Back
         </button>
 
         {/* Hero Card */}
-        <div className="bg-card border border-border rounded-3xl p-8 relative overflow-hidden shadow-sm">
+        <div className="bg-card border border-border rounded-3xl p-5 sm:p-8 relative overflow-hidden shadow-sm">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <span className="bg-primary/20 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase">{job.category}</span>

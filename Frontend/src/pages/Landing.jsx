@@ -161,7 +161,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto px-6">
 
           {/* 1. Welcome Hero Section */}
-          <section className="text-center py-10 md:py-12 mb-8 bg-white dark:bg-[#0d0d15] rounded-3xl border border-slate-200/60 dark:border-white/5 shadow-sm p-8 relative overflow-hidden transition-all duration-300">
+          <section className="text-center py-10 md:py-12 mb-8 bg-white dark:bg-[#0d0d15] rounded-3xl border border-slate-200/60 dark:border-white/5 shadow-sm p-5 sm:p-8 relative overflow-hidden transition-all duration-300">
             <div
               className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.07), transparent 65%)' }}
@@ -225,7 +225,7 @@ const Landing = () => {
               {isClientHome ? (
                 <>
                   {/* Client header + primary CTA */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                       Your Active Jobs
                     </h2>
@@ -405,7 +405,7 @@ const Landing = () => {
                           <img
                             src={featuredAd.mediaUrl}
                             alt={featuredAd.title}
-                            className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay"
+                            className="absolute inset-0 w-full h-full object-cover"
                           />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
@@ -504,7 +504,7 @@ const Landing = () => {
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="relative z-10 w-full max-w-6xl mx-auto px-6 py-32 text-center"
+          className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-28 md:py-32 text-center"
         >
 
           <motion.div variants={fadeInUp} className="mb-8">
@@ -514,7 +514,7 @@ const Landing = () => {
             </span>
           </motion.div>
 
-          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.1]">
+          <motion.h1 variants={fadeInUp} className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.1]">
             Find Work.{' '}
             <span className="bg-gradient-to-r from-[#1E00A9] via-[#6366F1] to-[#10B981] bg-clip-text text-transparent">
               Get Hired.
@@ -522,7 +522,7 @@ const Landing = () => {
             Build Together.
           </motion.h1>
 
-          <motion.p variants={fadeInUp} className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+          <motion.p variants={fadeInUp} className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             Connect with verified clients and skilled freelancers. Secure escrow payments, real-time chat, KYC-verified profiles.
           </motion.p>
 
@@ -555,7 +555,7 @@ const Landing = () => {
               whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(30,0,169,0.25)' }}
               whileTap={{ scale: 0.98 }}
               onClick={() => scrollToHowItWorks('clients')}
-              className="px-8 py-4 bg-primary text-white rounded-xl font-semibold text-lg shadow-lg shadow-primary/20 flex items-center gap-2 border-none cursor-pointer"
+              className="px-6 py-3.5 sm:px-8 sm:py-4 bg-primary text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg shadow-primary/20 flex items-center gap-2 border-none cursor-pointer"
             >
               I Want to Hire <ArrowRight className="w-5 h-5" />
             </motion.button>
@@ -563,7 +563,7 @@ const Landing = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => scrollToHowItWorks('freelancers')}
-              className="px-8 py-4 bg-[hsl(var(--surface))] text-primary rounded-xl font-semibold text-lg border-2 border-primary/20 hover:border-primary/50 transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3.5 sm:px-8 sm:py-4 bg-[hsl(var(--surface))] text-primary rounded-xl font-semibold text-base sm:text-lg border-2 border-primary/20 hover:border-primary/50 transition-colors flex items-center gap-2 cursor-pointer"
             >
               I Want to Work
             </motion.button>
@@ -572,7 +572,7 @@ const Landing = () => {
           {/* Stats Strip */}
           <motion.div 
             variants={fadeInUp} 
-            className="flex flex-wrap items-center justify-center gap-12 bg-[hsl(var(--surface))] border border-border/80 rounded-3xl p-8 max-w-4xl mx-auto shadow-sm"
+            className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 md:gap-12 bg-[hsl(var(--surface))] border border-border/80 rounded-3xl p-5 sm:p-8 max-w-4xl mx-auto shadow-sm"
           >
             <div className="flex flex-col items-center">
               <span className="text-3xl font-extrabold text-foreground">
@@ -609,8 +609,8 @@ const Landing = () => {
       </section>
 
       {/* How WorkQuora Works */}
-      <section id="how-it-works" className="py-24 bg-[hsl(var(--surface-2))] border-t border-border/40 scroll-mt-16">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="how-it-works" className="py-16 md:py-24 bg-[hsl(var(--surface-2))] border-t border-border/40 scroll-mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={staggerContainer} className="text-center mb-12">
             <motion.p variants={fadeInUp} className="text-primary font-semibold text-xs uppercase tracking-wider mb-2">
               Step-by-Step Guide
@@ -621,12 +621,12 @@ const Landing = () => {
           </motion.div>
 
           {/* Toggle Switch */}
-          <div className="flex justify-center mb-16">
-            <div className="bg-[hsl(var(--surface))] border border-border p-1 rounded-full flex gap-1 relative shadow-sm">
+          <div className="flex justify-center mb-16 px-2">
+            <div className="max-w-full bg-[hsl(var(--surface))] border border-border p-1 rounded-full flex gap-1 relative shadow-sm">
               <button
                 type="button"
                 onClick={() => setActiveTab('clients')}
-                className={`px-8 py-3 rounded-full text-xs font-bold transition-all relative z-10 cursor-pointer border-none outline-none ${
+                className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all relative z-10 cursor-pointer border-none outline-none whitespace-nowrap ${
                   activeTab === 'clients' ? 'text-white' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -642,7 +642,7 @@ const Landing = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('freelancers')}
-                className={`px-8 py-3 rounded-full text-xs font-bold transition-all relative z-10 cursor-pointer border-none outline-none ${
+                className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all relative z-10 cursor-pointer border-none outline-none whitespace-nowrap ${
                   activeTab === 'freelancers' ? 'text-white' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -794,8 +794,8 @@ const Landing = () => {
       </section>
 
       {/* SCREEN 5: DUAL CLIENT + FREELANCER CONVERSION */}
-      <section className="py-24 bg-[hsl(var(--background))] border-t border-border/40 relative z-10">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-16 md:py-24 bg-[hsl(var(--background))] border-t border-border/40 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Left Side: Client Panel */}
@@ -877,8 +877,8 @@ const Landing = () => {
       </section>
 
       {/* Trust Strip */}
-      <section className="py-16 bg-[hsl(var(--surface-2))] border-t border-border/40 relative z-10">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-12 md:py-16 bg-[hsl(var(--surface-2))] border-t border-border/40 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
               { icon: Shield, title: 'KYC Verified', desc: 'Secure digital identity checks linked to Aadhaar & PAN verification.' },

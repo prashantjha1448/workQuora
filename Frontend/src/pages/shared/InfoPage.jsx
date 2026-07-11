@@ -601,7 +601,7 @@ const InfoPage = () => {
   const PageIcon = page.icon;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16 space-y-8 min-h-[70vh]">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-8 min-h-[70vh]">
       {/* Back button */}
       <button 
         onClick={() => navigate(-1)} 
@@ -611,7 +611,7 @@ const InfoPage = () => {
       </button>
 
       {/* Hero Header block */}
-      <div className="p-8 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden bg-white dark:bg-[#0c0c14]">
+      <div className="p-5 sm:p-8 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden bg-white dark:bg-[#0c0c14]">
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none" style={{ background: `${page.color}15` }} />
         
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${page.color}15` }}>
